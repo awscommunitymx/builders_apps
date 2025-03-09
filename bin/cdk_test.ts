@@ -1,20 +1,18 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { CdkTestStack } from '../lib/cdk_test-stack';
+import { AppStack } from '../lib/app-stack';
 
 const app = new cdk.App();
-new CdkTestStack(app, 'CdkTestStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+// Get environment from context or default to 'dev'
+const environmentName = app.node.tryGetContext('env') || 'dev';
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+// Create the stack with environment-specific name
+new AppStack(app, `ProfilesStack-${environmentName}`, {
+  environmentName,
+  env: { 
+    account: process.env.CDK_DEFAULT_ACCOUNT, 
+    region: 'us-east-1'
+  },
+  description: `Profiles API stack - ${environmentName} environment`
 });
