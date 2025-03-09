@@ -6,7 +6,7 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
-  "postCreateCommand": "/workspaces/cdk_test/.devcontainer/configure-aws-sso.sh",
+  "postCreateCommand": "/workspaces/builders_apps/.devcontainer/configure-aws-sso.sh",
   "customizations": {
     "vscode": {
       "extensions": ["esbenp.prettier-vscode"]
