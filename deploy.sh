@@ -51,7 +51,22 @@ if [ -z "$ENV" ]; then
   echo "Detected environment from branch: $ENV"
 fi
 
-# Use provided region or default
+# Check for production deployment flag
+if [ "$ENV" = "prod" ] && [ -z "$ALLOW_PROD" ]; then
+  echo "Error: Production deployment requires --allow-prod flag"
+  exit 1
+fi
+
+# Show help if no environment is specified and not in a development branch
+if [ -z "$ENV" ] || { [ "$ENV" != "staging" ] && [ "$ENV" != "prod" ] && [[ ! "$ENV" =~ ^pr- ]]; }; then
+  echo "Usage: ./deploy.sh [options]"
+  echo "Options:"
+  echo "  --env, -e        Environment name (staging, prod, or branch-based)"
+  echo "  --region, -r     AWS region (default: $DEFAULT_REGION)"
+  echo "  --destroy, -d    Destroy stack instead of deploying"
+  echo "  --allow-prod     Allow deployment to production environment"
+  exit 1
+fi
 REGION=${REGION:-$DEFAULT_REGION}
 
 # Set CDK context values
