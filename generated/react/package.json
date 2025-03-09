@@ -1,0 +1,6 @@
+{
+  "name": "@awscommunity/generated-react",
+  "dependencies": {
+    "@apollo/client": "^3.13.3"
+  }
+}

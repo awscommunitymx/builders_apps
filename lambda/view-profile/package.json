@@ -13,6 +13,7 @@
     "@aws-lambda-powertools/tracer": "^2.16.0",
     "@aws-sdk/client-dynamodb": "^3.445.0",
     "@aws-sdk/lib-dynamodb": "^3.445.0",
+    "@awscommunity/generated-ts": "file:../../generated/ts",
     "@middy/core": "^6.1.5",
     "aws-xray-sdk": "^3.10.3"
   },

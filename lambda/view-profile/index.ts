@@ -9,40 +9,13 @@ import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
-import { Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import middy from '@middy/core';
+import { MutationViewProfileArgs, ProfileAccess, User } from '@awscommunity/generated-ts'
 
 // Initialize Powertools
 const tracer = new Tracer({ serviceName: 'view-profile-service' });
 const logger = new Logger({ serviceName: 'view-profile-service' });
 const metrics = new Metrics({ namespace: 'Profiles', serviceName: 'view-profile-service' });
-
-// Define interfaces for our data models
-interface User {
-    user_id: string;
-    short_id: string;
-    first_name?: string;
-    last_name?: string;
-    company?: string;
-    role?: string;
-    pin: number;
-    PK: string;
-    SK: string;
-}
-
-interface ViewProfileInput {
-    shortId: string;
-    pin: number;
-    viewerId: string;
-}
-
-interface ProfileAccess {
-    PK: string;
-    SK: string;
-    viewer_id: string;
-    viewed_id: string;
-    timestamp: string;
-}
 
 // Initialize DynamoDB client with X-Ray tracing
 const client = tracer.captureAWSv3Client(new DynamoDBClient({}));
@@ -50,7 +23,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const tableName = process.env.TABLE_NAME!;
 
 // Original handler function
-const handlerFunction: AppSyncResolverHandler<ViewProfileInput, User | null> = async (event) => {
+const handlerFunction: AppSyncResolverHandler<MutationViewProfileArgs, User | null> = async (event) => {
     // Add correlation ID for request tracing
     const correlationId = event.info?.fieldName + '-' + Date.now();
     logger.appendKeys({ correlationId });
