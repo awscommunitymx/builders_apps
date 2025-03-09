@@ -1,0 +1,35 @@
+type User {
+  user_id: ID!
+  short_id: String!
+  first_name: String
+  last_name: String
+  company: String
+  role: String
+  pin: Int
+}
+
+type ProfileAccess {
+  PK: String!
+  SK: String!
+  viewer_id: String!
+  viewed_id: String!
+  timestamp: String!
+}
+
+type Query {
+  getUserByShortId(shortId: String!): User
+  getProfileAccesses(userId: ID!): [ProfileAccess]
+}
+
+type Mutation {
+  viewProfile(
+    shortId: String!,
+    pin: Int!,
+    viewerId: ID!
+  ): User
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
