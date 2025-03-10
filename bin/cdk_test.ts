@@ -10,9 +10,9 @@ const environmentName = app.node.tryGetContext('env') || 'dev';
 // Create the stack with environment-specific name
 new AppStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
-  env: { 
-    account: process.env.CDK_DEFAULT_ACCOUNT, 
-    region: 'us-east-1'
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: 'us-east-1',
   },
-  description: `Profiles API stack - ${environmentName} environment`
+  description: `Profiles API stack - ${environmentName} environment`,
 });

@@ -29,41 +29,47 @@ When run without arguments, the script will detect the environment from your cur
 ./deploy.sh [options]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `--env`, `-e` | Explicitly specify environment name (staging, prod, custom) |
-| `--region`, `-r` | Specify AWS region (default: us-east-1) |
-| `--destroy`, `-d` | Destroy stack instead of deploying |
-| `--allow-prod` | Required flag to allow production deployments |
+| Option            | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| `--env`, `-e`     | Explicitly specify environment name (staging, prod, custom) |
+| `--region`, `-r`  | Specify AWS region (default: us-east-1)                     |
+| `--destroy`, `-d` | Destroy stack instead of deploying                          |
+| `--allow-prod`    | Required flag to allow production deployments               |
 
 ### Examples
 
 #### Deploy to current branch's environment
+
 ```bash
 ./deploy.sh
 ```
 
 #### Deploy to staging explicitly
+
 ```bash
 ./deploy.sh --env staging
 ```
 
 #### Deploy to production (with safety flag)
+
 ```bash
 ./deploy.sh --env prod --allow-prod
 ```
 
 #### Deploy to a custom environment
+
 ```bash
 ./deploy.sh --env custom-env
 ```
 
 #### Destroy a feature branch environment
+
 ```bash
 ./deploy.sh --env pr-feature-123 --destroy
 ```
 
 #### Deploy to a specific region
+
 ```bash
 ./deploy.sh --region eu-west-1
 ```
@@ -72,21 +78,23 @@ When run without arguments, the script will detect the environment from your cur
 
 The script uses the following rules to determine the deployment environment from Git branch names:
 
-| Branch Pattern | Environment |
-|----------------|------------|
-| `main`, `master` | `prod` |
-| `staging`, `develop` | `staging` |
+| Branch Pattern                      | Environment                  |
+| ----------------------------------- | ---------------------------- |
+| `main`, `master`                    | `prod`                       |
+| `staging`, `develop`                | `staging`                    |
 | `feature/*`, `bugfix/*`, `hotfix/*` | `pr-{sanitized-branch-name}` |
-| Other branches | `pr-{sanitized-branch-name}` |
+| Other branches                      | `pr-{sanitized-branch-name}` |
 
 ### Branch Name Sanitization
 
 The script sanitizes branch names for use as environment names by:
+
 1. Converting to lowercase
 2. Replacing special characters with dashes
 3. Prefixing with `pr-`
 
 Examples:
+
 - `feature/#42_add-auth` → `pr-feature-42-add-auth`
 - `bugfix/ISSUE-123_fix-login` → `pr-bugfix-issue-123-fix-login`
 
@@ -99,6 +107,7 @@ ProfilesStack-{environment}
 ```
 
 For example:
+
 - `ProfilesStack-prod`
 - `ProfilesStack-staging`
 - `ProfilesStack-pr-feature-42-add-auth`
@@ -106,10 +115,12 @@ For example:
 ## How It Works
 
 1. **Environment Detection**:
+
    - If `--env` is provided, use that value
    - Otherwise, determine environment from Git branch name
 
 2. **Safety Checks**:
+
    - For production deployments, verify the `--allow-prod` flag is present
    - Validate that the environment name is valid
 
@@ -140,10 +151,12 @@ This script is designed to work within automated CI/CD pipelines:
 ### Common Issues
 
 1. **Permission Errors**:
+
    - Ensure the script has execute permissions: `chmod +x deploy.sh`
    - Verify AWS credentials are properly configured
 
 2. **Environment Detection Failure**:
+
    - If not in a Git repository, provide explicit environment: `--env dev`
    - Check that your branch name follows naming conventions
 

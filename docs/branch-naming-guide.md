@@ -22,15 +22,15 @@ For example: `feature/#3_create-graphql-api`
 
 ## Branch Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `feature/` | New feature or functionality | `feature/#42_user-authentication` |
-| `bugfix/` | Bug fixes | `bugfix/#17_fix-login-error` |
-| `hotfix/` | Urgent fixes for production | `hotfix/#23_critical-security-patch` |
-| `docs/` | Documentation changes | `docs/#9_update-readme` |
-| `refactor/` | Code refactoring without feature changes | `refactor/#31_optimize-queries` |
-| `test` | Adding or modifying tests | `test/#28_add-api-tests` |
-| `chore/` | Maintenance tasks, dependencies, etc. | `chore/#15_update-dependencies` |
+| Type        | Description                              | Example                              |
+| ----------- | ---------------------------------------- | ------------------------------------ |
+| `feature/`  | New feature or functionality             | `feature/#42_user-authentication`    |
+| `bugfix/`   | Bug fixes                                | `bugfix/#17_fix-login-error`         |
+| `hotfix/`   | Urgent fixes for production              | `hotfix/#23_critical-security-patch` |
+| `docs/`     | Documentation changes                    | `docs/#9_update-readme`              |
+| `refactor/` | Code refactoring without feature changes | `refactor/#31_optimize-queries`      |
+| `test`      | Adding or modifying tests                | `test/#28_add-api-tests`             |
+| `chore/`    | Maintenance tasks, dependencies, etc.    | `chore/#15_update-dependencies`      |
 
 ## Why This Matters
 

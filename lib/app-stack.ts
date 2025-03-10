@@ -13,18 +13,18 @@ export class AppStack extends cdk.Stack {
     super(scope, id, props);
 
     const databaseStack = new DatabaseStack(this, 'DatabaseStack', {
-      environmentName: props.environmentName
+      environmentName: props.environmentName,
     });
-    
+
     const lambdaStack = new LambdaStack(this, 'LambdaStack', {
       environmentName: props.environmentName,
-      table: databaseStack.table
+      table: databaseStack.table,
     });
-    
+
     new ApiStack(this, 'ApiStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
-      viewProfileFunction: lambdaStack.viewProfileFunction
+      viewProfileFunction: lambdaStack.viewProfileFunction,
     });
   }
 }

@@ -13,10 +13,10 @@ interface LambdaStackProps {
 
 export class LambdaStack extends Construct {
   public readonly viewProfileFunction: NodejsFunction;
-  
+
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
-    
+
     // Create the Lambda function for viewProfile
     this.viewProfileFunction = new NodejsFunction(this, 'ViewProfileFunction', {
       functionName: `ViewProfile-${props.environmentName}`,
@@ -32,32 +32,34 @@ export class LambdaStack extends Construct {
         LOG_LEVEL: this.getLogLevel(props.environmentName),
         POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
         POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
-        POWERTOOLS_LOGGER_LOG_EVENT: 'true'
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
       },
       timeout: cdk.Duration.seconds(30),
       tracing: lambda.Tracing.ACTIVE,
       bundling: {
         externalModules: ['aws-sdk'],
         nodeModules: [
-          '@aws-lambda-powertools/tracer', 
-          '@aws-lambda-powertools/logger', 
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
           '@aws-lambda-powertools/metrics',
-          'aws-xray-sdk'
+          'aws-xray-sdk',
         ],
-      }
+      },
     });
 
     // Grant additional permissions for CloudWatch Metrics
-    this.viewProfileFunction.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ['cloudwatch:PutMetricData'],
-      resources: ['*']
-    }));
+    this.viewProfileFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['cloudwatch:PutMetricData'],
+        resources: ['*'],
+      })
+    );
 
     // Grant the Lambda function access to DynamoDB
     props.table.grantReadWriteData(this.viewProfileFunction);
   }
-  
+
   private getLogLevel(environmentName: string): string {
     // Different log levels based on environment
     if (environmentName === 'prod') return 'WARN';

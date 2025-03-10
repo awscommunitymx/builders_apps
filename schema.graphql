@@ -22,11 +22,7 @@ type Query {
 }
 
 type Mutation {
-  viewProfile(
-    shortId: String!,
-    pin: Int!,
-    viewerId: ID!
-  ): User
+  viewProfile(shortId: String!, pin: Int!, viewerId: ID!): User
 }
 
 schema {
