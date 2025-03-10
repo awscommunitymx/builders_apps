@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
