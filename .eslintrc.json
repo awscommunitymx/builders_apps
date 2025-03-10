@@ -9,16 +9,14 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
+  "ignorePatterns": ["generated/**/*"],
   "plugins": ["@typescript-eslint"],
   "rules": {
     "no-console": "warn",
     "indent": ["error", 2],
     "quotes": ["error", "single", { "avoidEscape": true }],
     "semi": ["error", "always"],
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      { "argsIgnorePattern": "^_" }
-    ],
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "warn"
   }
