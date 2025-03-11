@@ -8,6 +8,7 @@ SSO_ACCOUNT_ID="869935068073"
 SSO_ROLE_NAME="DeveloperAccess"
 DEFAULT_REGION="us-east-1"
 
+npm i -g aws-cdk
 npm install
 mkdir -p ~/.aws
 

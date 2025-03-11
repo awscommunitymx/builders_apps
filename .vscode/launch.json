@@ -6,7 +6,7 @@
       "request": "launch",
       "name": "CDK Synth",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/node_modules/aws-cdk/bin/cdk.js",
+      "program": "/usr/local/share/npm-global/bin/cdk",
       "args": ["synth"],
       "env": {
         "CDK_DEFAULT_REGION": "us-east-1"
@@ -16,10 +16,10 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "CDK Deploy Dev",
+      "name": "CDK Deploy",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/node_modules/aws-cdk/bin/cdk.js",
-      "args": ["deploy", "--context", "env=dev"],
+      "program": "/usr/local/share/npm-global/bin/cdk",
+      "args": ["deploy"],
       "env": {
         "CDK_DEFAULT_REGION": "us-east-1"
       },
@@ -33,6 +33,62 @@
       "program": "${file}",
       "skipFiles": ["<node_internals>/**"],
       "outFiles": ["${workspaceFolder}/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Deploy (Auto Environment)",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "bash",
+      "args": ["${workspaceFolder}/deploy.sh"],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Deploy (Specified Environment)",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "bash",
+      "args": [
+        "${workspaceFolder}/deploy.sh",
+        "--env",
+        "${input:deployEnvironment}",
+        "--region",
+        "${input:deployRegion}"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Destroy Stack",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "bash",
+      "args": [
+        "${workspaceFolder}/deploy.sh",
+        "--env",
+        "${input:deployEnvironment}",
+        "--region",
+        "${input:deployRegion}",
+        "--destroy"
+      ],
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "deployEnvironment",
+      "type": "pickString",
+      "description": "Environment to deploy to",
+      "options": ["staging", "prod", "pr-feature"],
+      "default": "staging"
+    },
+    {
+      "id": "deployRegion",
+      "type": "pickString",
+      "description": "AWS Region",
+      "options": ["us-east-1", "us-west-2", "eu-west-1"],
+      "default": "us-east-1"
     }
   ]
 }
