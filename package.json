@@ -10,8 +10,7 @@
     "test": "jest",
     "cdk": "cdk",
     "format": "prettier --write .",
-    "lint": "eslint . --ext .ts",
-    "prepare": "husky install"
+    "lint": "eslint . --ext .ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
