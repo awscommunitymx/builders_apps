@@ -1,5 +1,3 @@
 #!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
 
-# Run the schema validation script
-./scripts/validate-schema.sh
+sh scripts/validate-graphql-schema.sh
