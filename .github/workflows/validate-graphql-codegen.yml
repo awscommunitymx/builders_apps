@@ -28,7 +28,7 @@ jobs:
           npx graphql-codegen --check
           CODEGEN_EXIT=$?
           set -e
-          if [ $CODEGEN_EXIT -ne 0 ]; then
+          if [ "$CODEGEN_EXIT" -ne 0 ]; then
             echo "schema_changed=true" >> $GITHUB_OUTPUT
           else
             echo "schema_changed=false" >> $GITHUB_OUTPUT
