@@ -1,0 +1,49 @@
+name: Validate GraphQL CodeGeneration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-codegen:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.13.1'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for GraphQL schema changes
+        id: schema-check
+        run: |
+          set +e
+          npx graphql-codegen --check
+          CODEGEN_EXIT=$?
+          set -e
+          if [ $CODEGEN_EXIT -ne 0 ]; then
+            echo "schema_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "schema_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run GraphQL Code Generation
+        if: steps.schema-check.outputs.schema_changed == 'true'
+        run: npx graphql-codegen
+
+      - name: Verify no uncommitted changes were made by code generation
+        if: steps.schema-check.outputs.schema_changed == 'true'
+        run: |
+          # Check if running codegen produced changes
+          git diff --exit-code || { 
+            echo "Error: GraphQL code generation produced changes that are not committed.";
+            echo "Please run 'npx graphql-codegen' locally, review the changes, and commit the updated generated files.";
+            exit 1;
+          }
