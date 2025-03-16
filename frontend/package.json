@@ -13,7 +13,8 @@
     "@cloudscape-design/components": "^3.0.923",
     "@cloudscape-design/global-styles": "^1.0.38",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router": "^7.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
