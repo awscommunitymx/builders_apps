@@ -11,7 +11,9 @@
     "cdk": "cdk",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "frontend:build": "npm run build --workspace=frontend",
+    "frontend:dev": "npm run dev --workspace=frontend"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
