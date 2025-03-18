@@ -2,13 +2,13 @@
 
 ## Overview
 
-The deploy.sh script is a critical part of our deployment workflow, automating the process of deploying AWS CDK stacks to different environments. It provides a standardized approach to deployments across development, staging, and production environments, with intelligent environment detection based on Git branch names.
+The deployment script (`scripts/deploy.sh`) is a critical part of our deployment workflow, automating the process of deploying AWS CDK stacks to different environments. It provides a standardized approach to deployments across development, staging, and production environments, with intelligent environment detection based on Git branch names.
 
 ## Features
 
 - **Automatic Environment Detection**: Determines the deployment environment from Git branch names
 - **Environment Segregation**: Maintains separation between development, staging, and production
-- **Branch-Based PR Environments**: Creates isolated environments for feature branches
+- **Branch-Based Development Environments**: Creates isolated environments for feature branches
 - **Production Safeguards**: Prevents accidental production deployments
 - **Standardized Deployments**: Ensures consistent deployment practices across the team
 - **Stack Lifecycle Management**: Supports both deployment and destruction of stacks
@@ -18,15 +18,23 @@ The deploy.sh script is a critical part of our deployment workflow, automating t
 ### Basic Usage
 
 ```bash
-./deploy.sh
+npm run deploy
 ```
 
 When run without arguments, the script will detect the environment from your current Git branch and deploy accordingly.
 
+### Quick Commands
+
+```bash
+npm run deploy              # Deploy based on current branch
+npm run deploy:destroy      # Destroy current environment
+npm run deploy:help        # Show detailed help message
+```
+
 ### Command-line Arguments
 
 ```bash
-./deploy.sh [options]
+npm run deploy [options]
 ```
 
 | Option            | Description                                                 |
@@ -35,55 +43,62 @@ When run without arguments, the script will detect the environment from your cur
 | `--region`, `-r`  | Specify AWS region (default: us-east-1)                     |
 | `--destroy`, `-d` | Destroy stack instead of deploying                          |
 | `--allow-prod`    | Required flag to allow production deployments               |
+| `--help`, `-h`    | Show detailed help message                                  |
 
 ### Examples
 
 #### Deploy to current branch's environment
 
 ```bash
-./deploy.sh
+npm run deploy
 ```
 
 #### Deploy to staging explicitly
 
 ```bash
-./deploy.sh --env staging
+npm run deploy -- --env staging
 ```
 
 #### Deploy to production (with safety flag)
 
 ```bash
-./deploy.sh --env prod --allow-prod
+npm run deploy -- --env prod --allow-prod
 ```
 
 #### Deploy to a custom environment
 
 ```bash
-./deploy.sh --env custom-env
+npm run deploy -- --env custom-env
 ```
 
-#### Destroy a feature branch environment
+#### Destroy a development environment
 
 ```bash
-./deploy.sh --env pr-feature-123 --destroy
+npm run deploy:destroy
 ```
 
 #### Deploy to a specific region
 
 ```bash
-./deploy.sh --region eu-west-1
+npm run deploy -- --region eu-west-1
+```
+
+#### Get help
+
+```bash
+npm run deploy:help
 ```
 
 ## Environment Detection Logic
 
 The script uses the following rules to determine the deployment environment from Git branch names:
 
-| Branch Pattern                      | Environment                  |
-| ----------------------------------- | ---------------------------- |
-| `main`, `master`                    | `prod`                       |
-| `staging`, `develop`                | `staging`                    |
-| `feature/*`, `bugfix/*`, `hotfix/*` | `pr-{sanitized-branch-name}` |
-| Other branches                      | `pr-{sanitized-branch-name}` |
+| Branch Pattern                      | Environment                   |
+| ----------------------------------- | ----------------------------- |
+| `main`, `master`                    | `prod`                        |
+| `staging`, `develop`                | `staging`                     |
+| `feature/*`, `bugfix/*`, `hotfix/*` | `dev-{sanitized-branch-name}` |
+| Other branches                      | `dev-{sanitized-branch-name}` |
 
 ### Branch Name Sanitization
 
@@ -91,12 +106,12 @@ The script sanitizes branch names for use as environment names by:
 
 1. Converting to lowercase
 2. Replacing special characters with dashes
-3. Prefixing with `pr-`
+3. Prefixing with `dev-`
 
 Examples:
 
-- `feature/#42_add-auth` → `pr-feature-42-add-auth`
-- `bugfix/ISSUE-123_fix-login` → `pr-bugfix-issue-123-fix-login`
+- `feature/#42_add-auth` → `dev-feature-42-add-auth`
+- `bugfix/ISSUE-123_fix-login` → `dev-bugfix-issue-123-fix-login`
 
 ## Stack Naming Convention
 
@@ -110,7 +125,7 @@ For example:
 
 - `ProfilesStack-prod`
 - `ProfilesStack-staging`
-- `ProfilesStack-pr-feature-42-add-auth`
+- `ProfilesStack-dev-feature-42-add-auth`
 
 ## How It Works
 
@@ -126,8 +141,10 @@ For example:
 
 3. **Deployment Process**:
    - Set context values for the CDK deployment
-   - Synthesize the CloudFormation template
    - Deploy using CDK with the appropriate environment variables
+   - For first-time deployments, use standard deployment
+   - For subsequent updates in development, use hotswap for faster iterations
+   - Production always uses standard deployment
    - Output confirmation message upon completion
 
 ## Production Safeguards
@@ -152,8 +169,8 @@ This script is designed to work within automated CI/CD pipelines:
 
 1. **Permission Errors**:
 
-   - Ensure the script has execute permissions: `chmod +x deploy.sh`
-   - Verify AWS credentials are properly configured
+   - Ensure AWS credentials are properly configured
+   - Verify AWS CLI is installed and configured
 
 2. **Environment Detection Failure**:
 
@@ -168,6 +185,7 @@ This script is designed to work within automated CI/CD pipelines:
 
 For further assistance with deployment issues:
 
+- Run `npm run deploy:help` for detailed usage information
 - Check AWS CloudFormation logs
 - Review CDK documentation
 - Contact the DevOps team
@@ -175,7 +193,7 @@ For further assistance with deployment issues:
 ## Best Practices
 
 1. **Local Testing**: Always test deployments locally before pushing to shared branches
-2. **Clean Up**: Destroy PR environments when no longer needed
+2. **Clean Up**: Destroy development environments when no longer needed
 3. **Use Feature Branches**: Follow branch naming conventions for consistent environments
 4. **Monitor Deployments**: Watch for errors during the deployment process
 5. **Review Changes**: Use `cdk diff` to verify changes before deployment

@@ -11,7 +11,13 @@
     "cdk": "cdk",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "frontend:build": "npm run build --workspace=frontend",
+    "frontend:dev": "npm run dev --workspace=frontend",
+    "populate-dynamodb": "ts-node scripts/populate-dynamodb.ts",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:destroy": "bash scripts/deploy.sh --destroy",
+    "deploy:help": "bash scripts/deploy.sh --help"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",
@@ -41,6 +47,7 @@
   "workspaces": [
     "lambda/*",
     "generated/ts",
-    "generated/react"
+    "generated/react",
+    "frontend"
   ]
 }
