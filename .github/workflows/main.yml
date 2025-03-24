@@ -34,7 +34,7 @@ jobs:
       - name: Run deployment script
         run: |
           # Make deploy script executable
-          chmod +x ./deploy.sh
+          chmod +x ./scripts/deploy.sh
           
           # Get the PR branch name
           PR_BRANCH_NAME="${{ github.head_ref }}"
@@ -63,7 +63,7 @@ jobs:
       - name: Run cleanup script
         run: |
           # Make deploy script executable
-          chmod +x ./deploy.sh
+          chmod +x ./scripts/deploy.sh
           
           # Get the PR branch name
           PR_BRANCH_NAME="${{ github.head_ref }}"
