@@ -48,6 +48,7 @@
     "lambda/*",
     "generated/ts",
     "generated/react",
-    "frontend"
+    "frontend",
+    "utils:*"
   ]
 }
