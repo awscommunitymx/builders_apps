@@ -40,7 +40,7 @@ jobs:
           PR_BRANCH_NAME="${{ github.head_ref }}"
           
           # Run deployment script with branch name
-          ./deploy.sh --branch-name "$PR_BRANCH_NAME"
+          ./scripts/deploy.sh --branch-name "$PR_BRANCH_NAME"
 
   # Job for PR closed events
   CleanupPR:
@@ -69,7 +69,7 @@ jobs:
           PR_BRANCH_NAME="${{ github.head_ref }}"
           
           # Run deployment script with destroy flag
-          ./deploy.sh --branch-name "$PR_BRANCH_NAME" --destroy
+          ./scripts/deploy.sh --branch-name "$PR_BRANCH_NAME" --destroy
         env:
           # Add any additional environment variables your script might need
           AWS_REGION: us-east-1
