@@ -1,0 +1,32 @@
+name: PR Deployment
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          
+      - name: Run deployment script
+        run: |
+          # Make deploy script executable
+          chmod +x ./deploy.sh
+          
+          # Get the PR branch name
+          PR_BRANCH_NAME="${{ github.head_ref }}"
+          
+          # Run deployment script with branch name
+          ./deploy.sh --branch-name "$PR_BRANCH_NAME"
+        env:
+          # Add any additional environment variables your script might need
+          AWS_REGION: us-east-1
