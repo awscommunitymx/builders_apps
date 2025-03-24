@@ -36,11 +36,8 @@ jobs:
           # Make deploy script executable
           chmod +x ./scripts/deploy.sh
           
-          # Get the PR branch name
-          PR_BRANCH_NAME="${{ github.head_ref }}"
-          
           # Run deployment script with branch name
-          ./scripts/deploy.sh --branch-name "$PR_BRANCH_NAME"
+          ./scripts/deploy.sh 
 
   # Job for PR closed events
   CleanupPR:
@@ -64,12 +61,9 @@ jobs:
         run: |
           # Make deploy script executable
           chmod +x ./scripts/deploy.sh
-          
-          # Get the PR branch name
-          PR_BRANCH_NAME="${{ github.head_ref }}"
-          
+
           # Run deployment script with destroy flag
-          ./scripts/deploy.sh --branch-name "$PR_BRANCH_NAME" --destroy
+          ./scripts/deploy.sh  --destroy
         env:
           # Add any additional environment variables your script might need
           AWS_REGION: us-east-1
