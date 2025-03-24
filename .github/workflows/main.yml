@@ -1,21 +1,35 @@
-name: PR Deployment
+name: PR Deployment and Cleanup Workflow
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened, synchronize, closed]
+
+env:
+  AWS_REGION: "us-east-1"
+
+# Required permissions for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
+  # Job for PR opened/reopened/synchronized events
+  DeployPR:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Git clone the repository
+        uses: actions/checkout@v3
         
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub_PR_Deployment
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Verify AWS credentials
+        run: aws sts get-caller-identity
           
       - name: Run deployment script
         run: |
@@ -27,6 +41,35 @@ jobs:
           
           # Run deployment script with branch name
           ./deploy.sh --branch-name "$PR_BRANCH_NAME"
+
+  # Job for PR closed events
+  CleanupPR:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub_PR_Cleanup
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Verify AWS credentials
+        run: aws sts get-caller-identity
+        
+      - name: Run cleanup script
+        run: |
+          # Make deploy script executable
+          chmod +x ./deploy.sh
+          
+          # Get the PR branch name
+          PR_BRANCH_NAME="${{ github.head_ref }}"
+          
+          # Run deployment script with destroy flag
+          ./deploy.sh --branch-name "$PR_BRANCH_NAME" --destroy
         env:
           # Add any additional environment variables your script might need
           AWS_REGION: us-east-1
