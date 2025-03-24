@@ -1,4 +1,4 @@
-name: PR Deployment and Cleanup Workflow
+name: PR Deployment and Cleanup
 
 on:
   pull_request:
@@ -21,6 +21,13 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
         
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          check-latest: true
+          
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -28,16 +35,16 @@ jobs:
           role-session-name: GitHub_PR_Deployment
           aws-region: ${{ env.AWS_REGION }}
           
-      - name: Verify AWS credentials
-        run: aws sts get-caller-identity
+      - name: Install project dependencies
+        run: |
+          npm ci || npm install
+          npm install aws-cdk-lib @aws-cdk/aws-lambda @aws-cdk/aws-s3 --save
+          npm install @types/node --save-dev
           
       - name: Run deployment script
         run: |
-          # Make deploy script executable
           chmod +x ./scripts/deploy.sh
-          
-          # Run deployment script with branch name
-          ./scripts/deploy.sh 
+          ./scripts/deploy.sh
 
   # Job for PR closed events
   CleanupPR:
@@ -47,6 +54,13 @@ jobs:
       - name: Git clone the repository
         uses: actions/checkout@v3
         
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          check-latest: true
+          
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -54,16 +68,13 @@ jobs:
           role-session-name: GitHub_PR_Cleanup
           aws-region: ${{ env.AWS_REGION }}
           
-      - name: Verify AWS credentials
-        run: aws sts get-caller-identity
-        
+      - name: Install project dependencies
+        run: |
+          npm ci || npm install
+          npm install aws-cdk-lib @aws-cdk/aws-lambda @aws-cdk/aws-s3 --save
+          npm install @types/node --save-dev
+          
       - name: Run cleanup script
         run: |
-          # Make deploy script executable
           chmod +x ./scripts/deploy.sh
-
-          # Run deployment script with destroy flag
-          ./scripts/deploy.sh  --destroy
-        env:
-          # Add any additional environment variables your script might need
-          AWS_REGION: us-east-1
+          ./scripts/deploy.sh --destroy
