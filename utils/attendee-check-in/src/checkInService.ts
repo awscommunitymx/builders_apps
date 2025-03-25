@@ -1,9 +1,15 @@
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { AttendeeCheckIn } from "./types";
+import {
+  ConditionalCheckFailedException,
+  ProvisionedThroughputExceededException,
+  ResourceNotFoundException,
+} from "@aws-sdk/client-dynamodb";
 
 export async function storeAttendeeCheckIn(
   client: DynamoDBDocumentClient,
-  attendee: AttendeeCheckIn
+  attendee: AttendeeCheckIn,
+  tableName: string,
 ): Promise<void> {
   try {
     const item = {
@@ -23,14 +29,28 @@ export async function storeAttendeeCheckIn(
     };
 
     const command = new PutCommand({
-      TableName: process.env.DYNAMODB_TABLE!,
+      TableName: tableName,
       Item: item,
     });
 
     await client.send(command);
     console.log("✅ Check-in stored successfully");
   } catch (error) {
-    console.error("❌ Error storing check-in:", error);
-    throw new Error("Failed to store attendee check-in");
+    if (error instanceof ConditionalCheckFailedException) {
+      console.error("❌ Check-in already exists:", error);
+      throw new Error("Attendee already checked in.");
+    } else if (error instanceof ProvisionedThroughputExceededException) {
+      console.error("❌ DynamoDB throughput exceeded:", error);
+      throw new Error("Service is busy, please try again later.");
+    } else if (error instanceof ResourceNotFoundException) {
+      console.error("❌ DynamoDB table not found:", error);
+      throw new Error("Configuration error: DynamoDB table missing.");
+    } else if (error instanceof Error) {
+      console.error("❌ Unknown error storing check-in:", error);
+      throw new Error("An unexpected error occurred while storing check-in.");
+    } else {
+      console.error("❌ Unhandled error type:", error);
+      throw new Error("An unknown error occurred.");
+    }
   }
 }
