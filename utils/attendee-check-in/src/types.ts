@@ -17,10 +17,8 @@ export interface AttendeeCheckIn {
   contact_information: ContactInformation;
   first_name: string;
   last_name: string;
-  pin: string;
   gender: string;
   user_id: string;
-  last_name: string;
   pin: string;
   role: string;
   social_links: SocialLink[];
