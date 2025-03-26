@@ -1,4 +1,4 @@
-name: PR Deployment and Cleanup
+name: PR Deployment and Comment
 
 on:
   pull_request:
@@ -7,10 +7,11 @@ on:
 env:
   AWS_REGION: "us-east-1"
 
-# Required permissions for OIDC authentication
+# Required permissions for OIDC authentication and GitHub API
 permissions:
   id-token: write
   contents: read
+  pull-requests: write  # Permiso para comentar en PRs
 
 jobs:
   # Job for PR opened/reopened/synchronized events
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -38,13 +39,41 @@ jobs:
       - name: Install project dependencies
         run: |
           npm ci || npm install
-          npm install aws-cdk-lib @aws-cdk/aws-lambda @aws-cdk/aws-s3 --save
-          npm install @types/node --save-dev
           
       - name: Run deployment script
+        id: deploy
         run: |
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh
+          
+          # Extraer la URL de la salida del script o de CloudFormation
+          # Este comando debe adaptarse según cómo obtienes la URL en tu script
+          # Por ejemplo, podrías guardar la URL en un archivo o extraerla de la salida
+          API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-$(echo ${{ github.head_ref }} | tr '/' '-')" --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
+          
+          # Guardar la URL como un output del paso para usarlo después
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+      
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const apiUrl = '${{ steps.deploy.outputs.api_url }}';
+            if (!apiUrl) {
+              console.log('No API URL found, skipping PR comment');
+              return;
+            }
+            
+            const prNumber = context.issue.number;
+            const repo = context.repo;
+            
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.name,
+              issue_number: prNumber,
+              body: `✅ Deployment successful!\n\n**Environment:** \`${{ github.head_ref }}\`\n**API URL:** [${apiUrl}](${apiUrl})\n\nThis environment will be automatically destroyed when the PR is closed.`
+            });
 
   # Job for PR closed events
   CleanupPR:
@@ -52,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Git clone the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -71,10 +100,23 @@ jobs:
       - name: Install project dependencies
         run: |
           npm ci || npm install
-          npm install aws-cdk-lib @aws-cdk/aws-lambda @aws-cdk/aws-s3 --save
-          npm install @types/node --save-dev
           
       - name: Run cleanup script
         run: |
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh --destroy
+          
+      - name: Comment PR cleanup
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.issue.number;
+            const repo = context.repo;
+            
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.name,
+              issue_number: prNumber,
+              body: `🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
+            });
