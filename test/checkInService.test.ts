@@ -1,12 +1,12 @@
-import { storeAttendeeCheckIn } from '../src/checkInService';
+import { AttendeeCheckIn } from '../utils/types';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { AttendeeCheckIn } from '../src/types';
 import {
   ConditionalCheckFailedException,
   ProvisionedThroughputExceededException,
   ResourceNotFoundException,
 } from '@aws-sdk/client-dynamodb';
+import { storeAttendeeCheckIn } from '../utils/checkInService';
 
 // Mock DynamoDB client
 const ddbMock = mockClient(DynamoDBDocumentClient);
