@@ -50,6 +50,6 @@
     "generated/ts",
     "generated/react",
     "frontend",
-    "utils/*"
+    "utils"
   ]
 }
