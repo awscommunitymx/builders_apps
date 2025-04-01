@@ -102,12 +102,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = context.issue.number;
-            const repo = context.repo;
-
-            await github.rest.issues.createComment({
-              owner: repo.owner,
-              repo: repo.name,
-              issue_number: prNumber,
+            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               body: `🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
             });
