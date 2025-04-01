@@ -1,0 +1,15 @@
+{
+  "name": "utils",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.774.0",
+    "@aws-sdk/lib-dynamodb": "^3.774.0",
+    "aws-sdk": "^2.1692.0",
+    "ts-jest": "^29.3.0",
+    "typescript": "^5.8.2"
+  }
+}

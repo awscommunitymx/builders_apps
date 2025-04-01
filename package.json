@@ -37,10 +37,11 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "~5.6.3"
+    "typescript": "~5.6.3",
+    "aws-sdk-client-mock": "^4.1.0"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.181.1",
+    "aws-cdk-lib": "^2.184.0",
     "aws-sdk": "^2.1692.0",
     "constructs": "^10.4.2"
   },
@@ -48,6 +49,7 @@
     "lambda/*",
     "generated/ts",
     "generated/react",
-    "frontend"
+    "frontend",
+    "utils"
   ]
 }
