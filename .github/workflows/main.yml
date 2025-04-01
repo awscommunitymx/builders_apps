@@ -93,11 +93,12 @@ jobs:
 
       - name: Run cleanup script
         run: |
+          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
           chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh --destroy
+          ./scripts/deploy.sh -e $SANITIZED_BRANCH --destroy
 
       - name: Comment PR cleanup
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
