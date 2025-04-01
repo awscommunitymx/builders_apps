@@ -43,7 +43,7 @@ jobs:
       - name: Run deployment script
         id: deploy
         run: |
-          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh -e $SANITIZED_BRANCH
 
@@ -52,26 +52,18 @@ jobs:
           # Guardar la URL como un output del paso para usarlo después
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
 
-      - name: Comment on PR
-        uses: actions/github-script@v6
+      - uses: actions/github-script@v7
+        name: Comment on PR
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const apiUrl = '${{ steps.deploy.outputs.api_url }}';
-            if (!apiUrl) {
-              console.log('No API URL found, skipping PR comment');
-              return;
-            }
-
-            const prNumber = context.issue.number;
-            const repo = context.repo;
-
-            await github.rest.issues.createComment({
-              owner: repo.owner,
-              repo: repo.name,
-              issue_number: prNumber,
-              body: `✅ Deployment successful!\n\n**Environment:** \`${{ github.head_ref }}\`\n**API URL:** [${apiUrl}](${apiUrl})\n\nThis environment will be automatically destroyed when the PR is closed.`
-            });
+            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 La API está desplegada y disponible en: ${apiUrl}`
+            })
 
   # Job for PR closed events
   CleanupPR:
