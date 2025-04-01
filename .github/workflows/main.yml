@@ -47,7 +47,7 @@ jobs:
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh -e $SANITIZED_BRANCH
 
-          API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)          
+          API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?starts_with(OutputKey,'ApiStackGraphQLApiUrl')].OutputValue" --output text)          
 
           # Guardar la URL como un output del paso para usarlo después
           echo "api_url=$API_URL" >> $GITHUB_OUTPUT
