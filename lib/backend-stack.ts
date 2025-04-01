@@ -8,7 +8,10 @@ export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
 }
 
-export class AppStack extends cdk.Stack {
+export class BackendStack extends cdk.Stack {
+  public readonly apiUrl: string;
+  public readonly apiKey: string;
+
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
@@ -21,10 +24,14 @@ export class AppStack extends cdk.Stack {
       table: databaseStack.table,
     });
 
-    new ApiStack(this, 'ApiStack', {
+    const apiStack = new ApiStack(this, 'ApiStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
       viewProfileFunction: lambdaStack.viewProfileFunction,
     });
+
+    // Expose API URL and Key
+    this.apiUrl = apiStack.api.graphqlUrl;
+    this.apiKey = apiStack.api.apiKey || '';
   }
 }
