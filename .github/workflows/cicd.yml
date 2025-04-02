@@ -45,24 +45,24 @@ jobs:
         run: |
           SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
           chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh -e $SANITIZED_BRANCH
+          ./scripts/deploy.sh --deploy-frontend -e $SANITIZED_BRANCH
 
-          API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?starts_with(OutputKey,'ApiStackGraphQLApiUrl')].OutputValue" --output text)          
+          APP_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStackFrontend-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?OutputKey=='WebsiteURL'].OutputValue" --output text)          
 
           # Guardar la URL como un output del paso para usarlo después
-          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
 
       - uses: actions/github-script@v7
         name: Comment on PR
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
+            const appUrl = "${{ steps.deploy.outputs.app_url }}" || 'URL no disponible';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 La API está desplegada y disponible en: ${apiUrl}`
+              body: `🚀 La aplicación está desplegada y disponible en: ${appUrl}`
             })
 
   # Job for PR closed events
@@ -102,7 +102,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
