@@ -4,6 +4,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
@@ -52,6 +53,22 @@ export class FrontendStack extends cdk.Stack {
           responsePagePath: '/index.html',
         },
       ],
+      priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+    });
+
+    // Create a policy document for CloudFront invalidation
+    const cloudfrontPolicy = new iam.PolicyDocument({
+      statements: [
+        new iam.PolicyStatement({
+          actions: [
+            'cloudfront:CreateInvalidation',
+            'cloudfront:GetInvalidation',
+            'cloudfront:ListInvalidations',
+          ],
+          effect: iam.Effect.ALLOW,
+          resources: ['*'], // Ideally restrict to just this distribution
+        }),
+      ],
     });
 
     // Build and deploy React app
@@ -81,12 +98,44 @@ export class FrontendStack extends cdk.Stack {
       throw error;
     }
 
-    // Deploy the built app to S3
+    // Deploy with pre-created execution role with CloudFront permissions
+    const customRole = new iam.Role(this, 'CloudFrontInvalidationRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      inlinePolicies: {
+        'cloudfront-invalidation': cloudfrontPolicy,
+      },
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+      ],
+    });
+
+    // Add S3 permissions to the role
+    customRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: [
+          's3:GetObject*',
+          's3:GetBucket*',
+          's3:List*',
+          's3:DeleteObject*',
+          's3:PutObject*',
+          's3:Abort*',
+        ],
+        resources: [websiteBucket.bucketArn, `${websiteBucket.bucketArn}/*`],
+      })
+    );
+
+    // Use priveledged mode to avoid permission issues
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3deploy.Source.asset(path.join(frontendPath, 'dist'))],
       destinationBucket: websiteBucket,
       distribution,
       distributionPaths: ['/*'],
+      role: customRole,
+      prune: true,
+      memoryLimit: 1024, // Increase memory for the deployment Lambda
+      useEfs: false, // Don't use EFS
+      retainOnDelete: false, // Clean up when deleting stack
+      logRetention: cdk.aws_logs.RetentionDays.ONE_WEEK,
     });
 
     // Output the CloudFront URL
