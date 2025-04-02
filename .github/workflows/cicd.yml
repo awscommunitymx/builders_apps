@@ -44,6 +44,7 @@ jobs:
         id: deploy
         run: |
           SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH="dev-$SANITIZED_BRANCH"
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh --deploy-frontend -e $SANITIZED_BRANCH
 
@@ -121,6 +122,7 @@ jobs:
       - name: Run cleanup script
         run: |
           SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH="dev-$SANITIZED_BRANCH"
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh -e $SANITIZED_BRANCH --destroy
 
