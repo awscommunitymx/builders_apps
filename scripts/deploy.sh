@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-set -o xtrace
 
 # Echo pwd for debugging
 echo "Current working directory: $(pwd)"
