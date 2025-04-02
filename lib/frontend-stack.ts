@@ -6,7 +6,6 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
-import { execSync } from 'child_process';
 
 interface FrontendStackProps extends cdk.StackProps {
   apiUrl: string;
