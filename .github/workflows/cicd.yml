@@ -58,12 +58,39 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const appUrl = "${{ steps.deploy.outputs.app_url }}" || 'URL no disponible';
-            github.rest.issues.createComment({
+
+            // Check for existing comments with the URL
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚀 La aplicación está desplegada y disponible en: ${appUrl}`
-            })
+              repo: context.repo.repo
+            });
+
+            // Look for an existing deployment comment
+            const deploymentCommentPattern = /🚀 La aplicación está desplegada y disponible en:/;
+            const existingComment = comments.find(comment => 
+              deploymentCommentPattern.test(comment.body)
+            );
+
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `🚀 La aplicación está desplegada y disponible en: ${appUrl}`
+              });
+              console.log("Updated existing deployment comment");
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `🚀 La aplicación está desplegada y disponible en: ${appUrl}`
+              });
+              console.log("Created new deployment comment");
+            }
 
   # Job for PR closed events
   CleanupPR:
