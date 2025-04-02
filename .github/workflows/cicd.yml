@@ -58,7 +58,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const appUrl = "${{ steps.deploy.outputs.app_url }}" || 'URL no disponible';
+            const appUrl = "${{ steps.deploy.outputs.app_url }}" || 'URL unavailable';
 
             // Check for existing comments with the URL
             const { data: comments } = await github.rest.issues.listComments({
@@ -67,10 +67,13 @@ jobs:
               repo: context.repo.repo
             });
 
-            // Look for an existing deployment comment
-            const deploymentCommentPattern = /🚀 La aplicación está desplegada y disponible en:/;
+            // Create the comment message
+            const commentMessage = `> [!TIP]\n> 🚀 The application is deployed and available at: ${appUrl}`;
+
+            // Look for an existing deployment comment by our bot that contains our specific message format
             const existingComment = comments.find(comment => 
-              deploymentCommentPattern.test(comment.body)
+              comment.user.type === 'Bot' && 
+              comment.body.includes('The application is deployed and available at:')
             );
 
             if (existingComment) {
@@ -79,7 +82,7 @@ jobs:
                 comment_id: existingComment.id,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `🚀 La aplicación está desplegada y disponible en: ${appUrl}`
+                body: commentMessage
               });
               console.log("Updated existing deployment comment");
             } else {
@@ -88,7 +91,7 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `🚀 La aplicación está desplegada y disponible en: ${appUrl}`
+                body: commentMessage
               });
               console.log("Created new deployment comment");
             }
@@ -135,5 +138,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
+              body: `> [!NOTE]\n> 🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
             });
