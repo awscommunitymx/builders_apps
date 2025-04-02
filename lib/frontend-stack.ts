@@ -65,7 +65,7 @@ export class FrontendStack extends cdk.Stack {
             'cloudfront:ListInvalidations',
           ],
           effect: iam.Effect.ALLOW,
-          resources: ['*'], // Ideally restrict to just this distribution
+          resources: [distribution.distributionArn], // Ideally restrict to just this distribution
         }),
       ],
     });
@@ -100,7 +100,6 @@ export class FrontendStack extends cdk.Stack {
       })
     );
 
-    // Use priveledged mode to avoid permission issues
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3deploy.Source.asset(path.join(frontendPath, 'dist'))],
       destinationBucket: websiteBucket,
