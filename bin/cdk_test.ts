@@ -8,6 +8,15 @@ const app = new cdk.App();
 // Get environment from context or default to 'dev'
 const environmentName = app.node.tryGetContext('env') || 'dev';
 
+const tags = {
+  Environment: environmentName,
+  Cdk: 'True',
+};
+
+for (const [key, value] of Object.entries(tags)) {
+  cdk.Tags.of(app).add(key, value);
+}
+
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
   env: {
