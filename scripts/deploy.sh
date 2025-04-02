@@ -179,17 +179,7 @@ else
     DEPLOY_FLAGS=""
   fi
 
-  if [ "$DEPLOY_FRONTEND" = true ]; then
-    echo -e "${CYAN}📦 Building and deploying frontend...${NC}"
-    DEPLOY_FLAGS+=" --all"
-  else
-    echo -e "${CYAN}📦 Skipping frontend deployment...${NC}"
-    STACK_NAME="ProfilesStack-${ENV}"
-  fi
-
-
-  
-  npx cdk deploy ${DEPLOY_FLAGS} --require-approval never ${CONTEXT_VALUES[*]} ${STACK_NAME}
+  npx cdk deploy ${DEPLOY_FLAGS} --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStack-${ENV}"
   
   # Get the API URL and key from CloudFormation exports
   API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiUrl'].OutputValue" --output text)
@@ -202,6 +192,13 @@ VITE_GRAPHQL_API_KEY=${API_KEY}
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"
+  
+  if [ "$DEPLOY_FRONTEND" = true ]; then
+    echo -e "${CYAN}📦 Building and deploying frontend...${NC}"
+    npm run frontend:build
+    npx cdk deploy --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStackFrontend-${ENV}"
+    echo -e "${GREEN}✅ Frontend deployment completed${NC}"
+  fi
 
   # Populate DynamoDB with sample data for development environments on first deployment
   if [[ "$ENV" =~ ^dev- ]] && [ "$FIRST_TIME" = true ]; then

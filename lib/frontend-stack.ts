@@ -75,29 +75,6 @@ export class FrontendStack extends cdk.Stack {
     // Using environment variables for the build process
     const frontendPath = path.join(__dirname, '../frontend');
 
-    // Define environment variables for the build
-    const env = {
-      ...process.env,
-      VITE_GRAPHQL_API_URL: props.apiUrl,
-      VITE_GRAPHQL_API_KEY: props.apiKey,
-      VITE_ENVIRONMENT: props.environment || 'dev',
-    };
-
-    // Build the React app
-    const buildCommand = 'npm run build';
-    try {
-      console.log('Building React app...');
-      execSync(buildCommand, {
-        cwd: frontendPath,
-        env,
-        stdio: 'inherit',
-      });
-      console.log('React app build completed successfully.');
-    } catch (error) {
-      console.error('Failed to build React app:', error);
-      throw error;
-    }
-
     // Deploy with pre-created execution role with CloudFront permissions
     const customRole = new iam.Role(this, 'CloudFrontInvalidationRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
