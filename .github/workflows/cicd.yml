@@ -1,0 +1,111 @@
+name: PR Deployment and Comment
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+env:
+  AWS_REGION: 'us-east-1'
+
+# Required permissions for OIDC authentication and GitHub API
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write # Permiso para comentar en PRs
+
+jobs:
+  # Job for PR opened/reopened/synchronized events
+  DeployPR:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          check-latest: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub_PR_Deployment
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install project dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Run deployment script
+        id: deploy
+        run: |
+          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh -e $SANITIZED_BRANCH
+
+          API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?starts_with(OutputKey,'ApiStackGraphQLApiUrl')].OutputValue" --output text)          
+
+          # Guardar la URL como un output del paso para usarlo después
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+
+      - uses: actions/github-script@v7
+        name: Comment on PR
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 La API está desplegada y disponible en: ${apiUrl}`
+            })
+
+  # Job for PR closed events
+  CleanupPR:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          check-latest: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub_PR_Cleanup
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install project dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Run cleanup script
+        run: |
+          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh -e $SANITIZED_BRANCH --destroy
+
+      - name: Comment PR cleanup
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
+            });

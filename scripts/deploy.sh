@@ -135,8 +135,8 @@ if [ "$ENV" = "prod" ] && [ -z "$ALLOW_PROD" ]; then
   exit 1
 fi
 
-# Show help if no environment is specified and not in a development branch
-if [ -z "$ENV" ] || { [ "$ENV" != "staging" ] && [ "$ENV" != "prod" ] && [[ ! "$ENV" =~ ^dev- ]]; }; then
+# Show help if no environment is specified
+if [ -z "$ENV" ]; then
   echo -e "${YELLOW}📖 Usage: ./deploy.sh [options]${NC}"
   echo -e "${YELLOW}Options:${NC}"
   echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, prod, or branch-based)"
