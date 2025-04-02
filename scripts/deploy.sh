@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Needed for AWS CDK
+mkdir -p frontend/dist
+
 # Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
