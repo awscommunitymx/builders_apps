@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Echo pwd for debugging
-echo "Current working directory: $(pwd)"
-echo "Current user: $(whoami)"
-echo "Directory contents:"
-ls -la
-
-
 # Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
