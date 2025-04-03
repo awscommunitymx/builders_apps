@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { User } from '@awscommunity/generated-react/hooks';
@@ -11,6 +11,7 @@ import {
   TextContent,
   Alert,
 } from '@cloudscape-design/components';
+import { useNavigate, useParams } from 'react-router';
 
 const GET_USER = gql`
   query GetUserByShortId($shortId: String!) {
@@ -27,7 +28,16 @@ const GET_USER = gql`
 `;
 
 export function UserProfile({ initialId = '' }: { initialId?: string }) {
+  const { id } = useParams<{ id?: string }>();
   const [shortId, setShortId] = useState<string>(initialId);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (shortId && shortId !== id) {
+      navigate(`/uid/${shortId}`);
+    }
+  }, [shortId, id, navigate]);
 
   const isValidId = shortId && shortId.trim().length > 0;
 
