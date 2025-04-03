@@ -7,7 +7,14 @@ import { ApolloProvider } from '@apollo/client';
 import { client } from './apollo-client';
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+<ApolloProvider client={client}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/uid/:id" element={<UserProfileRoute />} />
+      </Routes>
+    </BrowserRouter>
+  </ApolloProvider>
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/uid/:id" element={<UserProfileRoute />} />
