@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Needed for AWS CDK
+mkdir -p frontend/dist
+
 # Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -33,6 +36,7 @@ show_help() {
   echo -e "  ${BLUE}--region, -r${NC}     AWS region (default: $DEFAULT_REGION)"
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
+  echo -e "  ${BLUE}--deploy-frontend${NC} Also build and deploy frontend (default: false)"
   echo -e "  ${BLUE}--help, -h${NC}       Show this help message"
   echo
   echo -e "${YELLOW}🌿 Environment Detection:${NC}"
@@ -83,6 +87,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --destroy|-d)
       DESTROY=true
+      shift
+      ;;
+    --allow-prod)
+      ALLOW_PROD=true
+      shift
+      ;;
+    --deploy-frontend)
+      DEPLOY_FRONTEND=true
       shift
       ;;
     --help|-h)
@@ -144,14 +156,10 @@ CONTEXT_VALUES=(
   "--context region=${REGION}"
 )
 
-# Prepare for deployment
-# echo -e "${CYAN}🔨 Synthesizing stack for environment: ${BLUE}$ENV${NC} in region: ${BLUE}$REGION${NC}"
-# npx cdk synth --quiet ${CONTEXT_VALUES[*]}
-
 # Deploy or destroy based on flag
 if [ "$DESTROY" == "true" ]; then
   echo -e "${RED}🗑️  Destroying stack for environment: ${BLUE}$ENV${NC} in region: ${BLUE}$REGION${NC}"
-  npx cdk destroy --force ${CONTEXT_VALUES[*]} "ProfilesStack-${ENV}"
+  npx cdk destroy --force ${CONTEXT_VALUES[*]} --all
 else
   echo -e "${CYAN}🚀 Deploying stack for environment: ${BLUE}$ENV${NC} in region: ${BLUE}$REGION${NC}"
   
@@ -173,7 +181,7 @@ else
     fi
     DEPLOY_FLAGS=""
   fi
-  
+
   npx cdk deploy ${DEPLOY_FLAGS} --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStack-${ENV}"
   
   # Get the API URL and key from CloudFormation exports
@@ -187,6 +195,13 @@ VITE_GRAPHQL_API_KEY=${API_KEY}
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"
+  
+  if [ "$DEPLOY_FRONTEND" = true ]; then
+    echo -e "${CYAN}📦 Building and deploying frontend...${NC}"
+    npm run frontend:build
+    npx cdk deploy --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStackFrontend-${ENV}"
+    echo -e "${GREEN}✅ Frontend deployment completed${NC}"
+  fi
 
   # Populate DynamoDB with sample data for development environments on first deployment
   if [[ "$ENV" =~ ^dev- ]] && [ "$FIRST_TIME" = true ]; then

@@ -44,26 +44,57 @@ jobs:
         id: deploy
         run: |
           SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH="dev-$SANITIZED_BRANCH"
           chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh -e $SANITIZED_BRANCH
+          ./scripts/deploy.sh --deploy-frontend -e $SANITIZED_BRANCH
 
-          API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?starts_with(OutputKey,'ApiStackGraphQLApiUrl')].OutputValue" --output text)          
+          APP_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStackFrontend-$(echo $SANITIZED_BRANCH | tr '/' '-')" --query "Stacks[0].Outputs[?OutputKey=='WebsiteURL'].OutputValue" --output text)          
 
           # Guardar la URL como un output del paso para usarlo después
-          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
 
       - uses: actions/github-script@v7
         name: Comment on PR
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
-            github.rest.issues.createComment({
+            const appUrl = "${{ steps.deploy.outputs.app_url }}" || 'URL unavailable';
+
+            // Check for existing comments with the URL
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚀 La API está desplegada y disponible en: ${apiUrl}`
-            })
+              repo: context.repo.repo
+            });
+
+            // Create the comment message
+            const commentMessage = `> [!TIP]\n> 🚀 The application is deployed and available at: ${appUrl}`;
+
+            // Look for an existing deployment comment by our bot that contains our specific message format
+            const existingComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('The application is deployed and available at:')
+            );
+
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentMessage
+              });
+              console.log("Updated existing deployment comment");
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentMessage
+              });
+              console.log("Created new deployment comment");
+            }
 
   # Job for PR closed events
   CleanupPR:
@@ -94,6 +125,7 @@ jobs:
       - name: Run cleanup script
         run: |
           SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH="dev-$SANITIZED_BRANCH"
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh -e $SANITIZED_BRANCH --destroy
 
@@ -102,10 +134,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const apiUrl = "${{ steps.deploy.outputs.api_url }}" || 'URL no disponible';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
+              body: `> [!NOTE]\n> 🧹 Environment for branch \`${{ github.head_ref }}\` has been successfully cleaned up and destroyed.`
             });
