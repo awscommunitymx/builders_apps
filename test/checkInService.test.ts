@@ -7,6 +7,7 @@ import {
   ResourceNotFoundException,
 } from '@aws-sdk/client-dynamodb';
 import { storeAttendeeCheckIn } from '../utils/checkInService';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 // Mock DynamoDB client
 const ddbMock = mockClient(DynamoDBDocumentClient);

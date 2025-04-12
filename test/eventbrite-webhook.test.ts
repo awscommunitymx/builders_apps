@@ -1,9 +1,10 @@
-import { handler } from '../lambda/eventbrite-webhook/src/handler.js';
+import { handler } from '../lambda/eventbrite-webhook/src/handler';
 import * as dynamodbService from '../lambda/eventbrite-webhook/src/services/dynamodb';
 import * as sqsService from '../lambda/eventbrite-webhook/src/services/sqs';
 import * as attendeeUtils from '../lambda/eventbrite-webhook/src/utils/attendee';
 import { mockClient } from 'aws-sdk-client-mock';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { beforeEach, describe, expect, it, vitest } from 'vitest';
 
 const secretsMock = mockClient(SecretsManagerClient);
 
@@ -24,7 +25,8 @@ describe('handler', () => {
     process.env.QUEUE_URL = 'https://sqs.amazonaws.com/test-queue';
 
     secretsMock.reset();
-    jest.clearAllMocks();
+    // jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
   it('should handle a successful request', async () => {
@@ -46,14 +48,19 @@ describe('handler', () => {
     secretsMock.on(GetSecretValueCommand).resolves({ SecretString: fakeToken });
 
     // Mock utility and service functions.
-    jest.spyOn(attendeeUtils, 'fetchAttendeeData').mockResolvedValue(fakeAttendee);
-    jest.spyOn(attendeeUtils, 'extractAndValidateData').mockReturnValue(extracted);
-    jest.spyOn(dynamodbService, 'saveToDynamoDB').mockResolvedValue('Record created or updated');
-    jest.spyOn(sqsService, 'sendToSqs').mockResolvedValue({ success: true, message_id: '123', sequence_number: '1' });
+    vitest.spyOn(attendeeUtils, 'fetchAttendeeData').mockResolvedValue(fakeAttendee);
+    vitest.spyOn(attendeeUtils, 'extractAndValidateData').mockReturnValue(extracted);
+    vitest.spyOn(dynamodbService, 'saveToDynamoDB').mockResolvedValue('Record created or updated');
+    vitest
+      .spyOn(sqsService, 'sendToSqs')
+      .mockResolvedValue({ success: true, message_id: '123', sequence_number: '1' });
 
     // Call the handler without a callback and cast the result type.
-    const response = (await handler(mockEvent, mockContext)) as { statusCode: number; body: string };
-    
+    const response = (await handler(mockEvent, mockContext)) as {
+      statusCode: number;
+      body: string;
+    };
+
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.body);
     expect(body.attendee_data.barcode).toBe('12345');
@@ -65,7 +72,10 @@ describe('handler', () => {
     // Mock Secrets Manager to throw an error.
     secretsMock.on(GetSecretValueCommand).rejects(new Error('Secrets error'));
 
-    const response = (await handler(mockEvent, mockContext)) as { statusCode: number; body: string };
+    const response = (await handler(mockEvent, mockContext)) as {
+      statusCode: number;
+      body: string;
+    };
     expect(response.statusCode).toBe(500);
     const body = JSON.parse(response.body);
     expect(body.error).toBe('Internal Server Error');
