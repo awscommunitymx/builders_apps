@@ -40,7 +40,7 @@
     "aws-sdk-client-mock": "^4.1.0"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.187.0",
+    "aws-cdk-lib": "^2.189.0",
     "aws-sdk": "^2.1692.0",
     "constructs": "^10.4.2"
   },
