@@ -1,8 +1,11 @@
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { AttendeeData } from '../types/attendee';
 
-export const saveToDynamoDB = async (client: DynamoDBClient, tableName: string, data: AttendeeData): Promise<string> => {
+export const saveToDynamoDB = async (
+  client: DynamoDBDocumentClient,
+  tableName: string,
+  data: AttendeeData
+): Promise<string> => {
   const item = {
     PK: `USER#${data.barcode}`,
     SK: 'PROFILE',
@@ -20,11 +23,12 @@ export const saveToDynamoDB = async (client: DynamoDBClient, tableName: string, 
     role: data.job_title,
   };
 
-  const command = new PutItemCommand({
+  const command = new PutCommand({
     TableName: tableName,
-    Item: marshall(item),
-    ConditionExpression: 'attribute_not_exists(PK) OR (attribute_exists(PK) AND initialized = :false)',
-    ExpressionAttributeValues: marshall({ ':false': false }),
+    Item: item,
+    ConditionExpression:
+      'attribute_not_exists(PK) OR (attribute_exists(PK) AND initialized = :false)',
+    ExpressionAttributeValues: { ':false': false },
   });
 
   try {
