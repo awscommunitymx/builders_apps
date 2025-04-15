@@ -24,9 +24,7 @@ describe('handler', () => {
     process.env.DYNAMODB_TABLE_NAME = 'test-table';
     process.env.QUEUE_URL = 'https://sqs.amazonaws.com/test-queue';
 
-    secretsMock.reset();
-    // jest.clearAllMocks();
-    vitest.clearAllMocks();
+    vitest.resetModules();
   });
 
   it('should handle a successful request', async () => {
@@ -69,9 +67,16 @@ describe('handler', () => {
   });
 
   it('should return 500 on error', async () => {
-    // Mock Secrets Manager to throw an error.
+    // Import the module after resetting to ensure that PRIVATE_TOKEN is undefined.
+    const { handler } = await import('../lambda/eventbrite-webhook/src/handler');
+
+    // Set up the secrets mock to reject.
+    const { SecretsManagerClient, GetSecretValueCommand } = await import('@aws-sdk/client-secrets-manager');
+    const { mockClient } = await import('aws-sdk-client-mock');
+    const secretsMock = mockClient(SecretsManagerClient);
     secretsMock.on(GetSecretValueCommand).rejects(new Error('Secrets error'));
 
+    // Call the handler.
     const response = (await handler(mockEvent, mockContext)) as {
       statusCode: number;
       body: string;

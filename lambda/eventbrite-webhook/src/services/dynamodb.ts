@@ -29,11 +29,11 @@ export const saveToDynamoDB = async (client: DynamoDBClient, tableName: string, 
 
   try {
     await client.send(command);
-    return 'Record created or updated';
+    return 'Record created';
   } catch (err: any) {
     if (err.name === 'ConditionalCheckFailedException') {
-      return 'Record already exists and is initialized, no update performed';
+      throw new Error('Record already exists and is initialized, no update performed');
     }
-    throw err;
+    throw new Error(`Failed to save data in DynamoDB: ${err.message}`);
   }
 };

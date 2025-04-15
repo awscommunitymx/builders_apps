@@ -17,6 +17,7 @@ export const sendToSqs = async (sqsClient: SQSClient, queueUrl: string, data: At
       sequence_number: result.SequenceNumber,
     };
   } catch (err: any) {
-    return { success: false, error: err.message };
+    // Change: Throwing error so that the catch block in the lambda catches it.
+    throw new Error(`SQS send failed: ${err.message}`);
   }
 };
