@@ -6,16 +6,35 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
+import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
 interface FrontendStackProps extends cdk.StackProps {
   apiUrl: string;
   apiKey: string;
   environment?: string;
+  certificateArn: string;
+  hostedZoneName: string;
+  hostedZoneId: string;
 }
 
 export class FrontendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, props);
+
+    const frontendDomain = `dev.${props.hostedZoneName}`;
+
+    const domainCert = certificatemanager.Certificate.fromCertificateArn(
+      this,
+      'domainCert',
+      props.certificateArn
+    );
+
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      hostedZoneId: props.hostedZoneId,
+      zoneName: props.hostedZoneName,
+    });
 
     // Create S3 bucket to host the React app
     const websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
@@ -53,6 +72,20 @@ export class FrontendStack extends cdk.Stack {
         },
       ],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+      domainNames: [frontendDomain],
+      certificate: domainCert,
+    });
+
+    new route53.AaaaRecord(this, 'AliasAaaa', {
+      zone: hostedZone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      recordName: frontendDomain,
+    });
+
+    new route53.ARecord(this, 'AliasA', {
+      zone: hostedZone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      recordName: frontendDomain,
     });
 
     // Create a policy document for CloudFront invalidation
