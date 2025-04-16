@@ -14,8 +14,8 @@ permissions:
   pull-requests: write # Permiso para comentar en PRs
 
 jobs:
-  # Job for PR opened/reopened/synchronized events
-  DeployPR:
+  # Job for running tests
+  TestPR:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
@@ -29,16 +29,38 @@ jobs:
           cache: 'npm'
           check-latest: true
 
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  # Job for PR opened/reopened/synchronized events
+  DeployPR:
+    needs: TestPR
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          check-latest: true
+
+      - name: Install project dependencies
+        run: |
+          npm ci || npm install
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GitHub_PR_Deployment
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install project dependencies
-        run: |
-          npm ci || npm install
 
       - name: Run deployment script
         id: deploy
