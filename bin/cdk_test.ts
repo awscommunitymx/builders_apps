@@ -31,6 +31,9 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
     region: 'us-east-1',
   },
   description: `Profiles API stack - ${environmentName} environment`,
+  certificateArn: certificateArn,
+  hostedZoneName: hostedZoneName,
+  hostedZoneId: hostedZoneId,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {

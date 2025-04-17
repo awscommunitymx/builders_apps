@@ -4,11 +4,18 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
+import { DomainName } from 'aws-cdk-lib/aws-apigateway';
+
 
 interface ApiStackProps {
   environmentName: string;
   table: dynamodb.Table;
   viewProfileFunction: NodejsFunction;
+  certificateArn: string;
+  hostedZoneName: string;
+  hostedZoneId: string;
 }
 
 export class ApiStack extends Construct {
@@ -17,10 +24,27 @@ export class ApiStack extends Construct {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id);
 
+    const backendDomain = `back.dev.${props.hostedZoneName}`;
+
+    const certificatearn = certificatemanager.Certificate.fromCertificateArn(
+      this,
+      'domainCert',
+      props.certificateArn
+    );
+
+    const zone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      hostedZoneId: props.hostedZoneId,
+      zoneName: props.hostedZoneName,
+    });
+
     // Create the AppSync API
     this.api = new appsync.GraphqlApi(this, 'ProfilesApi', {
       name: `ProfilesApi-${props.environmentName}`,
       definition: appsync.Definition.fromFile('./schema.graphql'),
+      domainName: {
+        domainName: backendDomain,
+        certificate: certificatearn,
+      },
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.API_KEY,
@@ -38,6 +62,13 @@ export class ApiStack extends Construct {
       },
       xrayEnabled: true,
     });
+
+    new route53.CnameRecord(this, `CnameApiRecord`, {
+      recordName: backendDomain,
+      zone,
+      domainName: this.api.appSyncDomainName, 
+    });
+
 
     // Create data sources
     const dynamoDataSource = this.api.addDynamoDbDataSource('DynamoDataSource', props.table);

@@ -6,6 +6,9 @@ import { LambdaStack } from './stacks/lambda';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
+  certificateArn: string;
+  hostedZoneName: string;
+  hostedZoneId: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -28,6 +31,9 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
       table: databaseStack.table,
       viewProfileFunction: lambdaStack.viewProfileFunction,
+      certificateArn: props.certificateArn,
+      hostedZoneName: props.hostedZoneName,
+      hostedZoneId: props.hostedZoneId,
     });
 
     // Expose API URL and Key
