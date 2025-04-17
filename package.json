@@ -8,6 +8,7 @@
     "test": "jest",
     "cdk": "cdk",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint . --ext .ts",
     "prepare": "husky",
     "frontend:build": "npm run build --workspace=frontend",
