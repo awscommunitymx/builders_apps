@@ -7,17 +7,20 @@ import { ApolloProvider } from '@apollo/client';
 import { client } from './apollo-client';
 import { Layout } from './Layout.tsx';
 import AuthCallback from './components/AuthCallback.tsx';
+import { AuthProvider } from './AuthContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
-  <ApolloProvider client={client}>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/" element={<Layout />}>
-          <Route index element={<App />} />
-          <Route path="/uid/:id" element={<UserProfileRoute />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </ApolloProvider>
+  <AuthProvider>
+    <ApolloProvider client={client}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<App />} />
+            <Route path="/uid/:id" element={<UserProfileRoute />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ApolloProvider>
+  </AuthProvider>
 );

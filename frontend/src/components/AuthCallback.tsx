@@ -1,8 +1,11 @@
+// src/components/AuthCallback.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useAuth } from '../AuthContext';
 import { COGNITO_DOMAIN, CLIENT_ID, REDIRECT_URI } from '../AuthConfig';
 
 export default function AuthCallback() {
+  const { setTokens } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,20 +23,20 @@ export default function AuthCallback() {
       redirect_uri: REDIRECT_URI,
     });
 
-    fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+    fetch(`https://${COGNITO_DOMAIN}/oauth2/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
     })
       .then((res) => res.json())
       .then((tokens) => {
-        localStorage.setItem('access_token', tokens.access_token);
-        localStorage.setItem('id_token', tokens.id_token);
-        localStorage.setItem('refresh_token', tokens.refresh_token);
+        setTokens(tokens);
         navigate('/');
       })
-      .catch(() => navigate('/'));
-  }, [navigate]);
+      .catch(() => {
+        navigate('/');
+      });
+  }, [navigate, setTokens]);
 
   return <p>Signing you in…</p>;
 }
