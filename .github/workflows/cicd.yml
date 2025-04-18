@@ -43,6 +43,9 @@ jobs:
     needs: TestPR
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    # Add outputs at the job level
+    outputs:
+      app_url: ${{ steps.deploy.outputs.app_url }}
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v4
@@ -147,7 +150,9 @@ jobs:
       - name: Run Playwright tests
         env:
           BASE_URL: ${{ needs.DeployPR.outputs.app_url }}
-        run: npx playwright test
+        run: |
+          echo "Using BASE_URL: $BASE_URL"
+          npx playwright test
 
       - uses: actions/upload-artifact@v4
         if: always()
