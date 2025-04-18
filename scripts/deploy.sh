@@ -229,7 +229,8 @@ EOL
       --user-pool-id "${USER_POOL_ID}" \
       --username "${SAMPLE_USER_EMAIL}" \
       --temporary-password "${SAMPLE_USER_PASSWORD}" \
-      --user-attributes Name=email,Value="${SAMPLE_USER_EMAIL}" Name=email_verified,Value=true
+      --user-attributes Name=email,Value="${SAMPLE_USER_EMAIL}" Name=email_verified,Value=true \
+      --message-action SUPPRESS >/dev/null 2>&1
     aws cognito-idp admin-set-user-password \
       --user-pool-id "${USER_POOL_ID}" \
       --username "${SAMPLE_USER_EMAIL}" \
