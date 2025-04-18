@@ -37,6 +37,7 @@ show_help() {
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
   echo -e "  ${BLUE}--deploy-frontend${NC} Also build and deploy frontend (default: false)"
+  echo -e "  ${BLUE}--force-populate${NC} Force population of DynamoDB and creation of Cognito user"
   echo -e "  ${BLUE}--help, -h${NC}       Show this help message"
   echo
   echo -e "${YELLOW}🌿 Environment Detection:${NC}"
@@ -95,6 +96,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --deploy-frontend)
       DEPLOY_FRONTEND=true
+      shift
+      ;;
+    --force-populate)
+      FORCE_POPULATE=true
       shift
       ;;
     --help|-h)
@@ -206,12 +211,32 @@ EOL
     echo -e "${GREEN}✅ Frontend deployment completed${NC}"
   fi
 
-  # Populate DynamoDB with sample data for development environments on first deployment
-  if [[ "$ENV" =~ ^dev- ]] && [ "$FIRST_TIME" = true ]; then
+  if [[ "$ENV" =~ ^dev- ]] && { [ "$FIRST_TIME" = true ] || [ "$FORCE_POPULATE" = true ]; }; then
+    # Populate DynamoDB with sample data for development environments
     echo -e "${CYAN}📊 Populating DynamoDB with sample data for development environment...${NC}"
     TABLE_NAME=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-ProfilesTableName'].OutputValue" --output text)
     npm run populate-dynamodb -- --table=${TABLE_NAME}
     echo -e "${GREEN}✅ DynamoDB population completed${NC}"
+
+    # Create a sample user in Cognito for development environments
+    echo -e "${CYAN}👤 Creating sample user in Cognito for development environment...${NC}"
+    USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolId'].OutputValue" --output text)
+    USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolClientId'].OutputValue" --output text)
+    USER_POOL_DOMAIN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolDomain'].OutputValue" --output text)
+    SAMPLE_USER_EMAIL="test@app.awscommunity.mx" 
+    SAMPLE_USER_PASSWORD="Test1234!"
+    aws cognito-idp admin-create-user \
+      --user-pool-id "${USER_POOL_ID}" \
+      --username "${SAMPLE_USER_EMAIL}" \
+      --temporary-password "${SAMPLE_USER_PASSWORD}" \
+      --user-attributes Name=email,Value="${SAMPLE_USER_EMAIL}" Name=email_verified,Value=true
+    aws cognito-idp admin-set-user-password \
+      --user-pool-id "${USER_POOL_ID}" \
+      --username "${SAMPLE_USER_EMAIL}" \
+      --password "${SAMPLE_USER_PASSWORD}" \
+      --permanent
+    echo -e "${GREEN}✅ Sample user created in Cognito${NC}"
+    echo -e "${YELLOW}🔑 Sample user credentials: ${BLUE}${SAMPLE_USER_EMAIL}:${SAMPLE_USER_PASSWORD}${NC}"
   fi
 fi
 
