@@ -1,9 +1,9 @@
 import { base36Encode } from './base36';
-import { AttendeeData } from '../types/attendee';
+import { AttendeeCheckIn } from '../../../../utils/types';
 import * as crypto from 'crypto';
 
-export const generateEventCode = (data: AttendeeData): string => {
-  const uniqueString = `${data.barcode}_${data.email}_${data.first_name}_${data.last_name}`;
+export const generateEventCode = (data: AttendeeCheckIn): string => {
+  const uniqueString = `${data.user_id}_${data.contact_information.email}_${data.first_name}_${data.last_name}`;
   const hash = crypto.createHash('sha256').update(uniqueString).digest('hex');
   const hashInt = BigInt('0x' + hash);
 

@@ -14,6 +14,7 @@ export interface AttendeeCheckIn {
   age_range: string;
   area_of_interest: string;
   company: string;
+  job_title: string;
   contact_information: ContactInformation;
   first_name: string;
   last_name: string;
@@ -23,4 +24,5 @@ export interface AttendeeCheckIn {
   role: string;
   social_links: SocialLink[];
   short_id: string;
+  initialized: boolean;
 }

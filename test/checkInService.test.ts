@@ -20,6 +20,7 @@ const mockAttendee: AttendeeCheckIn = {
   age_range: '25-34',
   gender: 'Male',
   company: 'Acme Corp',
+  job_title: 'Cloud Engineer',
   area_of_interest: 'Cloud Architecture',
   pin: '1234',
   role: 'Cloud Architect',
@@ -31,6 +32,7 @@ const mockAttendee: AttendeeCheckIn = {
   },
   social_links: [{ name: 'LinkedIn', url: 'https://linkedin.com/johndoe' }],
   short_id: 'ABC123',
+  initialized: false,
 };
 
 // Constants

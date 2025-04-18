@@ -9,9 +9,9 @@ import { Context } from 'aws-lambda';
 import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { fetchAttendeeData, extractAndValidateData } from './utils/attendee';
 import { generateEventCode } from './utils/generateEventCode';
-import { saveToDynamoDB } from './services/dynamodb';
 import { sendToSqs } from './services/sqs';
 import { SQSClient } from '@aws-sdk/client-sqs';
+import { storeAttendeeCheckIn } from '../../../utils/checkInService'
 
 
 const logger = new Logger({ serviceName: 'eventbrite-webhook' });
@@ -32,13 +32,17 @@ let PRIVATE_TOKEN: string | undefined;
 
 const getPrivateToken = async (): Promise<string> => {
   if (PRIVATE_TOKEN) return PRIVATE_TOKEN;
-  const command = new GetSecretValueCommand({ SecretId: SECRET_NAME });
-  const response = await secretsManager.send(command);
-  PRIVATE_TOKEN = response.SecretString;
-  if (!PRIVATE_TOKEN) {
-    throw new Error('Private token not found in Secrets Manager');
+  try {
+    const command = new GetSecretValueCommand({ SecretId: SECRET_NAME });
+    const response = await secretsManager.send(command);
+    PRIVATE_TOKEN = response.SecretString;
+    if (!PRIVATE_TOKEN) {
+      throw new Error('Private token not found in Secrets Manager');
+    }
+    return PRIVATE_TOKEN;
+  } catch (err) {
+    throw err;
   }
-  return PRIVATE_TOKEN;
 };
 
 const baseHandler = async (event: any, context: Context) => {
@@ -51,20 +55,18 @@ const baseHandler = async (event: any, context: Context) => {
     const token = await getPrivateToken();
     const attendeeData = await fetchAttendeeData(apiUrl, token);
     const extractedData = extractAndValidateData(attendeeData);
-
     const eventCode = generateEventCode(extractedData);
     extractedData.short_id = eventCode;
 
     logger.info('Data with event code', { data: extractedData });
 
-    const dbResult = await saveToDynamoDB(docDynamoClient, DYNAMODB_TABLE_NAME, extractedData);
+    await storeAttendeeCheckIn(docDynamoClient, extractedData, DYNAMODB_TABLE_NAME);
     const sqsResult = await sendToSqs(sqsClient, QUEUE_URL, extractedData);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         attendee_data: extractedData,
-        db_operation: dbResult,
         sqs_message_sent: sqsResult,
       }),
     };

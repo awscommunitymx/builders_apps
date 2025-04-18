@@ -1,12 +1,12 @@
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
-import { AttendeeData } from '../types/attendee';
+import { AttendeeCheckIn } from '../../../../utils/types';
 
-export const sendToSqs = async (sqsClient: SQSClient, queueUrl: string, data: AttendeeData): Promise<any> => {
+export const sendToSqs = async (sqsClient: SQSClient, queueUrl: string, data: AttendeeCheckIn): Promise<any> => {
   const command = new SendMessageCommand({
     QueueUrl: queueUrl,
     MessageBody: JSON.stringify(data),
-    MessageGroupId: data.barcode,
-    MessageDeduplicationId: data.barcode,
+    MessageGroupId: data.user_id,
+    MessageDeduplicationId: data.user_id,
   });
 
   try {
