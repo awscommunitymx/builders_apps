@@ -216,7 +216,7 @@ export class CognitoStack extends Construct {
     });
 
     new cdk.CfnOutput(this, 'UserPoolDomain', {
-      value: `${domainPrefix}.auth.${cdk.Stack.of(this).region}.amazoncognito.com`,
+      value: `${this.userPoolDomain.domainName}.auth.${cdk.Stack.of(this).region}.amazoncognito.com`,
       description: 'Cognito User Pool Domain for hosted UI',
       exportName: `${props.environmentName}-UserPoolDomain`,
     });
