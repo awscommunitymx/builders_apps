@@ -121,6 +121,58 @@ jobs:
               console.log("Created new deployment comment");
             }
 
+  # Job for running E2E tests against deployed environment
+  PlaywrightTests:
+    needs: DeployPR
+    if: github.event.action != 'closed'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          check-latest: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        env:
+          BASE_URL: ${{ needs.DeployPR.outputs.app_url }}
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Comment test results on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const testStatus = '${{ job.status }}';
+            const statusEmoji = testStatus === 'success' ? '✅' : '❌';
+            const commentBody = `> [!NOTE]\n> ${statusEmoji} E2E Tests ${testStatus}\n> For detailed results, check the [Playwright Report](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+
   # Job for PR closed events
   CleanupPR:
     if: github.event.action == 'closed'

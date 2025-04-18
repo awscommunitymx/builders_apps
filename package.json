@@ -25,11 +25,13 @@
     "@graphql-codegen/typescript-operations": "^4.5.1",
     "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@graphql-codegen/typescript-resolvers": "^4.4.4",
+    "@playwright/test": "^1.52.0",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "aws-cdk": "2.1003.0",
+    "aws-sdk-client-mock": "^4.1.0",
     "eslint": "^9.22.0",
     "graphql": "^16.10.0",
     "husky": "^9.1.7",
@@ -37,13 +39,13 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "~5.6.3",
-    "aws-sdk-client-mock": "^4.1.0"
+    "typescript": "~5.6.3"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.189.1",
     "aws-sdk": "^2.1692.0",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "dotenv": "^16.5.0"
   },
   "workspaces": [
     "lambda/*",
