@@ -12,10 +12,11 @@ import { generateEventCode } from './utils/generateEventCode';
 import { sendToSqs } from './services/sqs';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { storeAttendeeCheckIn } from '../../../utils/checkInService'
-
+import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 
 const logger = new Logger({ serviceName: 'eventbrite-webhook' });
 const tracer = new Tracer({ serviceName: 'eventbrite-webhook' });
+const metrics = new Metrics({ serviceName: 'view-profile-service' });
 
 const secretsManager = new SecretsManagerClient({});
 
@@ -72,6 +73,7 @@ const baseHandler = async (event: any, context: Context) => {
     };
   } catch (err: any) {
     logger.error('Error processing request', { error: err.message });
+    metrics.addMetric('EventbriteWebhook', MetricUnit.Count, 1);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error' }),
