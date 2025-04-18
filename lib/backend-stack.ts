@@ -30,16 +30,17 @@ export class BackendStack extends cdk.Stack {
       table: databaseStack.table,
     });
 
-    const apiStack = new ApiStack(this, 'ApiStack', {
-      environmentName: props.environmentName,
-      table: databaseStack.table,
-      viewProfileFunction: lambdaStack.viewProfileFunction,
-    });
-
     // Create Cognito Stack for authentication
     const cognitoStack = new CognitoStack(this, 'CognitoStack', {
       environmentName: props.environmentName,
       appDomain: props.appDomain,
+    });
+
+    const apiStack = new ApiStack(this, 'ApiStack', {
+      environmentName: props.environmentName,
+      table: databaseStack.table,
+      viewProfileFunction: lambdaStack.viewProfileFunction,
+      userPool: cognitoStack.userPool,
     });
 
     // Add permissions for authenticated users to access API operations

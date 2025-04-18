@@ -9,7 +9,6 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      'x-api-key': import.meta.env.VITE_GRAPHQL_API_KEY,
     },
   };
 });

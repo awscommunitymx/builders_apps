@@ -4,11 +4,13 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { IUserPool } from 'aws-cdk-lib/aws-cognito';
 
 interface ApiStackProps {
   environmentName: string;
   table: dynamodb.Table;
   viewProfileFunction: NodejsFunction;
+  userPool: IUserPool;
 }
 
 export class ApiStack extends Construct {
@@ -23,14 +25,8 @@ export class ApiStack extends Construct {
       definition: appsync.Definition.fromFile('./schema.graphql'),
       authorizationConfig: {
         defaultAuthorization: {
-          authorizationType: appsync.AuthorizationType.API_KEY,
-          apiKeyConfig: {
-            expires: cdk.Expiration.after(
-              cdk.Duration.days(
-                props.environmentName === 'prod' ? 365 : 30 // Longer expiration for prod
-              )
-            ),
-          },
+          authorizationType: appsync.AuthorizationType.USER_POOL,
+          userPoolConfig: { userPool: props.userPool },
         },
       },
       logConfig: {
