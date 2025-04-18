@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setTokens = (tokens: Tokens) => {
     const { access_token, id_token, refresh_token } = tokens;
-    console.log('Setting tokens:', tokens);
     localStorage.setItem('access_token', access_token);
     localStorage.setItem('id_token', id_token);
     localStorage.setItem('refresh_token', refresh_token);
