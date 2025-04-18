@@ -187,11 +187,15 @@ else
   # Get the API URL and key from CloudFormation exports
   API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiUrl'].OutputValue" --output text)
   API_KEY=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiKey'].OutputValue" --output text)
+  USERPOOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolClientId'].OutputValue" --output text)
+  USERPOOL_DOMAIN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolDomain'].OutputValue" --output text)
   
   # Create .env file in the frontend directory
   cat > frontend/.env << EOL
 VITE_GRAPHQL_API_URL=${API_URL}
 VITE_GRAPHQL_API_KEY=${API_KEY}
+COGNITO_USER_POOL_CLIENT_ID=${USERPOOL_CLIENT_ID}
+COGNITO_USER_POOL_DOMAIN=${USERPOOL_DOMAIN}
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"

@@ -95,28 +95,12 @@ export class CognitoStack extends Construct {
 
     // Define callback URLs based on environment
     const callbackUrls = props.appDomain
-      ? [
-          `https://${props.appDomain}`,
-          `https://${props.appDomain}/callback`,
-          `https://${props.appDomain}/auth/callback`,
-        ]
-      : [
-          'http://localhost:3000',
-          'http://localhost:3000/callback',
-          'http://localhost:3000/auth/callback',
-        ];
+      ? [`https://${props.appDomain}/auth/callback`]
+      : ['http://localhost:5173/auth/callback'];
 
     const logoutUrls = props.appDomain
-      ? [
-          `https://${props.appDomain}`,
-          `https://${props.appDomain}/logout`,
-          `https://${props.appDomain}/auth/logout`,
-        ]
-      : [
-          'http://localhost:3000',
-          'http://localhost:3000/logout',
-          'http://localhost:3000/auth/logout',
-        ];
+      ? [`https://${props.appDomain}/auth/logout`]
+      : ['http://localhost:5173/auth/logout'];
 
     // Create a client for the user pool
     this.userPoolClient = this.userPool.addClient('app-client', {
