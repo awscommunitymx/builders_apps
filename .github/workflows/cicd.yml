@@ -152,7 +152,7 @@ jobs:
           BASE_URL: ${{ needs.DeployPR.outputs.app_url }}
         run: |
           echo "Using BASE_URL: $BASE_URL"
-          npx playwright test
+          npx playwright test --trace on
 
       - uses: actions/upload-artifact@v4
         if: always()
