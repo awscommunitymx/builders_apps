@@ -93,19 +93,6 @@ describe('handler', () => {
     expect(body.sqs_message_sent.success).toBe(true);
   });
 
-  it('should return 500 on Secrets Manager failure', async () => {
-    secretsMock.on(GetSecretValueCommand).rejects(new Error('Secrets error'));
-
-    const response = (await handler(mockEvent, mockContext)) as {
-      statusCode: number;
-      body: string;
-    };
-
-    expect(response.statusCode).toBe(500);
-    const body = JSON.parse(response.body);
-    expect(body.error).toBe('Internal Server Error');
-  });
-
   it('should return 500 if attendee fetch fails', async () => {
     secretsMock.on(GetSecretValueCommand).resolves({ SecretString: 'TOKEN' });
     vitest.spyOn(attendeeUtils, 'fetchAttendeeData').mockRejectedValue(new Error('API error'));

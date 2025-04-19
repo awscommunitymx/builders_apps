@@ -3,6 +3,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
+import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
@@ -85,6 +86,13 @@ export class LambdaStack extends Construct {
           '@aws-lambda-powertools/tracer',
           '@aws-lambda-powertools/logger',
           '@aws-lambda-powertools/metrics',
+          '@aws-sdk/client-secrets-manager',
+          '@aws-sdk/client-sqs',
+          '@aws-sdk/client-dynamodb',
+          '@aws-sdk/lib-dynamodb',
+          '@middy/core',
+          'axios',
+          'crypto',
           'aws-xray-sdk',
         ],
       },
@@ -101,6 +109,12 @@ export class LambdaStack extends Construct {
 
     // Grant the Lambda function access to DynamoDB
     props.table.grantReadWriteData(this.eventbriteWebhookHandler);
+
+    // Add Function URL
+
+    this.eventbriteWebhookHandler.addFunctionUrl({
+      authType: lambdaUrl.FunctionUrlAuthType.NONE
+    });
   }
 
   private getLogLevel(environmentName: string): string {
