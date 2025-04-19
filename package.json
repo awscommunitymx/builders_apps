@@ -6,6 +6,8 @@
   },
   "scripts": {
     "test": "jest",
+    "test:e2e": "npx playwright test",
+    "test:e2e:install": "npx playwright install --with-deps",
     "cdk": "cdk",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -46,4 +46,11 @@ export default defineConfig({
       use: { ...devices['iPhone 12'] },
     },
   ],
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: 'npm run frontend:dev',
+        port: 5173,
+        reuseExistingServer: !process.env.CI,
+      },
 });
