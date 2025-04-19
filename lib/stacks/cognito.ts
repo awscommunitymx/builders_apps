@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { getAuthUrls, sanitizeDomainPrefix } from '../../utils/cognito';
 
 export interface CognitoStackProps {
   environmentName: string;
@@ -77,42 +78,21 @@ export class CognitoStack extends Construct {
     });
 
     // Create a domain for the user pool
-    // Create domain prefix without forbidden words, lowercase alphanumeric only
-    const sanitizedEnv = props.environmentName.replace(/[^a-z0-9]/gi, '').toLowerCase();
-    const domainPrefix = `profiles-${sanitizedEnv}`;
-
     // Ensure the prefix doesn't contain "cognito" (AWS restriction)
-    const finalDomainPrefix = domainPrefix.includes('cognito')
-      ? domainPrefix.replace('cognito', 'profiles')
-      : domainPrefix;
+    const finalDomainPrefix = sanitizeDomainPrefix(props.environmentName);
 
     this.userPoolDomain = this.userPool.addDomain('CognitoDomain', {
-      cognitoDomain: {
-        domainPrefix: finalDomainPrefix,
-      },
+      cognitoDomain: { domainPrefix: finalDomainPrefix },
       managedLoginVersion: cognito.ManagedLoginVersion.NEWER_MANAGED_LOGIN,
     });
 
-    // Define callback URLs based on environment
-    const callbackUrls = [];
-    const logoutUrls = [];
-
-    // Add production URL if appDomain is provided
-    if (props.appDomain) {
-      callbackUrls.push(`https://${props.appDomain}/auth/callback`);
-      logoutUrls.push(`https://${props.appDomain}/auth/logout`);
-    }
-
-    // Add localhost URLs only for non-production environments
-    if (props.environmentName !== 'production') {
-      callbackUrls.push('http://localhost:5173/auth/callback');
-      logoutUrls.push('http://localhost:5173/auth/logout');
-    }
+    const callbackUrls = getAuthUrls(props.environmentName, props.appDomain, 'callback');
+    const logoutUrls = getAuthUrls(props.environmentName, props.appDomain, 'logout');
 
     // Create a client for the user pool
     this.userPoolClient = this.userPool.addClient('app-client', {
       userPoolClientName: `profiles-client-${props.environmentName}`,
-      generateSecret: false, // Set to true for backend applications
+      generateSecret: false,
       authFlows: {
         userPassword: true,
         userSrp: true,
