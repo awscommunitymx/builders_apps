@@ -204,7 +204,7 @@ jobs:
             const testStatus = '${{ job.status }}';
             const statusEmoji = testStatus === 'success' ? '✅' : '❌';
             const branchName = process.env.GITHUB_HEAD_REF.toLowerCase().replace(/[^a-z0-9]/g, '-');
-            const reportUrl = `https://${process.env.E2E_REPORTS_DISTRO}/dev-${branchName}/e2e-reports/index.html`;
+            const reportUrl = `https://${process.env.E2E_REPORTS_DISTRO}/e2e-reports/dev-${branchName}/index.html`;
             const commentBody = `> [!NOTE]\n> ${statusEmoji} E2E Tests ${testStatus}\n> View detailed results in the [Playwright Report](${reportUrl})`;
 
             // Check for existing comments
