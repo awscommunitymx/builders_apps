@@ -24,6 +24,7 @@ const hostedZoneName = 'app.awscommunity.mx';
 
 const frontendDomain = `${environmentName}.${hostedZoneName}`;
 const backendDomain = `api-${environmentName}.${hostedZoneName}`;
+const authDomain = `auth-${environmentName}.${hostedZoneName}`;
 
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
@@ -37,6 +38,7 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   hostedZoneName: hostedZoneName,
   domainName: backendDomain,
   appDomain: frontendDomain,
+  authDomain: authDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {

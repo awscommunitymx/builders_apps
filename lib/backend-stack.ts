@@ -13,7 +13,8 @@ export interface AppStackProps extends cdk.StackProps {
   hostedZoneId: string;
   hostedZoneName: string;
   domainName: string;
-  appDomain?: string;
+  appDomain: string;
+  authDomain: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -51,6 +52,9 @@ export class BackendStack extends cdk.Stack {
     const cognitoStack = new CognitoStack(this, 'CognitoStack', {
       environmentName: props.environmentName,
       appDomain: props.appDomain,
+      authDomain: props.authDomain,
+      certificate: domainCert,
+      hostedZone: hostedZone,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {

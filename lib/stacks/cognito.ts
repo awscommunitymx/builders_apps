@@ -3,10 +3,15 @@ import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { getAuthUrls, sanitizeDomainPrefix } from '../../utils/cognito';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
 
 export interface CognitoStackProps {
   environmentName: string;
-  appDomain?: string;
+  appDomain: string;
+  authDomain: string;
+  certificate: ICertificate;
+  hostedZone: route53.IHostedZone;
 }
 
 export class CognitoStack extends Construct {
@@ -82,8 +87,17 @@ export class CognitoStack extends Construct {
     const finalDomainPrefix = sanitizeDomainPrefix(props.environmentName);
 
     this.userPoolDomain = this.userPool.addDomain('CognitoDomain', {
-      cognitoDomain: { domainPrefix: finalDomainPrefix },
+      customDomain: {
+        domainName: props.authDomain,
+        certificate: props.certificate,
+      },
       managedLoginVersion: cognito.ManagedLoginVersion.NEWER_MANAGED_LOGIN,
+    });
+
+    new route53.CnameRecord(this, 'CognitoDomainAlias', {
+      zone: props.hostedZone,
+      recordName: props.authDomain,
+      domainName: this.userPoolDomain.cloudFrontEndpoint,
     });
 
     const callbackUrls = getAuthUrls(props.environmentName, props.appDomain, 'callback');
@@ -203,7 +217,7 @@ export class CognitoStack extends Construct {
     });
 
     new cdk.CfnOutput(this, 'UserPoolDomain', {
-      value: `${this.userPoolDomain.domainName}.auth.${cdk.Stack.of(this).region}.amazoncognito.com`,
+      value: this.userPoolDomain.domainName,
       description: 'Cognito User Pool Domain for hosted UI',
       exportName: `${props.environmentName}-UserPoolDomain`,
     });
