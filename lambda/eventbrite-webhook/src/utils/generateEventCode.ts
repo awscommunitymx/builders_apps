@@ -8,7 +8,6 @@ export const generateEventCode = (data: AttendeeCheckIn): string => {
   const hashInt = BigInt('0x' + hash);
 
   const truncatedHash = Number(hashInt & ((1n << 36n) - 1n));
-  let eventCode = base36Encode(truncatedHash).padStart(6, '0');
+  return base36Encode(truncatedHash).padStart(6, '0');
 
-  return eventCode;
 };
