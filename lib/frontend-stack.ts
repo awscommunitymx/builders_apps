@@ -6,16 +6,34 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
+import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
 interface FrontendStackProps extends cdk.StackProps {
   apiUrl: string;
   apiKey: string;
   environment?: string;
+  certificateArn: string;
+  hostedZoneId: string;
+  hostedZoneName: string;
+  domainName: string;
 }
 
 export class FrontendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, props);
+
+    const domainCert = certificatemanager.Certificate.fromCertificateArn(
+      this,
+      'domainCert',
+      props.certificateArn
+    );
+
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      hostedZoneId: props.hostedZoneId,
+      zoneName: props.hostedZoneName,
+    });
 
     // Create S3 bucket to host the React app
     const websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
@@ -53,6 +71,20 @@ export class FrontendStack extends cdk.Stack {
         },
       ],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+      domainNames: [props.domainName],
+      certificate: domainCert,
+    });
+
+    new route53.AaaaRecord(this, 'AliasAaaa', {
+      zone: hostedZone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      recordName: props.domainName,
+    });
+
+    new route53.ARecord(this, 'AliasA', {
+      zone: hostedZone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      recordName: props.domainName,
     });
 
     // Create a policy document for CloudFront invalidation
@@ -115,14 +147,8 @@ export class FrontendStack extends cdk.Stack {
 
     // Output the CloudFront URL
     new cdk.CfnOutput(this, 'WebsiteURL', {
-      value: `https://${distribution.distributionDomainName}`,
+      value: `https://${props.domainName}`,
       description: 'Website URL',
-    });
-
-    // Output the S3 bucket URL
-    new cdk.CfnOutput(this, 'S3BucketURL', {
-      value: websiteBucket.bucketWebsiteUrl,
-      description: 'S3 Bucket URL',
     });
   }
 }
