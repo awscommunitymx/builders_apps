@@ -159,17 +159,37 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 30
+          retention-days: 1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: PlaywrightTestsE2E
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Playwright test results to S3
+        if: always()
+        env:
+          BUCKET_NAME: ${{ vars.BUCKET_NAME }}
+        run: |
+          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH="dev-$SANITIZED_BRANCH"
+          aws s3 cp playwright-report/ s3://$BUCKET_NAME/e2e-reports/$SANITIZED_BRANCH/ --recursive
 
       - name: Comment test results on PR
         if: always()
         uses: actions/github-script@v7
+        env:
+          E2E_REPORTS_DISTRO: ${{ vars.E2E_REPORTS_DISTRO }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const testStatus = '${{ job.status }}';
             const statusEmoji = testStatus === 'success' ? '✅' : '❌';
-            const commentBody = `> [!NOTE]\n> ${statusEmoji} E2E Tests ${testStatus}\n> For detailed results, check the [Playwright Report](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`;
+            const branchName = process.env.GITHUB_HEAD_REF.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const reportUrl = `https://${process.env.E2E_REPORTS_DISTRO}/dev-${branchName}/index.html`;
+            const commentBody = `> [!NOTE]\n> ${statusEmoji} E2E Tests ${testStatus}\n> View detailed results in the [Playwright Report](${reportUrl})`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
