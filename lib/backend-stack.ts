@@ -6,6 +6,7 @@ import { LambdaStack } from './stacks/lambda';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
+import * as rum from 'aws-cdk-lib/aws-rum';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
@@ -76,6 +77,36 @@ export class BackendStack extends cdk.Stack {
       })
     );
 
+    const rumApp = new rum.CfnAppMonitor(this, 'RumAppMonitor', {
+      name: `profiles-rum-${props.environmentName}`,
+      domainList: [props.appDomain, 'localhost'],
+      appMonitorConfiguration: {
+        allowCookies: true,
+        enableXRay: true,
+        sessionSampleRate: 1,
+        telemetries: ['errors', 'performance', 'http'],
+        guestRoleArn: cognitoStack.unauthenticatedRole.roleArn,
+        identityPoolId: cognitoStack.identityPool.ref,
+      },
+    });
+
+    cognitoStack.unauthenticatedRole.addToPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: ['rum:PutRumEvents'],
+        resources: [
+          cdk.Arn.format({
+            service: 'rum',
+            resource: 'appmonitor',
+            resourceName: `${rumApp.name}`,
+            region: cdk.Stack.of(this).region,
+            account: cdk.Stack.of(this).account,
+            partition: cdk.Aws.PARTITION,
+          }),
+        ],
+      })
+    );
+
     // Expose API URL and Key
     this.apiUrl = apiStack.api.graphqlUrl;
     this.apiKey = apiStack.api.apiKey || '';
@@ -110,6 +141,21 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'IdentityPoolId', {
       value: this.identityPoolId,
       description: 'Cognito Identity Pool ID',
+    });
+
+    new cdk.CfnOutput(this, 'RumAppMonitorId', {
+      value: rumApp.attrId,
+      description: 'CloudWatch RUM App Monitor ID',
+    });
+
+    new cdk.CfnOutput(this, 'RumAppRegion', {
+      value: cdk.Stack.of(this).region,
+      description: 'CloudWatch RUM App Monitor Region',
+    });
+
+    new cdk.CfnOutput(this, 'GuestRoleArn', {
+      value: cognitoStack.unauthenticatedRole.roleArn,
+      description: 'Cognito Guest Role ARN',
     });
   }
 }
