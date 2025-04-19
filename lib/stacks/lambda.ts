@@ -119,7 +119,7 @@ export class LambdaStack extends Construct {
 
   private getLogLevel(environmentName: string): string {
     // Different log levels based on environment
-    if (environmentName === 'prod') return 'WARN';
+    if (environmentName === 'production') return 'WARN';
     if (environmentName === 'staging') return 'INFO';
     return 'DEBUG'; // Development/PR environments
   }

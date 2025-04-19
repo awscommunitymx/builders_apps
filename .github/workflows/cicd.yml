@@ -6,6 +6,8 @@ on:
 
 env:
   AWS_REGION: 'us-east-1'
+  BUCKET_NAME: 'awscommunity-playwright-reports-lsf883qu'
+  E2E_REPORTS_DISTRO: 'e2e.app.awscommunity.mx'
 
 # Required permissions for OIDC authentication and GitHub API
 permissions:
@@ -14,8 +16,8 @@ permissions:
   pull-requests: write # Permiso para comentar en PRs
 
 jobs:
-  # Job for PR opened/reopened/synchronized events
-  DeployPR:
+  # Job for running tests
+  TestPR:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
@@ -29,16 +31,44 @@ jobs:
           cache: 'npm'
           check-latest: true
 
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Check code formatting
+        run: npm run format:check || echo "No lint or format check configured, skipping step"
+
+      - name: Run tests
+        run: npm test
+
+  # Job for PR opened/reopened/synchronized events
+  DeployPR:
+    needs: TestPR
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    # Add outputs at the job level
+    outputs:
+      app_url: ${{ steps.deploy.outputs.app_url }}
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          check-latest: true
+
+      - name: Install project dependencies
+        run: |
+          npm ci || npm install
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GitHub_PR_Deployment
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install project dependencies
-        run: |
-          npm ci || npm install
 
       - name: Run deployment script
         id: deploy
@@ -94,6 +124,121 @@ jobs:
                 body: commentMessage
               });
               console.log("Created new deployment comment");
+            }
+
+  # Job for running E2E tests against deployed environment
+  PlaywrightTests:
+    needs: DeployPR
+    if: github.event.action != 'closed'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          check-latest: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: PlaywrightTestsE2E
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: Install browser dependencies if cache hit
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      - name: Run Playwright tests
+        env:
+          BASE_URL: ${{ needs.DeployPR.outputs.app_url }}
+        run: |
+          echo "Using BASE_URL: $BASE_URL"
+          npx playwright test --trace on
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 1
+
+      - name: Upload Playwright test results to S3
+        if: always()
+        env:
+          BUCKET_NAME: ${{ env.BUCKET_NAME }}
+        run: |
+          SANITIZED_BRANCH=$(echo ${{ github.head_ref }} | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          SANITIZED_BRANCH="dev-$SANITIZED_BRANCH"
+          aws s3 cp playwright-report/ s3://$BUCKET_NAME/e2e-reports/$SANITIZED_BRANCH/ --recursive
+
+      - name: Comment test results on PR
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          E2E_REPORTS_DISTRO: ${{ env.E2E_REPORTS_DISTRO }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const testStatus = '${{ job.status }}';
+            const statusEmoji = testStatus === 'success' ? '✅' : '❌';
+            const branchName = process.env.GITHUB_HEAD_REF.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const reportUrl = `https://${process.env.E2E_REPORTS_DISTRO}/e2e-reports/dev-${branchName}/index.html`;
+            const commentBody = `> [!NOTE]\n> ${statusEmoji} E2E Tests ${testStatus}\n> View detailed results in the [Playwright Report](${reportUrl})`;
+
+            // Check for existing comments
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            // Look for an existing E2E test comment by our bot
+            const existingComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('E2E Tests') && 
+              comment.body.includes('Playwright Report')
+            );
+
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+              console.log("Updated existing E2E test comment");
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+              console.log("Created new E2E test comment");
             }
 
   # Job for PR closed events

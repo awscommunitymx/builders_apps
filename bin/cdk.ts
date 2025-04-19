@@ -17,6 +17,15 @@ for (const [key, value] of Object.entries(tags)) {
   cdk.Tags.of(app).add(key, value);
 }
 
+const certificateArn =
+  'arn:aws:acm:us-east-1:662722197286:certificate/ac873602-b70d-45c6-abe2-1b1357499c31';
+const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
+const hostedZoneName = 'app.awscommunity.mx';
+
+const frontendDomain = `${environmentName}.${hostedZoneName}`;
+const backendDomain = `api-${environmentName}.${hostedZoneName}`;
+const authDomain = `auth-${environmentName}.${hostedZoneName}`;
+
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
   env: {
@@ -24,6 +33,12 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
     region: 'us-east-1',
   },
   description: `Profiles API stack - ${environmentName} environment`,
+  certificateArn: certificateArn,
+  hostedZoneId: hostedZoneId,
+  hostedZoneName: hostedZoneName,
+  domainName: backendDomain,
+  appDomain: frontendDomain,
+  authDomain: authDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {
@@ -34,4 +49,8 @@ const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmen
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: 'us-east-1',
   },
+  certificateArn: certificateArn,
+  hostedZoneId: hostedZoneId,
+  hostedZoneName: hostedZoneName,
+  domainName: frontendDomain,
 });

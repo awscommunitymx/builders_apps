@@ -6,3 +6,9 @@ node_modules
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
