@@ -62,7 +62,7 @@ export class LambdaStack extends Construct {
     props.table.grantReadWriteData(this.viewProfileFunction);
 
     // Create the Lambda function for eventbriteWebhookHandler
-    this.eventbriteWebhookHandler = new NodejsFunction(this, 'EvenbriteWebhookHandler', {
+    this.eventbriteWebhookHandler = new NodejsFunction(this, 'EventbriteWebhookHandler', {
       functionName: `EventbriteWebhook-${props.environmentName}`,
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'handler',
