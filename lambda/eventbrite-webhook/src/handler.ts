@@ -16,7 +16,7 @@ import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 
 const logger = new Logger({ serviceName: 'eventbrite-webhook' });
 const tracer = new Tracer({ serviceName: 'eventbrite-webhook' });
-const metrics = new Metrics({ serviceName: 'view-profile-service' });
+const metrics = new Metrics({ serviceName: 'eventbrite-webhook' });
 
 const secretsManager = new SecretsManagerClient({});
 
