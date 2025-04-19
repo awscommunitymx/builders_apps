@@ -1,7 +1,18 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { Outlet } from 'react-router';
+import { COGNITO_DOMAIN, CLIENT_ID, REDIRECT_URI, RESPONSE_TYPE, SCOPES } from './AuthConfig';
 
 export function Layout() {
+  const generateLoginUrl = () => {
+    const params = new URLSearchParams({
+      response_type: RESPONSE_TYPE,
+      client_id: CLIENT_ID,
+      redirect_uri: REDIRECT_URI,
+      scope: SCOPES,
+    });
+    return `https://${COGNITO_DOMAIN}/login?${params}`;
+  };
+
   return (
     <div>
       <TopNavigation
@@ -16,73 +27,8 @@ export function Layout() {
         utilities={[
           {
             type: 'button',
-            text: 'Link',
-            href: 'https://example.com/',
-            external: true,
-            externalIconAriaLabel: ' (opens in a new tab)',
-          },
-          {
-            type: 'button',
-            iconName: 'notification',
-            title: 'Notifications',
-            ariaLabel: 'Notifications (unread)',
-            badge: true,
-            disableUtilityCollapse: false,
-          },
-          {
-            type: 'button',
-            iconName: 'heart',
-            title: 'Favorites',
-            ariaLabel: 'Favorites',
-          },
-          {
-            type: 'menu-dropdown',
-            iconName: 'settings',
-            ariaLabel: 'Settings',
-            title: 'Settings',
-            items: [
-              {
-                id: 'settings-org',
-                text: 'Organizational settings',
-              },
-              {
-                id: 'settings-project',
-                text: 'Project settings',
-              },
-            ],
-          },
-          {
-            type: 'menu-dropdown',
-            text: 'Customer Name',
-            description: 'email@example.com',
-            iconName: 'user-profile',
-            items: [
-              { id: 'profile', text: 'Profile' },
-              { id: 'preferences', text: 'Preferences' },
-              { id: 'security', text: 'Security' },
-              {
-                id: 'support-group',
-                text: 'Support',
-                items: [
-                  {
-                    id: 'documentation',
-                    text: 'Documentation',
-                    href: '#',
-                    external: true,
-                    externalIconAriaLabel: ' (opens in new tab)',
-                  },
-                  { id: 'support', text: 'Support' },
-                  {
-                    id: 'feedback',
-                    text: 'Feedback',
-                    href: '#',
-                    external: true,
-                    externalIconAriaLabel: ' (opens in new tab)',
-                  },
-                ],
-              },
-              { id: 'signout', text: 'Sign out' },
-            ],
+            text: 'Login',
+            href: generateLoginUrl(),
           },
         ]}
       />

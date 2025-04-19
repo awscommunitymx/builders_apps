@@ -32,16 +32,17 @@ show_help() {
   echo -e "  ${BLUE}npm run deploy:help${NC}         # Show this help message"
   echo
   echo -e "${YELLOW}🔧 Options:${NC}"
-  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, prod, or branch-based)"
+  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, production, or branch-based)"
   echo -e "  ${BLUE}--region, -r${NC}     AWS region (default: $DEFAULT_REGION)"
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
   echo -e "  ${BLUE}--deploy-frontend${NC} Also build and deploy frontend (default: false)"
+  echo -e "  ${BLUE}--force-populate${NC} Force population of DynamoDB and creation of Cognito user"
   echo -e "  ${BLUE}--help, -h${NC}       Show this help message"
   echo
   echo -e "${YELLOW}🌿 Environment Detection:${NC}"
   echo -e "The script automatically detects the environment from your Git branch:"
-  echo -e "  • ${BLUE}main/master${NC} → ${GREEN}prod${NC}"
+  echo -e "  • ${BLUE}main/master${NC} → ${GREEN}production${NC}"
   echo -e "  • ${BLUE}staging/develop${NC} → ${GREEN}staging${NC}"
   echo -e "  • ${BLUE}feature/*${NC} → ${GREEN}dev-feature-*${NC}"
   echo -e "  • ${BLUE}bugfix/*${NC} → ${GREEN}dev-bugfix-*${NC}"
@@ -97,6 +98,10 @@ while [[ $# -gt 0 ]]; do
       DEPLOY_FRONTEND=true
       shift
       ;;
+    --force-populate)
+      FORCE_POPULATE=true
+      shift
+      ;;
     --help|-h)
       show_help
       ;;
@@ -118,7 +123,7 @@ if [ -z "$ENV" ]; then
   
   # Handle special branch names
   if [ "$BRANCH_NAME" = "main" ] || [ "$BRANCH_NAME" = "master" ]; then
-    ENV="prod"
+    ENV="production"
   elif [ "$BRANCH_NAME" = "staging" ] || [ "$BRANCH_NAME" = "develop" ]; then
     ENV="staging"
   elif [[ "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix)/ ]]; then
@@ -133,7 +138,7 @@ if [ -z "$ENV" ]; then
 fi
 
 # Check for production deployment flag
-if [ "$ENV" = "prod" ] && [ -z "$ALLOW_PROD" ]; then
+if [ "$ENV" = "production" ] && [ -z "$ALLOW_PROD" ]; then
   echo -e "${RED}❌ Error: Production deployment requires --allow-prod flag${NC}"
   exit 1
 fi
@@ -142,7 +147,7 @@ fi
 if [ -z "$ENV" ]; then
   echo -e "${YELLOW}📖 Usage: ./deploy.sh [options]${NC}"
   echo -e "${YELLOW}Options:${NC}"
-  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, prod, or branch-based)"
+  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, production, or branch-based)"
   echo -e "  ${BLUE}--region, -r${NC}     AWS region (default: $DEFAULT_REGION)"
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
@@ -170,11 +175,11 @@ else
   fi
   
   # Use hotswap for non-prod environments, but only for updates
-  if [ "$ENV" != "prod" ] && [ "$FIRST_TIME" != true ]; then
+  if [ "$ENV" != "production" ] && [ "$FIRST_TIME" != true ]; then
     echo -e "${CYAN}⚡ Using hotswap deployment for faster updates...${NC}"
     DEPLOY_FLAGS="--hotswap-fallback --method=direct"
   else
-    if [ "$ENV" = "prod" ]; then
+    if [ "$ENV" = "production" ]; then
       echo -e "${YELLOW}🛡️  Using standard deployment for production...${NC}"
     else
       echo -e "${YELLOW}🛡️  Using standard deployment for first-time deployment...${NC}"
@@ -187,11 +192,14 @@ else
   # Get the API URL and key from CloudFormation exports
   API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiUrl'].OutputValue" --output text)
   API_KEY=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiKey'].OutputValue" --output text)
+  USERPOOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolClientId'].OutputValue" --output text)
+  USERPOOL_DOMAIN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolDomain'].OutputValue" --output text)
   
   # Create .env file in the frontend directory
   cat > frontend/.env << EOL
 VITE_GRAPHQL_API_URL=${API_URL}
-VITE_GRAPHQL_API_KEY=${API_KEY}
+VITE_COGNITO_USER_POOL_CLIENT_ID=${USERPOOL_CLIENT_ID}
+VITE_COGNITO_USER_POOL_DOMAIN=${USERPOOL_DOMAIN}
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"
@@ -203,12 +211,33 @@ EOL
     echo -e "${GREEN}✅ Frontend deployment completed${NC}"
   fi
 
-  # Populate DynamoDB with sample data for development environments on first deployment
-  if [[ "$ENV" =~ ^dev- ]] && [ "$FIRST_TIME" = true ]; then
+  if [[ "$ENV" =~ ^dev- ]] && { [ "$FIRST_TIME" = true ] || [ "$FORCE_POPULATE" = true ]; }; then
+    # Populate DynamoDB with sample data for development environments
     echo -e "${CYAN}📊 Populating DynamoDB with sample data for development environment...${NC}"
     TABLE_NAME=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-ProfilesTableName'].OutputValue" --output text)
     npm run populate-dynamodb -- --table=${TABLE_NAME}
     echo -e "${GREEN}✅ DynamoDB population completed${NC}"
+
+    # Create a sample user in Cognito for development environments
+    echo -e "${CYAN}👤 Creating sample user in Cognito for development environment...${NC}"
+    USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolId'].OutputValue" --output text)
+    USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolClientId'].OutputValue" --output text)
+    USER_POOL_DOMAIN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolDomain'].OutputValue" --output text)
+    SAMPLE_USER_EMAIL="test@app.awscommunity.mx" 
+    SAMPLE_USER_PASSWORD="Test1234!"
+    aws cognito-idp admin-create-user \
+      --user-pool-id "${USER_POOL_ID}" \
+      --username "${SAMPLE_USER_EMAIL}" \
+      --temporary-password "${SAMPLE_USER_PASSWORD}" \
+      --user-attributes Name=email,Value="${SAMPLE_USER_EMAIL}" Name=email_verified,Value=true \
+      --message-action SUPPRESS >/dev/null 2>&1
+    aws cognito-idp admin-set-user-password \
+      --user-pool-id "${USER_POOL_ID}" \
+      --username "${SAMPLE_USER_EMAIL}" \
+      --password "${SAMPLE_USER_PASSWORD}" \
+      --permanent
+    echo -e "${GREEN}✅ Sample user created in Cognito${NC}"
+    echo -e "${YELLOW}🔑 Sample user credentials: ${BLUE}${SAMPLE_USER_EMAIL}:${SAMPLE_USER_PASSWORD}${NC}"
   fi
 fi
 

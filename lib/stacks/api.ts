@@ -3,6 +3,7 @@ import * as appsync from 'aws-cdk-lib/aws-appsync';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { IUserPool } from 'aws-cdk-lib/aws-cognito';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 
@@ -10,6 +11,7 @@ interface ApiStackProps {
   environmentName: string;
   table: dynamodb.Table;
   viewProfileFunction: NodejsFunction;
+  userPool: IUserPool;
   certificate: certificatemanager.ICertificate;
   hostedZone: route53.IHostedZone;
   domainName: string;
@@ -34,14 +36,8 @@ export class ApiStack extends Construct {
       },
       authorizationConfig: {
         defaultAuthorization: {
-          authorizationType: appsync.AuthorizationType.API_KEY,
-          apiKeyConfig: {
-            expires: cdk.Expiration.after(
-              cdk.Duration.days(
-                props.environmentName === 'prod' ? 365 : 30 // Longer expiration for prod
-              )
-            ),
-          },
+          authorizationType: appsync.AuthorizationType.USER_POOL,
+          userPoolConfig: { userPool: props.userPool },
         },
       },
       logConfig: {
@@ -71,7 +67,7 @@ export class ApiStack extends Construct {
   }
 
   private getFieldLogLevel(environmentName: string): appsync.FieldLogLevel {
-    if (environmentName === 'prod') return appsync.FieldLogLevel.ERROR;
+    if (environmentName === 'production') return appsync.FieldLogLevel.ERROR;
     if (environmentName === 'staging') return appsync.FieldLogLevel.INFO;
     return appsync.FieldLogLevel.ALL; // Development/PR environments
   }

@@ -2,8 +2,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
-import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
 
 const app = new cdk.App();
 
@@ -26,6 +24,7 @@ const hostedZoneName = 'app.awscommunity.mx';
 
 const frontendDomain = `${environmentName}.${hostedZoneName}`;
 const backendDomain = `api-${environmentName}.${hostedZoneName}`;
+const authDomain = `auth-${environmentName}.${hostedZoneName}`;
 
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
@@ -38,6 +37,8 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   hostedZoneId: hostedZoneId,
   hostedZoneName: hostedZoneName,
   domainName: backendDomain,
+  appDomain: frontendDomain,
+  authDomain: authDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {
