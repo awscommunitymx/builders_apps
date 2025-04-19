@@ -1,12 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import * as appsync from 'aws-cdk-lib/aws-appsync';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
-import { DomainName } from 'aws-cdk-lib/aws-apigateway';
 
 interface ApiStackProps {
   environmentName: string;
@@ -19,9 +17,12 @@ interface ApiStackProps {
 
 export class ApiStack extends Construct {
   public readonly api: appsync.GraphqlApi;
+  public readonly domainName: string;
 
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id);
+
+    this.domainName = props.domainName;
 
     // Create the AppSync API
     this.api = new appsync.GraphqlApi(this, 'ProfilesApi', {
@@ -112,7 +113,7 @@ export class ApiStack extends Construct {
 
   private createOutputs(environmentName: string): void {
     new cdk.CfnOutput(this, 'GraphQLApiUrl', {
-      value: this.api.graphqlUrl,
+      value: `https://${this.domainName}/graphql`,
       exportName: `${environmentName}-GraphQLApiUrl`,
     });
 

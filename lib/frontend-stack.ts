@@ -147,14 +147,8 @@ export class FrontendStack extends cdk.Stack {
 
     // Output the CloudFront URL
     new cdk.CfnOutput(this, 'WebsiteURL', {
-      value: `https://${distribution.distributionDomainName}`,
+      value: `https://${props.domainName}`,
       description: 'Website URL',
-    });
-
-    // Output the S3 bucket URL
-    new cdk.CfnOutput(this, 'S3BucketURL', {
-      value: websiteBucket.bucketWebsiteUrl,
-      description: 'S3 Bucket URL',
     });
   }
 }
