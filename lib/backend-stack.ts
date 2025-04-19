@@ -77,14 +77,6 @@ export class BackendStack extends cdk.Stack {
       })
     );
 
-    cognitoStack.unauthenticatedRole.addToPolicy(
-      new cdk.aws_iam.PolicyStatement({
-        effect: cdk.aws_iam.Effect.ALLOW,
-        actions: ['rum:PutRumEvents'],
-        resources: ['*'], // TODO: Restrict to specific resources
-      })
-    );
-
     const rumApp = new rum.CfnAppMonitor(this, 'RumAppMonitor', {
       name: `profiles-rum-${props.environmentName}`,
       domainList: [props.appDomain, 'localhost'],
@@ -97,6 +89,23 @@ export class BackendStack extends cdk.Stack {
         identityPoolId: cognitoStack.identityPool.ref,
       },
     });
+
+    cognitoStack.unauthenticatedRole.addToPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: ['rum:PutRumEvents'],
+        resources: [
+          cdk.Arn.format({
+            service: 'rum',
+            resource: 'appmonitor',
+            resourceName: `${rumApp.name}`,
+            region: cdk.Stack.of(this).region,
+            account: cdk.Stack.of(this).account,
+            partition: cdk.Aws.PARTITION,
+          }),
+        ],
+      })
+    );
 
     // Expose API URL and Key
     this.apiUrl = apiStack.api.graphqlUrl;
