@@ -15,15 +15,14 @@ interface FrontendStackProps extends cdk.StackProps {
   apiKey: string;
   environment?: string;
   certificateArn: string;
-  hostedZoneName: string;
   hostedZoneId: string;
+  hostedZoneName: string;
+  domainName: string;
 }
 
 export class FrontendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, props);
-
-    const frontendDomain = `dev.${props.hostedZoneName}`;
 
     const domainCert = certificatemanager.Certificate.fromCertificateArn(
       this,
@@ -72,20 +71,20 @@ export class FrontendStack extends cdk.Stack {
         },
       ],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
-      domainNames: [frontendDomain],
+      domainNames: [props.domainName],
       certificate: domainCert,
     });
 
     new route53.AaaaRecord(this, 'AliasAaaa', {
       zone: hostedZone,
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
-      recordName: frontendDomain,
+      recordName: props.domainName,
     });
 
     new route53.ARecord(this, 'AliasA', {
       zone: hostedZone,
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
-      recordName: frontendDomain,
+      recordName: props.domainName,
     });
 
     // Create a policy document for CloudFront invalidation

@@ -8,14 +8,13 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import { DomainName } from 'aws-cdk-lib/aws-apigateway';
 
-
 interface ApiStackProps {
   environmentName: string;
   table: dynamodb.Table;
   viewProfileFunction: NodejsFunction;
-  certificateArn: string;
-  hostedZoneName: string;
-  hostedZoneId: string;
+  certificate: certificatemanager.ICertificate;
+  hostedZone: route53.IHostedZone;
+  domainName: string;
 }
 
 export class ApiStack extends Construct {
@@ -24,26 +23,13 @@ export class ApiStack extends Construct {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id);
 
-    const backendDomain = `back.dev.${props.hostedZoneName}`;
-
-    const certificatearn = certificatemanager.Certificate.fromCertificateArn(
-      this,
-      'domainCert',
-      props.certificateArn
-    );
-
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
-      hostedZoneId: props.hostedZoneId,
-      zoneName: props.hostedZoneName,
-    });
-
     // Create the AppSync API
     this.api = new appsync.GraphqlApi(this, 'ProfilesApi', {
       name: `ProfilesApi-${props.environmentName}`,
       definition: appsync.Definition.fromFile('./schema.graphql'),
       domainName: {
-        domainName: backendDomain,
-        certificate: certificatearn,
+        domainName: props.domainName,
+        certificate: props.certificate,
       },
       authorizationConfig: {
         defaultAuthorization: {
@@ -64,11 +50,10 @@ export class ApiStack extends Construct {
     });
 
     new route53.CnameRecord(this, `CnameApiRecord`, {
-      recordName: backendDomain,
-      zone,
-      domainName: this.api.appSyncDomainName, 
+      recordName: props.domainName,
+      zone: props.hostedZone,
+      domainName: this.api.appSyncDomainName,
     });
-
 
     // Create data sources
     const dynamoDataSource = this.api.addDynamoDbDataSource('DynamoDataSource', props.table);

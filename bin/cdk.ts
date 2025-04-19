@@ -2,6 +2,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
+import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
 
 const app = new cdk.App();
 
@@ -19,10 +21,11 @@ for (const [key, value] of Object.entries(tags)) {
 
 const certificateArn =
   'arn:aws:acm:us-east-1:662722197286:certificate/ac873602-b70d-45c6-abe2-1b1357499c31';
-
 const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
-
 const hostedZoneName = 'app.awscommunity.mx';
+
+const frontendDomain = `${environmentName}.${hostedZoneName}`;
+const backendDomain = `api-${environmentName}.${hostedZoneName}`;
 
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
@@ -32,8 +35,9 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   },
   description: `Profiles API stack - ${environmentName} environment`,
   certificateArn: certificateArn,
-  hostedZoneName: hostedZoneName,
   hostedZoneId: hostedZoneId,
+  hostedZoneName: hostedZoneName,
+  domainName: backendDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {
@@ -45,6 +49,7 @@ const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmen
     region: 'us-east-1',
   },
   certificateArn: certificateArn,
-  hostedZoneName: hostedZoneName,
   hostedZoneId: hostedZoneId,
+  hostedZoneName: hostedZoneName,
+  domainName: frontendDomain,
 });

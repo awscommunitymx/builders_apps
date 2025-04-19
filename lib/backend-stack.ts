@@ -3,12 +3,15 @@ import { Construct } from 'constructs';
 import { DatabaseStack } from './stacks/database';
 import { ApiStack } from './stacks/api';
 import { LambdaStack } from './stacks/lambda';
+import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
   certificateArn: string;
-  hostedZoneName: string;
   hostedZoneId: string;
+  hostedZoneName: string;
+  domainName: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -17,6 +20,17 @@ export class BackendStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
+
+    const domainCert = certificatemanager.Certificate.fromCertificateArn(
+      this,
+      'domainCert',
+      props.certificateArn
+    );
+
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      hostedZoneId: props.hostedZoneId,
+      zoneName: props.hostedZoneName,
+    });
 
     const databaseStack = new DatabaseStack(this, 'DatabaseStack', {
       environmentName: props.environmentName,
@@ -31,9 +45,9 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
       table: databaseStack.table,
       viewProfileFunction: lambdaStack.viewProfileFunction,
-      certificateArn: props.certificateArn,
-      hostedZoneName: props.hostedZoneName,
-      hostedZoneId: props.hostedZoneId,
+      certificate: domainCert,
+      hostedZone: hostedZone,
+      domainName: props.domainName,
     });
 
     // Expose API URL and Key
