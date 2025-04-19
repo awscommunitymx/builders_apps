@@ -2,8 +2,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
-import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
 
 const app = new cdk.App();
 
@@ -38,6 +36,7 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   hostedZoneId: hostedZoneId,
   hostedZoneName: hostedZoneName,
   domainName: backendDomain,
+  appDomain: frontendDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {
