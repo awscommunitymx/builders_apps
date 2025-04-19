@@ -33,7 +33,8 @@ export default function AuthCallback() {
         setTokens(tokens);
         navigate('/');
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error during authentication:', error);
         navigate('/');
       });
   }, [navigate, setTokens]);
