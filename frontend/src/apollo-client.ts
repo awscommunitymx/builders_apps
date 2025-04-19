@@ -43,7 +43,12 @@ async function refreshTokens(): Promise<string> {
     throw new Error('Failed to refresh token');
   }
 
-  const { access_token, id_token, refresh_token: newRefresh } = await resp.json();
+  const tokenResponse = await resp.json();
+  if (!tokenResponse || !tokenResponse.access_token || !tokenResponse.id_token) {
+    throw new Error('Invalid token response structure');
+  }
+
+  const { access_token, id_token, refresh_token: newRefresh } = tokenResponse;
 
   localStorage.setItem('access_token', access_token);
   localStorage.setItem('id_token', id_token);
