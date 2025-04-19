@@ -67,7 +67,7 @@ export class ApiStack extends Construct {
   }
 
   private getFieldLogLevel(environmentName: string): appsync.FieldLogLevel {
-    if (environmentName === 'prod') return appsync.FieldLogLevel.ERROR;
+    if (environmentName === 'production') return appsync.FieldLogLevel.ERROR;
     if (environmentName === 'staging') return appsync.FieldLogLevel.INFO;
     return appsync.FieldLogLevel.ALL; // Development/PR environments
   }

@@ -32,7 +32,7 @@ show_help() {
   echo -e "  ${BLUE}npm run deploy:help${NC}         # Show this help message"
   echo
   echo -e "${YELLOW}🔧 Options:${NC}"
-  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, prod, or branch-based)"
+  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, production, or branch-based)"
   echo -e "  ${BLUE}--region, -r${NC}     AWS region (default: $DEFAULT_REGION)"
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
@@ -42,7 +42,7 @@ show_help() {
   echo
   echo -e "${YELLOW}🌿 Environment Detection:${NC}"
   echo -e "The script automatically detects the environment from your Git branch:"
-  echo -e "  • ${BLUE}main/master${NC} → ${GREEN}prod${NC}"
+  echo -e "  • ${BLUE}main/master${NC} → ${GREEN}production${NC}"
   echo -e "  • ${BLUE}staging/develop${NC} → ${GREEN}staging${NC}"
   echo -e "  • ${BLUE}feature/*${NC} → ${GREEN}dev-feature-*${NC}"
   echo -e "  • ${BLUE}bugfix/*${NC} → ${GREEN}dev-bugfix-*${NC}"
@@ -123,7 +123,7 @@ if [ -z "$ENV" ]; then
   
   # Handle special branch names
   if [ "$BRANCH_NAME" = "main" ] || [ "$BRANCH_NAME" = "master" ]; then
-    ENV="prod"
+    ENV="production"
   elif [ "$BRANCH_NAME" = "staging" ] || [ "$BRANCH_NAME" = "develop" ]; then
     ENV="staging"
   elif [[ "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix)/ ]]; then
@@ -138,7 +138,7 @@ if [ -z "$ENV" ]; then
 fi
 
 # Check for production deployment flag
-if [ "$ENV" = "prod" ] && [ -z "$ALLOW_PROD" ]; then
+if [ "$ENV" = "production" ] && [ -z "$ALLOW_PROD" ]; then
   echo -e "${RED}❌ Error: Production deployment requires --allow-prod flag${NC}"
   exit 1
 fi
@@ -147,7 +147,7 @@ fi
 if [ -z "$ENV" ]; then
   echo -e "${YELLOW}📖 Usage: ./deploy.sh [options]${NC}"
   echo -e "${YELLOW}Options:${NC}"
-  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, prod, or branch-based)"
+  echo -e "  ${BLUE}--env, -e${NC}        Environment name (staging, production, or branch-based)"
   echo -e "  ${BLUE}--region, -r${NC}     AWS region (default: $DEFAULT_REGION)"
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
@@ -175,11 +175,11 @@ else
   fi
   
   # Use hotswap for non-prod environments, but only for updates
-  if [ "$ENV" != "prod" ] && [ "$FIRST_TIME" != true ]; then
+  if [ "$ENV" != "production" ] && [ "$FIRST_TIME" != true ]; then
     echo -e "${CYAN}⚡ Using hotswap deployment for faster updates...${NC}"
     DEPLOY_FLAGS="--hotswap-fallback --method=direct"
   else
-    if [ "$ENV" = "prod" ]; then
+    if [ "$ENV" = "production" ]; then
       echo -e "${YELLOW}🛡️  Using standard deployment for production...${NC}"
     else
       echo -e "${YELLOW}🛡️  Using standard deployment for first-time deployment...${NC}"
