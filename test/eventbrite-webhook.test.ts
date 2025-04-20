@@ -59,6 +59,7 @@ describe('handler', () => {
       area_of_interest: 'AI',
       social_links: [],
       pin: '0000',
+      short_id: 'ABCD123',
       initialized: false,
     };
 
@@ -68,9 +69,9 @@ describe('handler', () => {
     vitest.spyOn(attendeeUtils, 'extractAndValidateData').mockReturnValue(extracted);
     vitest.spyOn(storeAttendeeCheckIn, 'storeAttendeeCheckIn');
     vitest.spyOn(sqsService, 'sendToSqs').mockResolvedValue({
-        success: true,
-        message_id: '123',
-        sequence_number: 'abc',
+      success: true,
+      message_id: '123',
+      sequence_number: 'abc',
     });
 
     const response = (await handler(mockEvent, mockContext)) as {
@@ -80,7 +81,7 @@ describe('handler', () => {
 
     expect(ddbMock.calls()).toHaveLength(1);
     expect(ddbMock.calls()[0].args[0].input).toMatchObject({
-      TableName:  process.env.DYNAMODB_TABLE_NAME,
+      TableName: process.env.DYNAMODB_TABLE_NAME,
       Item: expect.objectContaining({
         PK: `USER#${extracted.user_id}`,
         SK: 'PROFILE',
@@ -134,7 +135,9 @@ describe('handler', () => {
     secretsMock.on(GetSecretValueCommand).resolves({ SecretString: 'TOKEN' });
     vitest.spyOn(attendeeUtils, 'fetchAttendeeData').mockResolvedValue(fakeAttendee);
     vitest.spyOn(attendeeUtils, 'extractAndValidateData').mockReturnValue(extracted);
-    vitest.spyOn(storeAttendeeCheckIn, 'storeAttendeeCheckIn').mockRejectedValue(new Error('DynamoDB error'));
+    vitest
+      .spyOn(storeAttendeeCheckIn, 'storeAttendeeCheckIn')
+      .mockRejectedValue(new Error('DynamoDB error'));
 
     const response = (await handler(mockEvent, mockContext)) as {
       statusCode: number;
