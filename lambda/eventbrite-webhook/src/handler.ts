@@ -11,7 +11,7 @@ import { fetchAttendeeData, extractAndValidateData } from './utils/attendee';
 import { generateEventCode } from './utils/generateEventCode';
 import { sendToSqs } from './services/sqs';
 import { SQSClient } from '@aws-sdk/client-sqs';
-import { storeAttendeeCheckIn } from '../../../utils/checkInService'
+import { storeAttendeeCheckIn } from '../../../utils/checkInService';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 
 const logger = new Logger({ serviceName: 'eventbrite-webhook' });
@@ -19,10 +19,6 @@ const tracer = new Tracer({ serviceName: 'eventbrite-webhook' });
 const metrics = new Metrics({ serviceName: 'eventbrite-webhook' });
 
 const secretsManager = new SecretsManagerClient({});
-
-const SECRET_NAME = process.env.SECRET_NAME!;
-const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
-const QUEUE_URL = process.env.QUEUE_URL!;
 
 // Initialize DynamoDB and SQS with X-Ray tracing
 const dynamoClient = tracer.captureAWSv3Client(new DynamoDBClient({}));
@@ -34,7 +30,7 @@ let PRIVATE_TOKEN: string | undefined;
 const getPrivateToken = async (): Promise<string> => {
   if (PRIVATE_TOKEN) return PRIVATE_TOKEN;
   try {
-    const command = new GetSecretValueCommand({ SecretId: SECRET_NAME });
+    const command = new GetSecretValueCommand({ SecretId: process.env.SECRET_NAME! });
     const response = await secretsManager.send(command);
     PRIVATE_TOKEN = response.SecretString;
     if (!PRIVATE_TOKEN) {
@@ -61,8 +57,8 @@ const baseHandler = async (event: any, context: Context) => {
 
     logger.info('Data with event code', { data: extractedData });
 
-    await storeAttendeeCheckIn(docDynamoClient, extractedData, DYNAMODB_TABLE_NAME);
-    const sqsResult = await sendToSqs(sqsClient, QUEUE_URL, extractedData);
+    await storeAttendeeCheckIn(docDynamoClient, extractedData, process.env.DYNAMODB_TABLE_NAME!);
+    const sqsResult = await sendToSqs(sqsClient, process.env.QUEUE_URL!, extractedData);
 
     return {
       statusCode: 200,
