@@ -2,6 +2,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
+import { generateAuthDomain } from '../utils/cognito';
 
 const app = new cdk.App();
 
@@ -24,7 +25,8 @@ const hostedZoneName = 'app.awscommunity.mx';
 
 const frontendDomain = `${environmentName}.${hostedZoneName}`;
 const backendDomain = `api-${environmentName}.${hostedZoneName}`;
-const authDomain = `auth-${environmentName}.${hostedZoneName}`;
+
+const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
 
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
