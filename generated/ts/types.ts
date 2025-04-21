@@ -16,6 +16,25 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AgendaData = {
+  __typename?: 'AgendaData';
+  sessions: Array<Session>;
+};
+
+export type Category = {
+  __typename?: 'Category';
+  categoryItems: Array<CategoryItem>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  sort: Scalars['Int']['output'];
+};
+
+export type CategoryItem = {
+  __typename?: 'CategoryItem';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   viewProfile?: Maybe<User>;
@@ -51,6 +70,43 @@ export type QueryGetProfileAccessesArgs = {
 
 export type QueryGetUserByShortIdArgs = {
   shortId: Scalars['String']['input'];
+};
+
+export type Room = {
+  __typename?: 'Room';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type Session = {
+  __typename?: 'Session';
+  categories: Array<Category>;
+  description: Scalars['String']['output'];
+  endsAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isConfirmed: Scalars['Boolean']['output'];
+  isInformed: Scalars['Boolean']['output'];
+  isPlenumSession: Scalars['Boolean']['output'];
+  isServiceSession: Scalars['Boolean']['output'];
+  liveUrl?: Maybe<Scalars['String']['output']>;
+  recordingUrl?: Maybe<Scalars['String']['output']>;
+  room: Room;
+  speakers: Array<Speaker>;
+  startsAt: Scalars['String']['output'];
+  status: SessionStatus;
+  title: Scalars['String']['output'];
+};
+
+export enum SessionStatus {
+  Cancelled = 'CANCELLED',
+  Draft = 'DRAFT',
+  Published = 'PUBLISHED'
+}
+
+export type Speaker = {
+  __typename?: 'Speaker';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type User = {
@@ -135,26 +191,58 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AgendaData: ResolverTypeWrapper<AgendaData>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Category: ResolverTypeWrapper<Category>;
+  CategoryItem: ResolverTypeWrapper<CategoryItem>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   ProfileAccess: ResolverTypeWrapper<ProfileAccess>;
   Query: ResolverTypeWrapper<{}>;
+  Room: ResolverTypeWrapper<Room>;
+  Session: ResolverTypeWrapper<Session>;
+  SessionStatus: SessionStatus;
+  Speaker: ResolverTypeWrapper<Speaker>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   User: ResolverTypeWrapper<User>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AgendaData: AgendaData;
   Boolean: Scalars['Boolean']['output'];
+  Category: Category;
+  CategoryItem: CategoryItem;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
   ProfileAccess: ProfileAccess;
   Query: {};
+  Room: Room;
+  Session: Session;
+  Speaker: Speaker;
   String: Scalars['String']['output'];
   User: User;
+};
+
+export type AgendaDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgendaData'] = ResolversParentTypes['AgendaData']> = {
+  sessions?: Resolver<Array<ResolversTypes['Session']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CategoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Category'] = ResolversParentTypes['Category']> = {
+  categoryItems?: Resolver<Array<ResolversTypes['CategoryItem']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sort?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CategoryItemResolvers<ContextType = any, ParentType extends ResolversParentTypes['CategoryItem'] = ResolversParentTypes['CategoryItem']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
@@ -175,6 +263,37 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getUserByShortId?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserByShortIdArgs, 'shortId'>>;
 };
 
+export type RoomResolvers<ContextType = any, ParentType extends ResolversParentTypes['Room'] = ResolversParentTypes['Room']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SessionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Session'] = ResolversParentTypes['Session']> = {
+  categories?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  endsAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isInformed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isPlenumSession?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isServiceSession?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  liveUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  recordingUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  room?: Resolver<ResolversTypes['Room'], ParentType, ContextType>;
+  speakers?: Resolver<Array<ResolversTypes['Speaker']>, ParentType, ContextType>;
+  startsAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['SessionStatus'], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SpeakerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Speaker'] = ResolversParentTypes['Speaker']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   first_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -187,9 +306,15 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type Resolvers<ContextType = any> = {
+  AgendaData?: AgendaDataResolvers<ContextType>;
+  Category?: CategoryResolvers<ContextType>;
+  CategoryItem?: CategoryItemResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   ProfileAccess?: ProfileAccessResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Room?: RoomResolvers<ContextType>;
+  Session?: SessionResolvers<ContextType>;
+  Speaker?: SpeakerResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
 
