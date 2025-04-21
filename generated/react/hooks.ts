@@ -15,6 +15,25 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AgendaData = {
+  __typename?: 'AgendaData';
+  sessions: Array<Session>;
+};
+
+export type Category = {
+  __typename?: 'Category';
+  categoryItems: Array<CategoryItem>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  sort: Scalars['Int']['output'];
+};
+
+export type CategoryItem = {
+  __typename?: 'CategoryItem';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   viewProfile?: Maybe<User>;
@@ -50,6 +69,37 @@ export type QueryGetProfileAccessesArgs = {
 
 export type QueryGetUserByShortIdArgs = {
   shortId: Scalars['String']['input'];
+};
+
+export type Room = {
+  __typename?: 'Room';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type Session = {
+  __typename?: 'Session';
+  categories: Array<Category>;
+  description: Scalars['String']['output'];
+  endsAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isConfirmed: Scalars['Boolean']['output'];
+  isInformed: Scalars['Boolean']['output'];
+  isPlenumSession: Scalars['Boolean']['output'];
+  isServiceSession: Scalars['Boolean']['output'];
+  liveUrl?: Maybe<Scalars['String']['output']>;
+  recordingUrl?: Maybe<Scalars['String']['output']>;
+  room: Room;
+  speakers: Array<Speaker>;
+  startsAt: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type Speaker = {
+  __typename?: 'Speaker';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type User = {

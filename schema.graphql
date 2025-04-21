@@ -29,3 +29,47 @@ schema {
   query: Query
   mutation: Mutation
 }
+
+type  AgendaData {
+  sessions: [Session!]!
+}
+
+type  Session {
+  id: ID!
+  title: String!
+  description: String!
+  startsAt: String!
+  endsAt: String!
+  isServiceSession: Boolean!
+  isPlenumSession: Boolean!
+  speakers: [Speaker!]!
+  categories: [Category!]!
+  room: Room!
+  liveUrl: String
+  recordingUrl: String
+  status: String!
+  isInformed: Boolean!
+  isConfirmed: Boolean!
+}
+
+type  Speaker {
+  id: ID!
+  name: String!
+}
+
+type  Category {
+  id: ID!
+  name: String!
+  categoryItems: [CategoryItem!]!
+  sort: Int!
+}
+
+type  CategoryItem {
+  id: ID!
+  name: String!
+}
+
+type Room {
+  id: ID!
+  name: String!
+}
