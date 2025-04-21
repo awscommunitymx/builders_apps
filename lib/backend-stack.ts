@@ -7,6 +7,7 @@ import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
 import * as rum from 'aws-cdk-lib/aws-rum';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
@@ -25,6 +26,7 @@ export class BackendStack extends cdk.Stack {
   public readonly userPoolClientId: string;
   public readonly userPoolDomain: string;
   public readonly identityPoolId: string;
+  public readonly userCreationQueue: sqs.Queue;
 
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
@@ -107,6 +109,20 @@ export class BackendStack extends cdk.Stack {
       })
     );
 
+    this.userCreationQueue = new sqs.Queue(this, 'UserCreationQueue', {
+      queueName: `user-creation-queue-${props.environmentName}`,
+      visibilityTimeout: cdk.Duration.minutes(30),
+      retentionPeriod: cdk.Duration.days(1),
+      deadLetterQueue: {
+        queue: new sqs.Queue(this, 'UserCreationDLQ', {
+          queueName: `user-creation-dlq-${props.environmentName}`,
+          visibilityTimeout: cdk.Duration.minutes(30),
+          retentionPeriod: cdk.Duration.days(1),
+        }),
+        maxReceiveCount: 3,
+      },
+    });
+
     // Expose API URL and Key
     this.apiUrl = apiStack.api.graphqlUrl;
     this.apiKey = apiStack.api.apiKey || '';
@@ -156,6 +172,11 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'GuestRoleArn', {
       value: cognitoStack.unauthenticatedRole.roleArn,
       description: 'Cognito Guest Role ARN',
+    });
+
+    new cdk.CfnOutput(this, 'UserCreationQueueUrl', {
+      value: this.userCreationQueue.queueUrl,
+      description: 'URL of the User Creation SQS Queue',
     });
   }
 }
