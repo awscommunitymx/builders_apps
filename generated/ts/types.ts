@@ -93,9 +93,15 @@ export type Session = {
   room: Room;
   speakers: Array<Speaker>;
   startsAt: Scalars['String']['output'];
-  status: Scalars['String']['output'];
+  status: SessionStatus;
   title: Scalars['String']['output'];
 };
+
+export enum SessionStatus {
+  Cancelled = 'CANCELLED',
+  Draft = 'DRAFT',
+  Published = 'PUBLISHED'
+}
 
 export type Speaker = {
   __typename?: 'Speaker';
@@ -196,6 +202,7 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   Room: ResolverTypeWrapper<Room>;
   Session: ResolverTypeWrapper<Session>;
+  SessionStatus: SessionStatus;
   Speaker: ResolverTypeWrapper<Speaker>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   User: ResolverTypeWrapper<User>;
@@ -276,7 +283,7 @@ export type SessionResolvers<ContextType = any, ParentType extends ResolversPare
   room?: Resolver<ResolversTypes['Room'], ParentType, ContextType>;
   speakers?: Resolver<Array<ResolversTypes['Speaker']>, ParentType, ContextType>;
   startsAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['SessionStatus'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

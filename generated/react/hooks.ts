@@ -92,9 +92,15 @@ export type Session = {
   room: Room;
   speakers: Array<Speaker>;
   startsAt: Scalars['String']['output'];
-  status: Scalars['String']['output'];
+  status: SessionStatus;
   title: Scalars['String']['output'];
 };
+
+export enum SessionStatus {
+  Cancelled = 'CANCELLED',
+  Draft = 'DRAFT',
+  Published = 'PUBLISHED'
+}
 
 export type Speaker = {
   __typename?: 'Speaker';

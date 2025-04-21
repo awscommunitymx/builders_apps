@@ -47,7 +47,7 @@ type  Session {
   room: Room!
   liveUrl: String
   recordingUrl: String
-  status: String!
+  status: SessionStatus!
   isInformed: Boolean!
   isConfirmed: Boolean!
 }
@@ -72,4 +72,10 @@ type  CategoryItem {
 type Room {
   id: ID!
   name: String!
+}
+
+enum SessionStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
 }
