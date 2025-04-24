@@ -30,7 +30,7 @@ const frontendDomain =
 
 const backendDomain =
   environmentName === 'production'
-    ? `${environmentName}.${hostedZoneName}`
+    ? `api.${hostedZoneName}`
     : `api-${environmentName}.${hostedZoneName}`;
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
