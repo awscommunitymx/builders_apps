@@ -26,6 +26,13 @@ export function generateAuthDomain(
   environmentName: string,
   hostedZoneName: string
 ): { authDomain: string; truncated: boolean } {
+  if (environmentName === 'production') {
+    return {
+      authDomain: `auth.${hostedZoneName}`,
+      truncated: false,
+    };
+  }
+
   const prefix = `auth-${environmentName}`;
   const hostedZoneNameLength = hostedZoneName.length;
   const maxLength = 63;

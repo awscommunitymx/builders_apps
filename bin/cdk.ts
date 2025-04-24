@@ -23,8 +23,13 @@ const certificateArn =
 const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
 const hostedZoneName = 'app.awscommunity.mx';
 
-const frontendDomain = `${environmentName}.${hostedZoneName}`;
-const backendDomain = `api-${environmentName}.${hostedZoneName}`;
+const frontendDomain =
+  environmentName == 'production' ? hostedZoneName : `${environmentName}.${hostedZoneName}`;
+
+const backendDomain =
+  environmentName === 'production'
+    ? `${environmentName}.${hostedZoneName}`
+    : `api-${environmentName}.${hostedZoneName}`;
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
 
