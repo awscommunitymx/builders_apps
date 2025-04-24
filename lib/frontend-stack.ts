@@ -13,7 +13,7 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 interface FrontendStackProps extends cdk.StackProps {
   apiUrl: string;
   apiKey: string;
-  environment?: string;
+  environment: string;
   certificateArn: string;
   hostedZoneId: string;
   hostedZoneName: string;
@@ -46,8 +46,10 @@ export class FrontendStack extends cdk.Stack {
         ignorePublicAcls: false,
         restrictPublicBuckets: false,
       },
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // For development - change for production
-      autoDeleteObjects: true, // For development - change for production
+      removalPolicy: ['production', 'staging'].includes(props.environment)
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: !['production', 'staging'].includes(props.environment), // Only allow auto-delete for non-production
     });
 
     // CloudFront distribution for HTTPS and caching
@@ -139,9 +141,9 @@ export class FrontendStack extends cdk.Stack {
       distributionPaths: ['/*'],
       role: customRole,
       prune: true,
-      memoryLimit: 1024, // Increase memory for the deployment Lambda
-      useEfs: false, // Don't use EFS
-      retainOnDelete: false, // Clean up when deleting stack
+      memoryLimit: 1024,
+      useEfs: false,
+      retainOnDelete: ['production', 'staging'].includes(props.environment), // Retain deployment in production
       logRetention: cdk.aws_logs.RetentionDays.ONE_WEEK,
     });
 

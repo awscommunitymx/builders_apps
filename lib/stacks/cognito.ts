@@ -79,7 +79,9 @@ export class CognitoStack extends Construct {
         tempPasswordValidity: cdk.Duration.days(7),
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_AND_PHONE_WITHOUT_MFA,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // Consider RETAIN for production
+      removalPolicy: ['production', 'staging'].includes(props.environmentName)
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
     });
 
     // Create a domain for the user pool
