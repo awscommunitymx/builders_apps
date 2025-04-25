@@ -31,7 +31,7 @@ export function useUserProfile(shortId: string): UserProfileData {
 
   return {
     loading,
-    error: error ? error : undefined,
+    error: error || undefined,
     user: data?.getUserByShortId,
   };
 }
