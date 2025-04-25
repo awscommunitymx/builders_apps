@@ -1,6 +1,6 @@
 import { ApolloProvider } from '@apollo/client';
 import { client } from './apollo-client';
-import UserProfileRoute from './components/UserProfileRoute';
+import UserProfileRoute from './routes/UserProfileRoute';
 
 function App() {
   return (

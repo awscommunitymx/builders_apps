@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import { BrowserRouter, Route, Routes } from 'react-router';
-import UserProfileRoute from './components/UserProfileRoute.tsx';
+import UserProfileRoute from './routes/UserProfileRoute.tsx';
 import { ApolloProvider } from '@apollo/client';
 import { client } from './apollo-client';
 import { Layout } from './Layout.tsx';
