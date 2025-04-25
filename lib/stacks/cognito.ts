@@ -79,9 +79,7 @@ export class CognitoStack extends Construct {
         tempPasswordValidity: cdk.Duration.days(7),
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_AND_PHONE_WITHOUT_MFA,
-      removalPolicy: ['production', 'staging'].includes(props.environmentName)
-        ? cdk.RemovalPolicy.RETAIN
-        : cdk.RemovalPolicy.DESTROY,
+      removalPolicy: this.getRemovalPolicy(props.environmentName),
     });
 
     // Create a domain for the user pool
@@ -223,5 +221,10 @@ export class CognitoStack extends Construct {
       description: 'Cognito User Pool Domain for hosted UI',
       exportName: `${props.environmentName}-UserPoolDomain`,
     });
+  }
+
+  private getRemovalPolicy(environmentName: string): cdk.RemovalPolicy {
+    // For production, retain the user pool to prevent accidental deletion
+    return environmentName === 'production' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY;
   }
 }
