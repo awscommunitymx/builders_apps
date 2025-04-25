@@ -84,7 +84,7 @@ describe('CognitoStack', () => {
       });
     });
 
-    it('should use DESTROY for staging environment', () => {
+    it('should use RETAIN for staging environment', () => {
       // ARRANGE
       const app = new cdk.App();
       const stack = new TestStack(app, 'TestStack');
@@ -114,8 +114,8 @@ describe('CognitoStack', () => {
       // ASSERT
       const template = Template.fromStack(stack);
       template.hasResource('AWS::Cognito::UserPool', {
-        DeletionPolicy: 'Delete',
-        UpdateReplacePolicy: 'Delete',
+        DeletionPolicy: 'Retain',
+        UpdateReplacePolicy: 'Retain',
       });
     });
   });
