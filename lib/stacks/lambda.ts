@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { truncateLambdaName } from '../../utils/lambda';
 
 interface LambdaStackProps {
   environmentName: string;
@@ -21,7 +22,7 @@ export class LambdaStack extends Construct {
 
     // Create the Lambda function for viewProfile
     this.viewProfileFunction = new NodejsFunction(this, 'ViewProfileFunction', {
-      functionName: `ViewProfile-${props.environmentName}`,
+      functionName: truncateLambdaName('ViewProfile', props.environmentName),
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'handler',
       entry: path.join(__dirname, '../../lambda/view-profile/index.ts'),
@@ -63,7 +64,7 @@ export class LambdaStack extends Construct {
 
     // Create the Lambda function for eventbriteWebhookHandler
     this.eventbriteWebhookHandler = new NodejsFunction(this, 'EventbriteWebhookHandler', {
-      functionName: `EventbriteWebhook-${props.environmentName}`,
+      functionName: truncateLambdaName('EventbriteWebhook', props.environmentName),
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'handler',
       entry: path.join(__dirname, '../../lambda/eventbrite-webhook/src/handler.ts'),
@@ -113,7 +114,7 @@ export class LambdaStack extends Construct {
     // Add Function URL
 
     this.eventbriteWebhookHandler.addFunctionUrl({
-      authType: lambdaUrl.FunctionUrlAuthType.NONE
+      authType: lambdaUrl.FunctionUrlAuthType.NONE,
     });
   }
 
