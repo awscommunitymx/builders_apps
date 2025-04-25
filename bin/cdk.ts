@@ -20,11 +20,18 @@ for (const [key, value] of Object.entries(tags)) {
 
 const certificateArn =
   'arn:aws:acm:us-east-1:662722197286:certificate/ac873602-b70d-45c6-abe2-1b1357499c31';
+const prodApexCertificateArn =
+  'arn:aws:acm:us-east-1:662722197286:certificate/1f086f3c-c4cd-42f4-819d-97f9f5f3324e';
 const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
 const hostedZoneName = 'app.awscommunity.mx';
 
-const frontendDomain = `${environmentName}.${hostedZoneName}`;
-const backendDomain = `api-${environmentName}.${hostedZoneName}`;
+const frontendDomain =
+  environmentName == 'production' ? hostedZoneName : `${environmentName}.${hostedZoneName}`;
+
+const backendDomain =
+  environmentName === 'production'
+    ? `api.${hostedZoneName}`
+    : `api-${environmentName}.${hostedZoneName}`;
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
 
@@ -52,6 +59,7 @@ const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmen
     region: 'us-east-1',
   },
   certificateArn: certificateArn,
+  prodApexCertificateArn: environmentName === 'production' ? prodApexCertificateArn : undefined,
   hostedZoneId: hostedZoneId,
   hostedZoneName: hostedZoneName,
   domainName: frontendDomain,

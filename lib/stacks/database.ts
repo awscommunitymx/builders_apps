@@ -45,7 +45,9 @@ export class DatabaseStack extends Construct {
   }
 
   private getRemovalPolicy(environmentName: string): cdk.RemovalPolicy {
-    // For production, retain the table to prevent accidental deletion
-    return environmentName === 'production' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY;
+    // For production and staging, retain the table to prevent accidental deletion
+    return ['production', 'staging'].includes(environmentName)
+      ? cdk.RemovalPolicy.RETAIN
+      : cdk.RemovalPolicy.DESTROY;
   }
 }

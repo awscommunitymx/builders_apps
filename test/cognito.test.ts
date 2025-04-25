@@ -25,6 +25,14 @@ describe('cognito utilities', () => {
       expect(result.truncated).toBe(false);
       expect(result.authDomain.length).toBe(63);
     });
+
+    it('should handle production environment', () => {
+      const result = generateAuthDomain('production', 'app.awscommunity.mx');
+      expect(result).toEqual({
+        authDomain: 'auth.app.awscommunity.mx',
+        truncated: false,
+      });
+    });
   });
 
   describe('sanitizeDomainPrefix', () => {

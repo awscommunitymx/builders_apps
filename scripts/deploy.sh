@@ -175,7 +175,7 @@ else
   fi
   
   # Use hotswap for non-prod environments, but only for updates
-  if [ "$ENV" != "production" ] && [ "$FIRST_TIME" != true ]; then
+  if [ "$ENV" != "production" ] && [ "$ENV" != "staging" ] && [ "$FIRST_TIME" != true ]; then
     echo -e "${CYAN}⚡ Using hotswap deployment for faster updates...${NC}"
     DEPLOY_FLAGS="--hotswap-fallback --method=direct"
   else

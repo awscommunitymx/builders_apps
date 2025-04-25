@@ -13,8 +13,9 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 interface FrontendStackProps extends cdk.StackProps {
   apiUrl: string;
   apiKey: string;
-  environment?: string;
+  environment: string;
   certificateArn: string;
+  prodApexCertificateArn?: string;
   hostedZoneId: string;
   hostedZoneName: string;
   domainName: string;
@@ -29,6 +30,15 @@ export class FrontendStack extends cdk.Stack {
       'domainCert',
       props.certificateArn
     );
+
+    let prodApexCertificate: certificatemanager.ICertificate | undefined;
+    if (props.prodApexCertificateArn) {
+      prodApexCertificate = certificatemanager.Certificate.fromCertificateArn(
+        this,
+        'prodApexCertificate',
+        props.prodApexCertificateArn
+      );
+    }
 
     const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
       hostedZoneId: props.hostedZoneId,
@@ -46,8 +56,10 @@ export class FrontendStack extends cdk.Stack {
         ignorePublicAcls: false,
         restrictPublicBuckets: false,
       },
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // For development - change for production
-      autoDeleteObjects: true, // For development - change for production
+      removalPolicy: ['production', 'staging'].includes(props.environment)
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: !['production', 'staging'].includes(props.environment), // Only allow auto-delete for non-production
     });
 
     // CloudFront distribution for HTTPS and caching
@@ -72,7 +84,7 @@ export class FrontendStack extends cdk.Stack {
       ],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
       domainNames: [props.domainName],
-      certificate: domainCert,
+      certificate: prodApexCertificate || domainCert,
     });
 
     new route53.AaaaRecord(this, 'AliasAaaa', {
@@ -139,9 +151,9 @@ export class FrontendStack extends cdk.Stack {
       distributionPaths: ['/*'],
       role: customRole,
       prune: true,
-      memoryLimit: 1024, // Increase memory for the deployment Lambda
-      useEfs: false, // Don't use EFS
-      retainOnDelete: false, // Clean up when deleting stack
+      memoryLimit: 1024,
+      useEfs: false,
+      retainOnDelete: ['production', 'staging'].includes(props.environment), // Retain deployment in production
       logRetention: cdk.aws_logs.RetentionDays.ONE_WEEK,
     });
 
