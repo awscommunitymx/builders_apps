@@ -49,9 +49,9 @@ jobs:
 
           # If branch is main, add the --allow-prod flag
           if [ "$BRANCH_NAME" = "main" ]; then
-            ./scripts/deploy.sh --deploy-frontend -e $BRANCH_NAME --allow-prod
+            ./scripts/deploy.sh --deploy-frontend -e production --allow-prod
           else
-            ./scripts/deploy.sh --deploy-frontend -e $BRANCH_NAME
+            ./scripts/deploy.sh --deploy-frontend -e staging
           fi
 
           # Log the deployment information

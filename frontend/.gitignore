@@ -29,3 +29,5 @@ dist-ssr
 .env.*.local
 
 !vite-env.d.ts
+
+*storybook.log

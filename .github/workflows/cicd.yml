@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, closed]
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 env:
   AWS_REGION: 'us-east-1'
   BUCKET_NAME: 'awscommunity-playwright-reports-lsf883qu'
