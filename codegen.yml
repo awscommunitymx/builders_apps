@@ -1,6 +1,6 @@
 schema: ./schema.graphql
 generates:
-  ./generated/ts/types.ts:
+  ./generated/ts/graphql-types.ts:
     plugins:
       - typescript
       - typescript-resolvers
@@ -8,6 +8,7 @@ generates:
       scalars:
         ID: string
   ./generated/react/hooks.ts:
+    documents: ./generated/graphql/**/*.graphql      # ← add this
     plugins:
       - typescript
       - typescript-operations
