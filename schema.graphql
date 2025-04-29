@@ -21,8 +21,18 @@ type Query {
   getProfileAccesses(userId: ID!): [ProfileAccess]
 }
 
+input UpdateUserInput {
+  userId: ID!
+  firstName: String
+  lastName: String
+  company: String
+  role: String
+  pin: Int
+}
+
 type Mutation {
   viewProfile(shortId: String!, pin: Int!, viewerId: ID!): User
+  updateUser(input: UpdateUserInput!): User
 }
 
 schema {
