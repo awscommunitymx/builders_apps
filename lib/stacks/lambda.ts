@@ -14,15 +14,15 @@ interface LambdaStackProps {
 }
 
 export class LambdaStack extends Construct {
-  public readonly graphQlResolver: NodejsFunction;
+  public readonly graphQLResolver: NodejsFunction;
   public readonly eventbriteWebhookHandler: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
 
     // Create the Lambda function for graphql resolver
-    this.graphQlResolver = new NodejsFunction(this, 'GraphQlResolver', {
-      functionName: truncateLambdaName('GraphQlResolver', props.environmentName),
+    this.graphQLResolver = new NodejsFunction(this, 'GraphQLResolver', {
+      functionName: truncateLambdaName('GraphQLResolver', props.environmentName),
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'handler',
       entry: path.join(__dirname, '../../lambda/graphql-resolver/index.ts'),
@@ -51,7 +51,7 @@ export class LambdaStack extends Construct {
     });
 
     // Grant additional permissions for CloudWatch Metrics
-    this.graphQlResolver.addToRolePolicy(
+    this.graphQLResolver.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ['cloudwatch:PutMetricData'],
@@ -60,7 +60,7 @@ export class LambdaStack extends Construct {
     );
 
     // Grant the Lambda function access to DynamoDB
-    props.table.grantReadWriteData(this.graphQlResolver);
+    props.table.grantReadWriteData(this.graphQLResolver);
 
     // Create the Lambda function for eventbriteWebhookHandler
     this.eventbriteWebhookHandler = new NodejsFunction(this, 'EventbriteWebhookHandler', {

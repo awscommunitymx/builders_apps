@@ -10,7 +10,7 @@ import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 interface ApiStackProps {
   environmentName: string;
   table: dynamodb.Table;
-  graphQlResolver: NodejsFunction;
+  graphQLResolver: NodejsFunction;
   userPool: IUserPool;
   certificate: certificatemanager.ICertificate;
   hostedZone: route53.IHostedZone;
@@ -55,8 +55,8 @@ export class ApiStack extends Construct {
     // Create data sources
     const dynamoDataSource = this.api.addDynamoDbDataSource('DynamoDataSource', props.table);
     const lambdaDataSource = this.api.addLambdaDataSource(
-      'GraphQlResolverDataSource',
-      props.graphQlResolver
+      'GraphQLResolverDataSource',
+      props.graphQLResolver
     );
 
     // Add the resolvers
@@ -89,12 +89,12 @@ export class ApiStack extends Construct {
     });
 
     // Create resolver for viewProfile
-    lambdaDataSource.createResolver('GraphQlResolver', {
+    lambdaDataSource.createResolver('GraphQLResolverViewProfile', {
       typeName: 'Mutation',
       fieldName: 'viewProfile',
     });
 
-    lambdaDataSource.createResolver('GraphQlResolver', {
+    lambdaDataSource.createResolver('GraphQLResolverUpdateUser', {
       typeName: 'Mutation',
       fieldName: 'updateUser',
     });
