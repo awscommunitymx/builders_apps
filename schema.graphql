@@ -30,6 +30,18 @@ input UpdateUserInput {
   pin: Int
 }
 
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    user_id
+    short_id
+    first_name
+    last_name
+    company
+    role
+    pin
+  }
+}
+
 type Mutation {
   viewProfile(shortId: String!, pin: Int!, viewerId: ID!): User
   updateUser(input: UpdateUserInput!): User

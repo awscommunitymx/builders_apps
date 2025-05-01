@@ -8,7 +8,6 @@ generates:
       scalars:
         ID: string
   ./generated/react/hooks.ts:
-    documents: ./generated/graphql/**/*.graphql      # ← add this
     plugins:
       - typescript
       - typescript-operations
