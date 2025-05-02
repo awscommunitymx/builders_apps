@@ -19,7 +19,8 @@
     "deploy": "bash scripts/deploy.sh",
     "deploy:with-frontend": "bash scripts/deploy.sh --deploy-frontend",
     "deploy:destroy": "bash scripts/deploy.sh --destroy",
-    "deploy:help": "bash scripts/deploy.sh --help"
+    "deploy:help": "bash scripts/deploy.sh --help",
+    "storybook": "npm run storybook --workspace=frontend"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.5",

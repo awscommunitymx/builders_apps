@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+import { useState, useEffect } from 'react';
 import { User } from '@awscommunity/generated-react/hooks';
 import '@cloudscape-design/global-styles/index.css';
 import {
@@ -11,40 +9,40 @@ import {
   TextContent,
   Alert,
 } from '@cloudscape-design/components';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate } from 'react-router';
 
-const GET_USER = gql`
-  query GetUserByShortId($shortId: String!) {
-    getUserByShortId(shortId: $shortId) {
-      user_id
-      short_id
-      first_name
-      last_name
-      company
-      role
-      pin
-    }
-  }
-`;
+export interface UserProfileProps {
+  initialId?: string;
+  loading?: boolean;
+  error?: Error | null;
+  user?: User | null;
+  onIdChange?: (id: string) => void;
+}
 
-export function UserProfile({ initialId = '' }: { initialId?: string }) {
-  const { id } = useParams<{ id?: string }>();
+export function UserProfile({
+  initialId = '',
+  loading = false,
+  error = null,
+  user = null,
+  onIdChange,
+}: UserProfileProps) {
   const [shortId, setShortId] = useState<string>(initialId);
-
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (shortId && shortId !== id) {
-      navigate(`/uid/${shortId}`);
-    }
-  }, [shortId, id, navigate]);
 
   const isValidId = shortId && shortId.trim().length > 0;
 
-  const { loading, error, data } = useQuery(GET_USER, {
-    variables: { shortId },
-    skip: !isValidId,
-  });
+  useEffect(() => {
+    if (shortId && shortId !== initialId) {
+      navigate(`/uid/${shortId}`);
+      if (onIdChange) {
+        onIdChange(shortId);
+      }
+    }
+  }, [shortId, initialId, navigate, onIdChange]);
+
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setShortId(e.target.value);
+  };
 
   return (
     <ContentLayout
@@ -56,7 +54,7 @@ export function UserProfile({ initialId = '' }: { initialId?: string }) {
           <input
             type="text"
             value={shortId}
-            onChange={(e) => setShortId(e.target.value)}
+            onChange={handleIdChange}
             placeholder="Enter short ID"
             style={{ padding: '8px', width: '200px' }}
           />
@@ -67,7 +65,7 @@ export function UserProfile({ initialId = '' }: { initialId?: string }) {
         {shortId && !isValidId && <Alert type="error">Please enter a valid user ID.</Alert>}
         {error && <Alert type="error">Error loading profile: {error.message}</Alert>}
         {loading && <Alert type="info">Loading profile...</Alert>}
-        {data?.getUserByShortId && (
+        {user && (
           <Cards
             cardDefinition={{
               header: (item: User) => (
@@ -99,7 +97,7 @@ export function UserProfile({ initialId = '' }: { initialId?: string }) {
               ],
             }}
             cardsPerRow={[{ cards: 1, minWidth: 0 }]}
-            items={[data.getUserByShortId]}
+            items={[user]}
             loadingText="Loading profile"
             empty={<TextContent>Enter a short ID to view the user's profile</TextContent>}
           />
