@@ -12,6 +12,7 @@ import {
   LambdaInvoke,
   DynamoPutItem,
   DynamoAttributeValue,
+  DynamoUpdateItem,
 } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { SecretValue, Duration } from 'aws-cdk-lib';
@@ -111,9 +112,63 @@ export class UserStepFunctionStack extends Construct {
       })
     );
 
+    const processAttendeesUpdateChoice = new Choice(this, 'ProcessAttendeesUpdate')
+      .when(
+        Condition.stringEquals(
+          JsonPath.stringAt('$.body.profile.first_name'),
+          'Information Requested'
+        ),
+        new Fail(this, 'AttendeeUpdateFail')
+      )
+      .otherwise(
+        new DynamoUpdateItem(this, 'FillProfile', {
+          table: props.dynamoTable,
+          key: {
+            PK: DynamoAttributeValue.fromString(
+              JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+            ),
+            SK: DynamoAttributeValue.fromString('PROFILE'),
+          },
+          expressionAttributeValues: {
+            ':gender': DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.profile.gender')),
+            ':company': DynamoAttributeValue.fromString(
+              JsonPath.stringAt('$.body.profile.company')
+            ),
+            ':job_title': DynamoAttributeValue.fromString(
+              JsonPath.stringAt('$.body.profile.job_title')
+            ),
+            ':cell_phone': DynamoAttributeValue.fromString(
+              JsonPath.stringAt('$.body.profile.cell_phone')
+            ),
+          },
+          updateExpression:
+            'SET gender = :gender, company = :company, job_title = :job_title, cell_phone = :cell_phone',
+        })
+      );
+
+    const processAttendeesUpdate = Chain.start(
+      new DynamoUpdateItem(this, 'SetTicketClassID', {
+        table: props.dynamoTable,
+        key: {
+          PK: DynamoAttributeValue.fromString(
+            JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+          ),
+          SK: DynamoAttributeValue.fromString('PROFILE'),
+        },
+        expressionAttributeValues: {
+          ':ticket_class_id': DynamoAttributeValue.fromString(
+            JsonPath.stringAt('$.body.ticket_class_id')
+          ),
+        },
+        updateExpression: 'SET ticket_class_id = :ticket_class_id',
+        conditionExpression: 'attribute_exists(PK)',
+        resultPath: JsonPath.DISCARD,
+      })
+    ).next(processAttendeesUpdateChoice);
+
     const handlerChoice = new Choice(this, 'HandlerChoice')
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
-      .when(Condition.stringEquals('$.config.action', 'attendee.updated'), attendeeUpdatedSuccess);
+      .when(Condition.stringEquals('$.config.action', 'attendee.updated'), processAttendeesUpdate);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
       .when(Condition.numberEquals('$.statusCode', 200), handlerChoice)
