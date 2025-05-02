@@ -56,19 +56,18 @@ export class UserStepFunctionStack extends Construct {
       outputPath: '$.Payload',
     });
 
+    const unknownWebhookTypeFail = new Fail(this, 'UnknownWebhookTypeFail');
+    const apiFailure = new Fail(this, 'ApiFailure');
+    const orderPlacedSuccess = new Succeed(this, 'OrderPlacedSuccess');
+    const attendeeUpdatedSuccess = new Succeed(this, 'AttendeeUpdatedSuccess');
+
     const handlerChoice = new Choice(this, 'HandlerChoice')
-      .when(
-        Condition.stringEquals('$.config.action', 'order.placed'),
-        new Succeed(this, 'OrderPlacedSuccess')
-      )
-      .when(
-        Condition.stringEquals('$.config.action', 'attendee.updated'),
-        new Succeed(this, 'AttendeeUpdatedSuccess')
-      );
+      .when(Condition.stringEquals('$.config.action', 'order.placed'), orderPlacedSuccess)
+      .when(Condition.stringEquals('$.config.action', 'attendee.updated'), attendeeUpdatedSuccess);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
       .when(Condition.stringEquals('$.statusCode', '200'), handlerChoice)
-      .otherwise(new Fail(this, 'ApiFailure'));
+      .otherwise(apiFailure);
 
     const apiChain = Chain.start(callEventbriteApi).next(apiChoice);
 
@@ -90,7 +89,7 @@ export class UserStepFunctionStack extends Construct {
     const webhook_type = new Choice(this, 'WebhookTypeChoice')
       .when(Condition.stringEquals('$.config.action', 'order.placed'), orderPlacedChain)
       .when(Condition.stringEquals('$.config.action', 'attendee.updated'), attendeeUpdatedChain)
-      .otherwise(new Fail(this, 'UnknownWebhookTypeFail'));
+      .otherwise(unknownWebhookTypeFail);
 
     // Define the state machine for user step functions
     const userStepFunction = new StateMachine(this, 'UserStepFunction', {
