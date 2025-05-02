@@ -66,7 +66,7 @@ export class UserStepFunctionStack extends Construct {
       .when(Condition.stringEquals('$.config.action', 'attendee.updated'), attendeeUpdatedSuccess);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
-      .when(Condition.stringEquals('$.statusCode', '200'), handlerChoice)
+      .when(Condition.numberEquals('$.statusCode', 200), handlerChoice)
       .otherwise(apiFailure);
 
     const apiChain = Chain.start(callEventbriteApi).next(apiChoice);
