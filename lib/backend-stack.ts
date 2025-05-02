@@ -8,6 +8,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
 import * as rum from 'aws-cdk-lib/aws-rum';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { UserStepFunctionStack } from './stacks/user-step-function';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
@@ -121,6 +122,10 @@ export class BackendStack extends cdk.Stack {
         }),
         maxReceiveCount: 3,
       },
+    });
+
+    new UserStepFunctionStack(this, 'UserStepFunctionStack', {
+      environmentName: props.environmentName,
     });
 
     // Expose API URL and Key
