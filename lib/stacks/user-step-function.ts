@@ -7,18 +7,24 @@ import {
   Succeed,
   Condition,
   Fail,
-  TaskInput,
-  Pass,
 } from 'aws-cdk-lib/aws-stepfunctions';
-import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import {
+  LambdaInvoke,
+  DynamoPutItem,
+  DynamoAttributeValue,
+} from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { SecretValue, Duration } from 'aws-cdk-lib';
 import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 
 interface UserStepFunctionStackProps {
   environmentName: string;
+  userPoolId: string;
+  dynamoTable: ITable;
 }
 
 export class UserStepFunctionStack extends Construct {
@@ -46,8 +52,30 @@ export class UserStepFunctionStack extends Construct {
       },
     });
 
+    // Create the Lambda function for creating Cognito users
+    const createCognitoUsersLambda = new NodejsFunction(this, 'CreateCognitoUserFunction', {
+      functionName: `create-cognito-user-${props.environmentName}`,
+      runtime: Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/create-cognito-user/index.ts'),
+      description: 'Creates Cognito users for event attendees',
+      timeout: Duration.seconds(30),
+      memorySize: 256,
+    });
+
     // Grant the Lambda function permission to read the secret
     eventbriteApiKey.grantRead(eventbriteApiCallLambda);
+
+    // If a userPoolId was provided, grant the Lambda function permission to create Cognito users
+    if (props.userPoolId) {
+      // Grant permissions to manage Cognito users
+      const userPool = UserPool.fromUserPoolId(this, 'ExistingUserPool', props.userPoolId);
+      userPool.grant(
+        createCognitoUsersLambda,
+        'cognito-idp:AdminCreateUser',
+        'cognito-idp:AdminAddUserToGroup'
+      );
+    }
 
     // Create separate Lambda task instances for each flow
     // One for order.placed
@@ -56,13 +84,35 @@ export class UserStepFunctionStack extends Construct {
       outputPath: '$.Payload',
     });
 
+    // Create the Lambda task for creating Cognito users
+    const createCognitoUserTask = new LambdaInvoke(this, 'CreateCognitoUser', {
+      lambdaFunction: createCognitoUsersLambda,
+      outputPath: '$.Payload',
+    });
+
     const unknownWebhookTypeFail = new Fail(this, 'UnknownWebhookTypeFail');
     const apiFailure = new Fail(this, 'ApiFailure');
     const orderPlacedSuccess = new Succeed(this, 'OrderPlacedSuccess');
     const attendeeUpdatedSuccess = new Succeed(this, 'AttendeeUpdatedSuccess');
 
+    // Add the createCognitoUserTask to the Map state
+    const processAttendees = Chain.start(
+      new DynamoPutItem(this, 'DynamoPutItem', {
+        table: props.dynamoTable,
+        item: {
+          PK: DynamoAttributeValue.fromString(
+            JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
+          ),
+          SK: DynamoAttributeValue.fromString('PROFILE'),
+          email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.email')),
+          name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
+        },
+        conditionExpression: 'attribute_not_exists(PK)',
+      })
+    );
+
     const handlerChoice = new Choice(this, 'HandlerChoice')
-      .when(Condition.stringEquals('$.config.action', 'order.placed'), orderPlacedSuccess)
+      .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
       .when(Condition.stringEquals('$.config.action', 'attendee.updated'), attendeeUpdatedSuccess);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
@@ -71,30 +121,10 @@ export class UserStepFunctionStack extends Construct {
 
     const apiChain = Chain.start(callEventbriteApi).next(apiChoice);
 
-    // Create a Pass state to append "/attendee" to the API URL for order.placed events
-    const appendAttendeeToUrl = new Pass(this, 'AppendAttendeeToUrl', {
-      parameters: {
-        'api_url.$': "States.Format('{}{}', $.api_url, 'attendees')",
-        'config.$': '$.config',
-      },
-    });
-
-    // Flow for order.placed: Append "/attendee" to URL before calling API
-    const orderPlacedChain = Chain.start(appendAttendeeToUrl).next(apiChain);
-
-    // Flow for attendee.updated: Call API directly
-    const attendeeUpdatedChain = Chain.start(apiChain);
-
-    // Define the choice state for different webhook types
-    const webhook_type = new Choice(this, 'WebhookTypeChoice')
-      .when(Condition.stringEquals('$.config.action', 'order.placed'), orderPlacedChain)
-      .when(Condition.stringEquals('$.config.action', 'attendee.updated'), attendeeUpdatedChain)
-      .otherwise(unknownWebhookTypeFail);
-
     // Define the state machine for user step functions
     const userStepFunction = new StateMachine(this, 'UserStepFunction', {
       stateMachineName: 'UserStepFunction',
-      definition: webhook_type,
+      definition: apiChain,
       tracingEnabled: true,
     });
   }
