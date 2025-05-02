@@ -44,6 +44,7 @@
     "vitest": "^3.1.1"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.799.0",
     "aws-cdk-lib": "^2.189.1",
     "aws-sdk": "^2.1692.0",
     "constructs": "^10.4.2",
