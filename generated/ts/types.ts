@@ -37,7 +37,13 @@ export type CategoryItem = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  updateUser?: Maybe<User>;
   viewProfile?: Maybe<User>;
+};
+
+
+export type MutationUpdateUserArgs = {
+  input: UpdateUserInput;
 };
 
 
@@ -107,6 +113,15 @@ export type Speaker = {
   __typename?: 'Speaker';
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+};
+
+export type UpdateUserInput = {
+  company?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  pin?: InputMaybe<Scalars['Int']['input']>;
+  role?: InputMaybe<Scalars['String']['input']>;
+  userId: Scalars['ID']['input'];
 };
 
 export type User = {
@@ -205,6 +220,7 @@ export type ResolversTypes = {
   SessionStatus: SessionStatus;
   Speaker: ResolverTypeWrapper<Speaker>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  UpdateUserInput: UpdateUserInput;
   User: ResolverTypeWrapper<User>;
 };
 
@@ -223,6 +239,7 @@ export type ResolversParentTypes = {
   Session: Session;
   Speaker: Speaker;
   String: Scalars['String']['output'];
+  UpdateUserInput: UpdateUserInput;
   User: User;
 };
 
@@ -246,6 +263,7 @@ export type CategoryItemResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
   viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'pin' | 'shortId' | 'viewerId'>>;
 };
 

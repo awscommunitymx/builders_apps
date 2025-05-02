@@ -14,23 +14,23 @@ interface LambdaStackProps {
 }
 
 export class LambdaStack extends Construct {
-  public readonly viewProfileFunction: NodejsFunction;
+  public readonly graphQLResolver: NodejsFunction;
   public readonly eventbriteWebhookHandler: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
 
-    // Create the Lambda function for viewProfile
-    this.viewProfileFunction = new NodejsFunction(this, 'ViewProfileFunction', {
-      functionName: truncateLambdaName('ViewProfile', props.environmentName),
+    // Create the Lambda function for graphql resolver
+    this.graphQLResolver = new NodejsFunction(this, 'GraphQLResolver', {
+      functionName: truncateLambdaName('GraphQLResolver', props.environmentName),
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'handler',
-      entry: path.join(__dirname, '../../lambda/view-profile/index.ts'),
+      entry: path.join(__dirname, '../../lambda/graphql-resolver/index.ts'),
       environment: {
         TABLE_NAME: props.table.tableName,
         ENVIRONMENT: props.environmentName,
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-        POWERTOOLS_SERVICE_NAME: 'view-profile-service',
+        POWERTOOLS_SERVICE_NAME: 'graphql-resolver',
         POWERTOOLS_METRICS_NAMESPACE: 'Profiles',
         LOG_LEVEL: this.getLogLevel(props.environmentName),
         POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
@@ -51,7 +51,7 @@ export class LambdaStack extends Construct {
     });
 
     // Grant additional permissions for CloudWatch Metrics
-    this.viewProfileFunction.addToRolePolicy(
+    this.graphQLResolver.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ['cloudwatch:PutMetricData'],
@@ -60,7 +60,7 @@ export class LambdaStack extends Construct {
     );
 
     // Grant the Lambda function access to DynamoDB
-    props.table.grantReadWriteData(this.viewProfileFunction);
+    props.table.grantReadWriteData(this.graphQLResolver);
 
     // Create the Lambda function for eventbriteWebhookHandler
     this.eventbriteWebhookHandler = new NodejsFunction(this, 'EventbriteWebhookHandler', {

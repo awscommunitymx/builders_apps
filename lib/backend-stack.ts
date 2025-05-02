@@ -63,7 +63,7 @@ export class BackendStack extends cdk.Stack {
     const apiStack = new ApiStack(this, 'ApiStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
-      viewProfileFunction: lambdaStack.viewProfileFunction,
+      graphQLResolver: lambdaStack.graphQLResolver,
       certificate: domainCert,
       hostedZone: hostedZone,
       domainName: props.domainName,
