@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { JsonPath } from 'aws-cdk-lib/aws-stepfunctions';
+import { JsonPath, Parallel } from 'aws-cdk-lib/aws-stepfunctions';
 import {
   StateMachine,
   Choice,
@@ -161,29 +161,77 @@ export class UserStepFunctionStack extends Construct {
         new Fail(this, 'AttendeeUpdateFail')
       )
       .otherwise(
-        new DynamoUpdateItem(this, 'FillProfile', {
-          table: props.dynamoTable,
-          key: {
-            PK: DynamoAttributeValue.fromString(
-              JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-            ),
-            SK: DynamoAttributeValue.fromString('PROFILE'),
-          },
-          expressionAttributeValues: {
-            ':gender': DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.profile.gender')),
-            ':company': DynamoAttributeValue.fromString(
-              JsonPath.stringAt('$.body.profile.company')
-            ),
-            ':job_title': DynamoAttributeValue.fromString(
-              JsonPath.stringAt('$.body.profile.job_title')
-            ),
-            ':cell_phone': DynamoAttributeValue.fromString(
-              JsonPath.stringAt('$.body.profile.cell_phone')
-            ),
-          },
-          updateExpression:
-            'SET gender = :gender, company = :company, job_title = :job_title, cell_phone = :cell_phone',
-        })
+        Chain.start(
+          new DynamoUpdateItem(this, 'FillProfile', {
+            table: props.dynamoTable,
+            key: {
+              PK: DynamoAttributeValue.fromString(
+                JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+              ),
+              SK: DynamoAttributeValue.fromString('PROFILE'),
+            },
+            expressionAttributeValues: {
+              ':gender': DynamoAttributeValue.fromString(
+                JsonPath.stringAt('$.body.profile.gender')
+              ),
+              ':company': DynamoAttributeValue.fromString(
+                JsonPath.stringAt('$.body.profile.company')
+              ),
+            },
+            updateExpression: 'SET gender = :gender, company = :company',
+            resultPath: JsonPath.DISCARD,
+          })
+        ).next(
+          new Parallel(this, 'ProcessAttendeesUpdateParallel')
+            .branch(
+              new Choice(this, 'JobTitlePresent')
+                .when(
+                  Condition.isPresent('$.body.profile.job_title'),
+                  new DynamoUpdateItem(this, 'SetJobTitle', {
+                    table: props.dynamoTable,
+                    key: {
+                      PK: DynamoAttributeValue.fromString(
+                        JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                      ),
+                      SK: DynamoAttributeValue.fromString('PROFILE'),
+                    },
+                    expressionAttributeValues: {
+                      ':job_title': DynamoAttributeValue.fromString(
+                        JsonPath.stringAt('$.body.profile.job_title')
+                      ),
+                    },
+                    updateExpression: 'SET job_title = :job_title',
+                    conditionExpression: 'attribute_exists(PK)',
+                    resultPath: JsonPath.DISCARD,
+                  })
+                )
+                .otherwise(new Succeed(this, 'JobTitleNotPresent'))
+            )
+            .branch(
+              new Choice(this, 'CellPhonePresent')
+                .when(
+                  Condition.isPresent('$.body.profile.cell_phone'),
+                  new DynamoUpdateItem(this, 'SetCellPhone', {
+                    table: props.dynamoTable,
+                    key: {
+                      PK: DynamoAttributeValue.fromString(
+                        JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                      ),
+                      SK: DynamoAttributeValue.fromString('PROFILE'),
+                    },
+                    expressionAttributeValues: {
+                      ':cell_phone': DynamoAttributeValue.fromString(
+                        JsonPath.stringAt('$.body.profile.cell_phone')
+                      ),
+                    },
+                    updateExpression: 'SET cell_phone = :cell_phone',
+                    conditionExpression: 'attribute_exists(PK)',
+                    resultPath: JsonPath.DISCARD,
+                  })
+                )
+                .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
+            )
+        )
       );
 
     const processAttendeesUpdate = Chain.start(
