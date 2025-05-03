@@ -37,6 +37,7 @@ interface UserStepFunctionStackProps {
   webhookDomain: string;
   hostedZone: IHostedZone;
   certificate: ICertificate;
+  eventbriteApiKeySecretArn: string;
 }
 
 export class UserStepFunctionStack extends Construct {
@@ -47,10 +48,8 @@ export class UserStepFunctionStack extends Construct {
     super(scope, id);
 
     // Create Eventbrite API Key secret in Secrets Manager
-    const eventbriteApiKey = new Secret(this, `EventbriteApiKey-${props.environmentName}`, {
-      secretName: `EventbriteApiKeySecret-${props.environmentName}`,
-      description: 'Eventbrite API Key for authentication',
-      secretStringValue: SecretValue.unsafePlainText('3R3JB2BGHUFVEK5IYYX3'), // TODO: DO NOT COMMIT
+    const eventbriteApiKey = Secret.fromSecretAttributes(this, 'EventbriteApiKey', {
+      secretCompleteArn: props.eventbriteApiKeySecretArn,
     });
 
     // Create the Lambda function for making API calls to Eventbrite
