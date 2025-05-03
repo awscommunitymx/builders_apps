@@ -59,6 +59,7 @@ export class BackendStack extends cdk.Stack {
       authDomain: props.authDomain,
       certificate: domainCert,
       hostedZone: hostedZone,
+      groups: ['Attendees', 'Sponsors'],
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -126,6 +127,8 @@ export class BackendStack extends cdk.Stack {
 
     new UserStepFunctionStack(this, 'UserStepFunctionStack', {
       environmentName: props.environmentName,
+      userPool: cognitoStack.userPool,
+      dynamoTable: databaseStack.table,
     });
 
     // Expose API URL and Key

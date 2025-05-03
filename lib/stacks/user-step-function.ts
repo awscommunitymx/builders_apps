@@ -13,18 +13,20 @@ import {
   DynamoPutItem,
   DynamoAttributeValue,
   DynamoUpdateItem,
+  CallAwsService,
 } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { SecretValue, Duration } from 'aws-cdk-lib';
-import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
+import * as cdk from 'aws-cdk-lib';
 
 interface UserStepFunctionStackProps {
   environmentName: string;
-  userPoolId: string;
+  userPool: UserPool;
   dynamoTable: ITable;
 }
 
@@ -53,41 +55,24 @@ export class UserStepFunctionStack extends Construct {
       },
     });
 
-    // Create the Lambda function for creating Cognito users
-    const createCognitoUsersLambda = new NodejsFunction(this, 'CreateCognitoUserFunction', {
-      functionName: `create-cognito-user-${props.environmentName}`,
-      runtime: Runtime.NODEJS_22_X,
-      handler: 'handler',
-      entry: path.join(__dirname, '../../lambda/create-cognito-user/index.ts'),
-      description: 'Creates Cognito users for event attendees',
-      timeout: Duration.seconds(30),
-      memorySize: 256,
-    });
-
     // Grant the Lambda function permission to read the secret
     eventbriteApiKey.grantRead(eventbriteApiCallLambda);
 
-    // If a userPoolId was provided, grant the Lambda function permission to create Cognito users
-    if (props.userPoolId) {
-      // Grant permissions to manage Cognito users
-      const userPool = UserPool.fromUserPoolId(this, 'ExistingUserPool', props.userPoolId);
-      userPool.grant(
-        createCognitoUsersLambda,
-        'cognito-idp:AdminCreateUser',
-        'cognito-idp:AdminAddUserToGroup'
-      );
-    }
+    // // If a userPoolId was provided, grant the Lambda function permission to create Cognito users
+    // if (props.userPoolId) {
+    //   // Grant permissions to manage Cognito users
+    //   const userPool = UserPool.fromUserPoolId(this, 'ExistingUserPool', props.userPoolId);
+    //   userPool.grant(
+    //     createCognitoUsersLambda,
+    //     'cognito-idp:AdminCreateUser',
+    //     'cognito-idp:AdminAddUserToGroup'
+    //   );
+    // }
 
     // Create separate Lambda task instances for each flow
     // One for order.placed
     const callEventbriteApi = new LambdaInvoke(this, 'CallEventbriteApi', {
       lambdaFunction: eventbriteApiCallLambda,
-      outputPath: '$.Payload',
-    });
-
-    // Create the Lambda task for creating Cognito users
-    const createCognitoUserTask = new LambdaInvoke(this, 'CreateCognitoUser', {
-      lambdaFunction: createCognitoUsersLambda,
       outputPath: '$.Payload',
     });
 
@@ -98,7 +83,7 @@ export class UserStepFunctionStack extends Construct {
 
     // Add the createCognitoUserTask to the Map state
     const processAttendees = Chain.start(
-      new DynamoPutItem(this, 'DynamoPutItem', {
+      new DynamoPutItem(this, 'CreateUser', {
         table: props.dynamoTable,
         item: {
           PK: DynamoAttributeValue.fromString(
@@ -109,6 +94,26 @@ export class UserStepFunctionStack extends Construct {
           name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
         },
         conditionExpression: 'attribute_not_exists(PK)',
+        resultPath: JsonPath.DISCARD,
+      })
+    ).next(
+      new CallAwsService(this, 'CreateCognitoUser', {
+        action: 'adminCreateUser',
+        iamAction: 'cognito-idp:AdminCreateUser',
+        iamResources: [
+          `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
+        ],
+        service: 'cognitoidentityprovider',
+        parameters: {
+          Username: JsonPath.stringAt('$.body.email'),
+          UserPoolId: props.userPool.userPoolId,
+          MessageAction: 'SUPPRESS',
+        },
+        outputPath: '$.merged',
+        resultSelector: {
+          'merged.$':
+            'States.JsonMerge($$.Execution.Input, States.StringToJson(States.Format(\'\\{"cognito_sub":"{}"\\}\', $.User.Username)), false)',
+        },
       })
     );
 
