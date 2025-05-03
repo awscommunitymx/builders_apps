@@ -12,6 +12,7 @@ export interface CognitoStackProps {
   authDomain: string;
   certificate: ICertificate;
   hostedZone: route53.IHostedZone;
+  groups?: string[];
 }
 
 export class CognitoStack extends Construct {
@@ -196,6 +197,15 @@ export class CognitoStack extends Construct {
         unauthenticated: this.unauthenticatedRole.roleArn,
       },
     });
+
+    // Create groups in the user pool if provided
+    if (props.groups) {
+      for (const group of props.groups) {
+        this.userPool.addGroup(group, {
+          groupName: group,
+        });
+      }
+    }
 
     // Output important values
     new cdk.CfnOutput(this, 'UserPoolId', {

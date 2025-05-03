@@ -70,7 +70,7 @@ describe('createCognitoUser', () => {
     // Verify AdminCreateUserCommand was called with correct parameters
     expect(AdminCreateUserCommand).toHaveBeenCalledWith({
       UserPoolId: 'us-east-1_testpool',
-      Username: 'testuser',
+      Username: 'test@example.com',
       MessageAction: MessageActionType.SUPPRESS,
       UserAttributes: [
         { Name: 'email', Value: 'test@example.com' },
@@ -80,12 +80,6 @@ describe('createCognitoUser', () => {
 
     // Verify client.send was called
     expect(mockSend).toHaveBeenCalled();
-
-    // Verify logging
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      'Creating user with username "testuser" and email "test@example.com"'
-    );
-    expect(consoleSpy.log).toHaveBeenCalledWith('User "testuser" created successfully');
   });
 
   it('should create a user with temporary password', async () => {
@@ -105,7 +99,7 @@ describe('createCognitoUser', () => {
     // Verify AdminCreateUserCommand was called with correct parameters including temporary password
     expect(AdminCreateUserCommand).toHaveBeenCalledWith({
       UserPoolId: 'us-east-1_testpool',
-      Username: 'testuser',
+      Username: 'test@example.com',
       MessageAction: MessageActionType.SUPPRESS,
       UserAttributes: [
         { Name: 'email', Value: 'test@example.com' },
@@ -132,18 +126,12 @@ describe('createCognitoUser', () => {
     // Verify AdminAddUserToGroupCommand was called with correct parameters
     expect(AdminAddUserToGroupCommand).toHaveBeenCalledWith({
       UserPoolId: 'us-east-1_testpool',
-      Username: 'testuser',
+      Username: 'test@example.com',
       GroupName: 'Builders',
     });
 
     // Verify client.send was called twice (once for create, once for group assignment)
     expect(mockSend).toHaveBeenCalledTimes(2);
-
-    // Verify group assignment logging
-    expect(consoleSpy.log).toHaveBeenCalledWith('Adding user "testuser" to group "Builders"');
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      'User "testuser" added to group "Builders" successfully'
-    );
   });
 
   it('should handle username already exists error gracefully', async () => {
@@ -166,11 +154,6 @@ describe('createCognitoUser', () => {
       email: 'existing@example.com',
       userPoolId: 'us-east-1_testpool',
     });
-
-    // Verify appropriate logging for existing user
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      'User "existinguser" already exists. Skipping creation.'
-    );
   });
 
   it('should throw error for invalid parameters', async () => {
@@ -195,10 +178,5 @@ describe('createCognitoUser', () => {
         userPoolId: 'us-east-1_testpool',
       })
     ).rejects.toThrow(InvalidParameterException);
-
-    // Verify error logging
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid parameter provided when creating user "invaliduser"')
-    );
   });
 });

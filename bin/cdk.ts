@@ -24,6 +24,8 @@ const prodApexCertificateArn =
   'arn:aws:acm:us-east-1:662722197286:certificate/1f086f3c-c4cd-42f4-819d-97f9f5f3324e';
 const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
 const hostedZoneName = 'app.awscommunity.mx';
+const eventbriteApiKeySecretArn =
+  'arn:aws:secretsmanager:us-east-1:662722197286:secret:eventbrite/api_key-U2D38z';
 
 const frontendDomain =
   environmentName == 'production' ? hostedZoneName : `${environmentName}.${hostedZoneName}`;
@@ -34,6 +36,11 @@ const backendDomain =
     : `api-${environmentName}.${hostedZoneName}`;
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
+
+const webhookDomain =
+  environmentName === 'production'
+    ? `webhook.${hostedZoneName}`
+    : `webhook-${environmentName}.${hostedZoneName}`;
 
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
@@ -48,6 +55,8 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   domainName: backendDomain,
   appDomain: frontendDomain,
   authDomain: authDomain,
+  webhookDomain: webhookDomain,
+  eventbriteApiKeySecretArn: eventbriteApiKeySecretArn,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {

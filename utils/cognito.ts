@@ -117,12 +117,12 @@ export async function createCognitoUser(
   const client = new CognitoIdentityProviderClient();
 
   try {
-    console.log(`Creating user with username "${username}" and email "${email}"`);
+    console.log(`Creating user with email "${email}"`);
 
     // Prepare the command parameters
     const createUserParams = {
       UserPoolId: userPoolId,
-      Username: username,
+      Username: email,
       MessageAction: MessageActionType.SUPPRESS, // Suppress the default welcome email
       UserAttributes: [
         {
@@ -140,14 +140,14 @@ export async function createCognitoUser(
     // Create the user
     const createUserCommand = new AdminCreateUserCommand(createUserParams);
     const response = await client.send(createUserCommand);
-    console.log(`User "${username}" created successfully`);
+    console.log(`User "${email}" created successfully`);
 
     // If a group was specified, add the user to that group
     if (group) {
-      console.log(`Adding user "${username}" to group "${group}"`);
+      console.log(`Adding user "${email}" to group "${group}"`);
       const addToGroupCommand = new AdminAddUserToGroupCommand({
         UserPoolId: userPoolId,
-        Username: username,
+        Username: email,
         GroupName: group,
       });
       await client.send(addToGroupCommand);
