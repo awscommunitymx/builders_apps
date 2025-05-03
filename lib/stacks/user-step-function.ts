@@ -154,11 +154,8 @@ export class UserStepFunctionStack extends Construct {
 
     const processAttendeesUpdateChoice = new Choice(this, 'ProcessAttendeesUpdate')
       .when(
-        Condition.stringEquals(
-          JsonPath.stringAt('$.body.profile.first_name'),
-          'Information Requested'
-        ),
-        new Fail(this, 'AttendeeUpdateFail')
+        Condition.stringEquals(JsonPath.stringAt('$.body.profile.first_name'), 'Info Requested'),
+        new Succeed(this, 'AttendeeNotCreatedYet')
       )
       .otherwise(
         Chain.start(
