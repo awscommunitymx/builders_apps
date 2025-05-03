@@ -18,6 +18,7 @@ export interface AppStackProps extends cdk.StackProps {
   domainName: string;
   appDomain: string;
   authDomain: string;
+  webhookDomain: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -129,6 +130,9 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
       userPool: cognitoStack.userPool,
       dynamoTable: databaseStack.table,
+      webhookDomain: props.webhookDomain,
+      hostedZone: hostedZone,
+      certificate: domainCert,
     });
 
     // Expose API URL and Key

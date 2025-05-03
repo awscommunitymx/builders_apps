@@ -35,6 +35,11 @@ const backendDomain =
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
 
+const webhookDomain =
+  environmentName === 'production'
+    ? `webhook.${hostedZoneName}`
+    : `webhook-${environmentName}.${hostedZoneName}`;
+
 const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   environmentName,
   env: {
@@ -48,6 +53,7 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   domainName: backendDomain,
   appDomain: frontendDomain,
   authDomain: authDomain,
+  webhookDomain: webhookDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {

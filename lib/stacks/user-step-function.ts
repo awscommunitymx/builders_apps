@@ -25,11 +25,18 @@ import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import * as cdk from 'aws-cdk-lib';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as route53_targets from 'aws-cdk-lib/aws-route53-targets';
 
 interface UserStepFunctionStackProps {
   environmentName: string;
   userPool: UserPool;
   dynamoTable: ITable;
+  webhookDomain: string;
+  hostedZone: IHostedZone;
+  certificate: ICertificate;
 }
 
 export class UserStepFunctionStack extends Construct {
@@ -231,6 +238,10 @@ export class UserStepFunctionStack extends Construct {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
       },
+      domainName: {
+        domainName: props.webhookDomain,
+        certificate: props.certificate,
+      },
     });
 
     // Create the execution role for API Gateway to invoke Step Function
@@ -307,6 +318,13 @@ export class UserStepFunctionStack extends Construct {
         ],
       }
     );
+
+    // Add route53 record for the API Gateway
+    new route53.ARecord(this, 'UserStepFunctionApiRecord', {
+      zone: props.hostedZone,
+      recordName: props.webhookDomain,
+      target: route53.RecordTarget.fromAlias(new route53_targets.ApiGateway(this.apiGateway)),
+    });
 
     // Create output for the API Gateway URL
     new cdk.CfnOutput(this, 'UserStepFunctionApiUrl', {
