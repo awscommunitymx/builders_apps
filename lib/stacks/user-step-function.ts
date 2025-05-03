@@ -23,6 +23,8 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import * as cdk from 'aws-cdk-lib';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 interface UserStepFunctionStackProps {
   environmentName: string;
@@ -31,6 +33,9 @@ interface UserStepFunctionStackProps {
 }
 
 export class UserStepFunctionStack extends Construct {
+  public readonly stepFunction: StateMachine;
+  public readonly apiGateway: apigateway.RestApi;
+
   constructor(scope: Construct, id: string, props: UserStepFunctionStackProps) {
     super(scope, id);
 
@@ -207,9 +212,114 @@ export class UserStepFunctionStack extends Construct {
 
     // Define the state machine for user step functions
     const userStepFunction = new StateMachine(this, 'UserStepFunction', {
-      stateMachineName: 'UserStepFunction',
+      stateMachineName: `UserStepFunction-${props.environmentName}`,
       definition: apiChain,
       tracingEnabled: true,
+    });
+
+    this.stepFunction = userStepFunction;
+
+    // Create API Gateway to trigger the step function
+    this.apiGateway = new apigateway.RestApi(this, 'UserStepFunctionApi', {
+      restApiName: `UserStepFunction-API-${props.environmentName}`,
+      description: 'API Gateway to trigger User Step Function',
+      deployOptions: {
+        stageName: props.environmentName,
+        tracingEnabled: true,
+      },
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+      },
+    });
+
+    // Create the execution role for API Gateway to invoke Step Function
+    const apiGatewayStepFunctionRole = new iam.Role(this, 'ApiGatewayStepFunctionRole', {
+      assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
+      description: 'Role for API Gateway to start execution of Step Function',
+    });
+
+    // Grant permission to execute the step function
+    this.stepFunction.grantStartExecution(apiGatewayStepFunctionRole);
+
+    // Add a resource and method to the API
+    const stepFunctionResource = this.apiGateway.root.addResource('invoke');
+
+    // Add POST method to invoke the step function
+    stepFunctionResource.addMethod(
+      'POST',
+      new apigateway.AwsIntegration({
+        service: 'states',
+        action: 'StartExecution',
+        integrationHttpMethod: 'POST',
+        options: {
+          credentialsRole: apiGatewayStepFunctionRole,
+          requestTemplates: {
+            'application/json': `{
+              "input": "$util.escapeJavaScript($input.json('$'))",
+              "stateMachineArn": "${this.stepFunction.stateMachineArn}"
+            }`,
+          },
+          integrationResponses: [
+            {
+              statusCode: '200',
+              responseTemplates: {
+                'application/json': `{
+                  "status": "success",
+                }`,
+              },
+            },
+            {
+              selectionPattern: '4\\d{2}',
+              statusCode: '400',
+              responseTemplates: {
+                'application/json': `{
+                  "error": "Bad request"
+                }`,
+              },
+            },
+            {
+              selectionPattern: '5\\d{2}',
+              statusCode: '500',
+              responseTemplates: {
+                'application/json': `{
+                  "error": "Internal server error"
+                }`,
+              },
+            },
+          ],
+        },
+      }),
+      {
+        methodResponses: [
+          {
+            statusCode: '200',
+            responseModels: { 'application/json': apigateway.Model.EMPTY_MODEL },
+          },
+          {
+            statusCode: '400',
+            responseModels: { 'application/json': apigateway.Model.ERROR_MODEL },
+          },
+          {
+            statusCode: '500',
+            responseModels: { 'application/json': apigateway.Model.ERROR_MODEL },
+          },
+        ],
+      }
+    );
+
+    // Create output for the API Gateway URL
+    new cdk.CfnOutput(this, 'UserStepFunctionApiUrl', {
+      value: this.apiGateway.url,
+      description: 'URL of the API Gateway endpoint to invoke the User Step Function',
+      exportName: `${props.environmentName}-UserStepFunctionApiUrl`,
+    });
+
+    // Create output for the Step Function ARN
+    new cdk.CfnOutput(this, 'UserStepFunctionArn', {
+      value: this.stepFunction.stateMachineArn,
+      description: 'ARN of the User Step Function',
+      exportName: `${props.environmentName}-UserStepFunctionArn`,
     });
   }
 }
