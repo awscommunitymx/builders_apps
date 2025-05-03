@@ -58,17 +58,6 @@ export class UserStepFunctionStack extends Construct {
     // Grant the Lambda function permission to read the secret
     eventbriteApiKey.grantRead(eventbriteApiCallLambda);
 
-    // // If a userPoolId was provided, grant the Lambda function permission to create Cognito users
-    // if (props.userPoolId) {
-    //   // Grant permissions to manage Cognito users
-    //   const userPool = UserPool.fromUserPoolId(this, 'ExistingUserPool', props.userPoolId);
-    //   userPool.grant(
-    //     createCognitoUsersLambda,
-    //     'cognito-idp:AdminCreateUser',
-    //     'cognito-idp:AdminAddUserToGroup'
-    //   );
-    // }
-
     // Create separate Lambda task instances for each flow
     // One for order.placed
     const callEventbriteApi = new LambdaInvoke(this, 'CallEventbriteApi', {
@@ -132,6 +121,23 @@ export class UserStepFunctionStack extends Construct {
             GroupName: 'Attendees',
           },
           resultPath: JsonPath.DISCARD,
+        })
+      )
+      .next(
+        // Add sub to DynamoDB
+        new DynamoUpdateItem(this, 'AddSubToDynamoDB', {
+          table: props.dynamoTable,
+          key: {
+            PK: DynamoAttributeValue.fromString(
+              JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
+            ),
+            SK: DynamoAttributeValue.fromString('PROFILE'),
+          },
+          expressionAttributeValues: {
+            ':sub': DynamoAttributeValue.fromString(JsonPath.stringAt('$.cognito.sub')),
+          },
+          updateExpression: 'SET cognito_sub = :sub',
+          conditionExpression: 'attribute_exists(PK)',
         })
       );
 
