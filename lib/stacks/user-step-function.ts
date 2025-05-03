@@ -96,26 +96,44 @@ export class UserStepFunctionStack extends Construct {
         conditionExpression: 'attribute_not_exists(PK)',
         resultPath: JsonPath.DISCARD,
       })
-    ).next(
-      new CallAwsService(this, 'CreateCognitoUser', {
-        action: 'adminCreateUser',
-        iamAction: 'cognito-idp:AdminCreateUser',
-        iamResources: [
-          `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
-        ],
-        service: 'cognitoidentityprovider',
-        parameters: {
-          Username: JsonPath.stringAt('$.body.email'),
-          UserPoolId: props.userPool.userPoolId,
-          MessageAction: 'SUPPRESS',
-        },
-        outputPath: '$.merged',
-        resultSelector: {
-          'merged.$':
-            'States.JsonMerge($$.Execution.Input, States.StringToJson(States.Format(\'\\{"cognito_sub":"{}"\\}\', $.User.Username)), false)',
-        },
-      })
-    );
+    )
+      .next(
+        new CallAwsService(this, 'CreateCognitoUser', {
+          action: 'adminCreateUser',
+          iamAction: 'cognito-idp:AdminCreateUser',
+          iamResources: [
+            `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
+          ],
+          service: 'cognitoidentityprovider',
+          parameters: {
+            Username: JsonPath.stringAt('$.body.email'),
+            UserPoolId: props.userPool.userPoolId,
+            MessageAction: 'SUPPRESS',
+          },
+          outputPath: '$',
+          resultPath: '$.cognito',
+          resultSelector: {
+            'sub.$': '$.User.Username',
+          },
+        })
+      )
+      .next(
+        // Add user to group
+        new CallAwsService(this, 'AddUserToGroup', {
+          action: 'adminAddUserToGroup',
+          iamAction: 'cognito-idp:AdminAddUserToGroup',
+          iamResources: [
+            `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
+          ],
+          service: 'cognitoidentityprovider',
+          parameters: {
+            UserPoolId: props.userPool.userPoolId,
+            Username: JsonPath.stringAt('$.body.email'),
+            GroupName: 'Attendees',
+          },
+          resultPath: JsonPath.DISCARD,
+        })
+      );
 
     const processAttendeesUpdateChoice = new Choice(this, 'ProcessAttendeesUpdate')
       .when(
