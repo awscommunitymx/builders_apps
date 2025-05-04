@@ -2,6 +2,7 @@ import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { Outlet } from 'react-router';
 import { generateLoginUrl } from './auth-utils';
 import { useEffect, useState } from 'react';
+import imgUrl from './assets/logo.svg';
 
 export function Layout() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -37,13 +38,45 @@ export function Layout() {
       <TopNavigation
         identity={{
           href: '#',
-          title: 'Service',
           logo: {
-            src: '/logo-small-top-navigation.svg',
-            alt: 'Service',
+            src: imgUrl,
+            alt: 'Logo',
           },
         }}
-        utilities={getUtilityItems()}
+        utilities={[
+          ...getUtilityItems(),
+          {
+            type: 'button',
+            text: 'Link',
+            href: 'https://example.com/',
+            external: true,
+            externalIconAriaLabel: ' (opens in a new tab)',
+          },
+          {
+            type: 'button',
+            iconName: 'notification',
+            title: 'Notifications',
+            ariaLabel: 'Notifications (unread)',
+            badge: true,
+            disableUtilityCollapse: false,
+          },
+          {
+            type: 'menu-dropdown',
+            iconName: 'settings',
+            ariaLabel: 'Settings',
+            title: 'Settings',
+            items: [
+              {
+                id: 'settings-org',
+                text: 'Organizational settings',
+              },
+              {
+                id: 'settings-project',
+                text: 'Project settings',
+              },
+            ],
+          },
+        ]}
       />
       <Outlet /> {/* This renders the current route's component */}
     </div>
