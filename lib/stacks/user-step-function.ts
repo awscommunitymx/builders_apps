@@ -160,7 +160,7 @@ export class UserStepFunctionStack extends Construct {
       )
       .otherwise(
         Chain.start(
-          new DynamoUpdateItem(this, 'FillProfile', {
+          new DynamoUpdateItem(this, 'Set company', {
             table: props.dynamoTable,
             key: {
               PK: DynamoAttributeValue.fromString(
@@ -169,14 +169,11 @@ export class UserStepFunctionStack extends Construct {
               SK: DynamoAttributeValue.fromString('PROFILE'),
             },
             expressionAttributeValues: {
-              ':gender': DynamoAttributeValue.fromString(
-                JsonPath.stringAt('$.body.profile.gender')
-              ),
               ':company': DynamoAttributeValue.fromString(
                 JsonPath.stringAt('$.body.profile.company')
               ),
             },
-            updateExpression: 'SET gender = :gender, company = :company',
+            updateExpression: 'SET company = :company',
             resultPath: JsonPath.DISCARD,
           })
         ).next(
@@ -228,6 +225,30 @@ export class UserStepFunctionStack extends Construct {
                   })
                 )
                 .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
+            )
+            .branch(
+              new Choice(this, 'GenderPresent')
+                .when(
+                  Condition.isPresent('$.body.profile.gender'),
+                  new DynamoUpdateItem(this, 'SetGender', {
+                    table: props.dynamoTable,
+                    key: {
+                      PK: DynamoAttributeValue.fromString(
+                        JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                      ),
+                      SK: DynamoAttributeValue.fromString('PROFILE'),
+                    },
+                    expressionAttributeValues: {
+                      ':gender': DynamoAttributeValue.fromString(
+                        JsonPath.stringAt('$.body.profile.gender')
+                      ),
+                    },
+                    updateExpression: 'SET gender = :gender',
+                    conditionExpression: 'attribute_exists(PK)',
+                    resultPath: JsonPath.DISCARD,
+                  })
+                )
+                .otherwise(new Succeed(this, 'GenderNotPresent'))
             )
         )
       );
