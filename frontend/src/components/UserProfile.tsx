@@ -9,6 +9,7 @@ import {
   KeyValuePairs,
   CopyToClipboard,
   Button,
+  Spinner,
 } from '@cloudscape-design/components';
 
 export interface UserProfileProps {
@@ -48,7 +49,9 @@ export function UserProfile({ loading = false, error = null, user = null }: User
           items={[
             {
               label: 'ARN',
-              value: (
+              value: loading ? (
+                <Spinner />
+              ) : (
                 <CopyToClipboard
                   copyButtonAriaLabel="Copy ARN"
                   copyErrorText="ARN failed to copy"
@@ -60,19 +63,19 @@ export function UserProfile({ loading = false, error = null, user = null }: User
             },
             {
               label: 'Nombre',
-              value: user?.name,
+              value: loading ? <Spinner /> : user?.name,
             },
             {
               label: 'Email',
-              value: user?.email,
+              value: loading ? <Spinner /> : user?.email,
             },
             {
               label: 'Teléfono',
-              value: user?.cell_phone,
+              value: loading ? <Spinner /> : user?.cell_phone,
             },
             {
               label: 'Compañía',
-              value: user?.company,
+              value: loading ? <Spinner /> : user?.company,
             },
           ]}
         />
