@@ -9,41 +9,15 @@ import {
   TextContent,
   Alert,
 } from '@cloudscape-design/components';
-import { useNavigate } from 'react-router';
 
 export interface UserProfileProps {
   initialId?: string;
   loading?: boolean;
   error?: Error | null;
   user?: User | null;
-  onIdChange?: (id: string) => void;
 }
 
-export function UserProfile({
-  initialId = '',
-  loading = false,
-  error = null,
-  user = null,
-  onIdChange,
-}: UserProfileProps) {
-  const [shortId, setShortId] = useState<string>(initialId);
-  const navigate = useNavigate();
-
-  const isValidId = shortId && shortId.trim().length > 0;
-
-  useEffect(() => {
-    if (shortId && shortId !== initialId) {
-      navigate(`/uid/${shortId}`);
-      if (onIdChange) {
-        onIdChange(shortId);
-      }
-    }
-  }, [shortId, initialId, navigate, onIdChange]);
-
-  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShortId(e.target.value);
-  };
-
+export function UserProfile({ loading = false, error = null, user = null }: UserProfileProps) {
   return (
     <ContentLayout
       header={
@@ -51,28 +25,16 @@ export function UserProfile({
           <Header variant="h1" description="Enter a short ID to view the user's profile">
             User Profile
           </Header>
-          <input
-            type="text"
-            value={shortId}
-            onChange={handleIdChange}
-            placeholder="Enter short ID"
-            style={{ padding: '8px', width: '200px' }}
-          />
         </SpaceBetween>
       }
     >
       <SpaceBetween size="l">
-        {shortId && !isValidId && <Alert type="error">Please enter a valid user ID.</Alert>}
         {error && <Alert type="error">Error loading profile: {error.message}</Alert>}
         {loading && <Alert type="info">Loading profile...</Alert>}
         {user && (
           <Cards
             cardDefinition={{
-              header: (item: User) => (
-                <Header>
-                  {item.first_name} {item.last_name}
-                </Header>
-              ),
+              header: (item: User) => <Header>{item.name}</Header>,
               sections: [
                 {
                   id: 'details',
@@ -80,16 +42,16 @@ export function UserProfile({
                   content: (item: User) => (
                     <SpaceBetween size="s">
                       <TextContent>
-                        <strong>User ID:</strong> {item.user_id}
-                      </TextContent>
-                      <TextContent>
-                        <strong>Short ID:</strong> {item.short_id}
-                      </TextContent>
-                      <TextContent>
                         <strong>Company:</strong> {item.company || 'N/A'}
                       </TextContent>
                       <TextContent>
-                        <strong>Role:</strong> {item.role || 'N/A'}
+                        <strong>Role:</strong> {item.job_title || 'N/A'}
+                      </TextContent>
+                      <TextContent>
+                        <strong>Email:</strong> {item.email || 'N/A'}
+                      </TextContent>
+                      <TextContent>
+                        <strong>Cell Phone:</strong> {item.cell_phone || 'N/A'}
                       </TextContent>
                     </SpaceBetween>
                   ),
