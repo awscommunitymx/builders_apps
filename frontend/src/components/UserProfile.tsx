@@ -22,9 +22,7 @@ export function UserProfile({ loading = false, error = null, user = null }: User
     <ContentLayout
       header={
         <SpaceBetween size="m">
-          <Header variant="h1" description="Enter a short ID to view the user's profile">
-            User Profile
-          </Header>
+          <Header variant="h1">User Profile</Header>
         </SpaceBetween>
       }
     >
@@ -61,7 +59,6 @@ export function UserProfile({ loading = false, error = null, user = null }: User
             cardsPerRow={[{ cards: 1, minWidth: 0 }]}
             items={[user]}
             loadingText="Loading profile"
-            empty={<TextContent>Enter a short ID to view the user's profile</TextContent>}
           />
         )}
       </SpaceBetween>
