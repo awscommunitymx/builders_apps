@@ -10,6 +10,7 @@ import AuthCallback from './components/AuthCallback.tsx';
 import { AuthProvider } from './AuthContext.tsx';
 import { AwsRumProvider } from './AwsRumProvider.tsx';
 import ErrorBoundary from './ErrorBoundary.tsx';
+import { MyProfileRoute } from './routes/MyProfileRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/" element={<Layout />}>
                 <Route index element={<App />} />
                 <Route path="/uid/:id" element={<UserProfileRoute />} />
+                <Route path="/profile" element={<MyProfileRoute />} />
               </Route>
             </Routes>
           </BrowserRouter>
