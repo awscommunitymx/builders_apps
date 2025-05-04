@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { faker } from '@faker-js/faker';
 
 // Get table name from command line arguments or use default
 const args = process.argv.slice(2);
@@ -15,42 +16,29 @@ const generateRandomNumbers = (length: number): string => {
   return Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
 };
 
-// Sample users data with updated structure
-const users = [
-  {
-    PK: `USER#${generateRandomNumbers(12)}`,
-    SK: 'PROFILE',
-    name: 'John Doe',
-    email: 'john@example.com',
-    cell_phone: '+1234567890',
-    company: 'AWS',
-    gender: 'Male',
-    job_title: 'Solutions Architect',
-    ticket_class_id: generateRandomNumbers(10),
-  },
-  {
-    PK: `USER#${generateRandomNumbers(12)}`,
-    SK: 'PROFILE',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    cell_phone: '+1987654321',
-    company: 'Amazon',
-    gender: 'Female',
-    job_title: 'Software Engineer',
-    ticket_class_id: generateRandomNumbers(10),
-  },
-  {
-    PK: `USER#${generateRandomNumbers(12)}`,
-    SK: 'PROFILE',
-    name: 'Bob Wilson',
-    email: 'bob@example.com',
-    cell_phone: '+1567891234',
-    company: 'AWS Community',
-    gender: 'Male',
-    job_title: 'Developer Advocate',
-    ticket_class_id: generateRandomNumbers(10),
-  },
-];
+// Function to generate users array with faker
+const generateUsers = (count: number = 3) => {
+  return Array.from({ length: count }, () => {
+    const userId = generateRandomNumbers(12);
+    const gender = faker.person.sexType();
+
+    return {
+      PK: `USER#${userId}`,
+      SK: 'PROFILE',
+      user_id: userId,
+      name: faker.person.fullName({ sex: gender }),
+      email: faker.internet.email(),
+      cell_phone: faker.phone.number({ style: 'international' }),
+      company: faker.company.name(),
+      gender: gender === 'male' ? 'Male' : 'Female',
+      job_title: faker.person.jobTitle(),
+      ticket_class_id: generateRandomNumbers(10),
+    };
+  });
+};
+
+// Generate users data using the function
+const users = generateUsers();
 
 async function populateTable() {
   try {

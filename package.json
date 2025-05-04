@@ -23,6 +23,7 @@
     "storybook": "npm run storybook --workspace=frontend"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.7.0",
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/typescript": "^4.1.5",
     "@graphql-codegen/typescript-operations": "^4.5.1",

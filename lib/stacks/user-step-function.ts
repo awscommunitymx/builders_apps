@@ -92,6 +92,7 @@ export class UserStepFunctionStack extends Construct {
           SK: DynamoAttributeValue.fromString('PROFILE'),
           email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.email')),
           name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
+          user_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.id')),
         },
         conditionExpression: 'attribute_not_exists(PK)',
         resultPath: JsonPath.DISCARD,
