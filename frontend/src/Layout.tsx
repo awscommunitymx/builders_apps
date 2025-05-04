@@ -37,7 +37,7 @@ export function Layout() {
     <div>
       <TopNavigation
         identity={{
-          href: '#',
+          href: '/',
           logo: {
             src: imgUrl,
             alt: 'Logo',

@@ -12,6 +12,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@cloudscape-design/board-components": "^3.0.101",
     "@cloudscape-design/components": "^3.0.923",
     "@cloudscape-design/global-styles": "^1.0.38",
     "aws-rum-web": "^1.22.1",
