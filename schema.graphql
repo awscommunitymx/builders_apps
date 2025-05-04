@@ -1,18 +1,15 @@
 type User {
   user_id: ID!
-  short_id: String!
-  first_name: String
-  last_name: String
+  name: String!
   company: String
-  role: String
-  pin: Int
+  job_title: String
+  cell_phone: String
+  email: String
 }
 
 type ProfileAccess {
   PK: String!
   SK: String!
-  viewer_id: String!
-  viewed_id: String!
   timestamp: String!
 }
 
@@ -43,7 +40,7 @@ mutation UpdateUser($input: UpdateUserInput!) {
 }
 
 type Mutation {
-  viewProfile(shortId: String!, pin: Int!, viewerId: ID!): User
+  viewProfile(id: String!): User
   updateUser(input: UpdateUserInput!): User
 }
 
@@ -52,11 +49,11 @@ schema {
   mutation: Mutation
 }
 
-type  AgendaData {
+type AgendaData {
   sessions: [Session!]!
 }
 
-type  Session {
+type Session {
   id: ID!
   title: String!
   description: String!
@@ -74,19 +71,19 @@ type  Session {
   isConfirmed: Boolean!
 }
 
-type  Speaker {
+type Speaker {
   id: ID!
   name: String!
 }
 
-type  Category {
+type Category {
   id: ID!
   name: String!
   categoryItems: [CategoryItem!]!
   sort: Int!
 }
 
-type  CategoryItem {
+type CategoryItem {
   id: ID!
   name: String!
 }

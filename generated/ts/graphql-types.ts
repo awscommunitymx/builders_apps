@@ -48,9 +48,7 @@ export type MutationUpdateUserArgs = {
 
 
 export type MutationViewProfileArgs = {
-  pin: Scalars['Int']['input'];
-  shortId: Scalars['String']['input'];
-  viewerId: Scalars['ID']['input'];
+  id: Scalars['String']['input'];
 };
 
 export type ProfileAccess = {
@@ -58,8 +56,6 @@ export type ProfileAccess = {
   PK: Scalars['String']['output'];
   SK: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
-  viewed_id: Scalars['String']['output'];
-  viewer_id: Scalars['String']['output'];
 };
 
 export type Query = {
@@ -126,12 +122,11 @@ export type UpdateUserInput = {
 
 export type User = {
   __typename?: 'User';
+  cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
-  first_name?: Maybe<Scalars['String']['output']>;
-  last_name?: Maybe<Scalars['String']['output']>;
-  pin?: Maybe<Scalars['Int']['output']>;
-  role?: Maybe<Scalars['String']['output']>;
-  short_id: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
+  job_title?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
   user_id: Scalars['ID']['output'];
 };
 
@@ -264,15 +259,13 @@ export type CategoryItemResolvers<ContextType = any, ParentType extends Resolver
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
-  viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'pin' | 'shortId' | 'viewerId'>>;
+  viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'id'>>;
 };
 
 export type ProfileAccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProfileAccess'] = ResolversParentTypes['ProfileAccess']> = {
   PK?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   SK?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  viewed_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  viewer_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -313,12 +306,11 @@ export type SpeakerResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  cell_phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  first_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  last_name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  pin?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  short_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  job_title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

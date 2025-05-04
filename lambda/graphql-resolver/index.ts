@@ -1,4 +1,4 @@
-import { AppSyncResolverHandler } from 'aws-lambda';
+import { AppSyncIdentityCognito, AppSyncResolverHandler } from 'aws-lambda';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
@@ -23,9 +23,11 @@ export const handler = middy((async (event) => {
     logger.info(`Processing ${event.info.fieldName}`, { event });
     metrics.addMetric(`${event.info.fieldName}Attempt`, MetricUnit.Count, 1);
 
+    const identity = event.identity as AppSyncIdentityCognito;
+
     if (event.info.fieldName === 'viewProfile') {
-      const { shortId, pin, viewerId } = event.arguments as MutationViewProfileArgs;
-      return handleViewProfile(shortId, pin, viewerId);
+      const { id } = event.arguments as MutationViewProfileArgs;
+      return handleViewProfile(id, identity.sub);
     }
 
     if (event.info.fieldName === 'updateUser') {
@@ -33,11 +35,11 @@ export const handler = middy((async (event) => {
       const { userId, firstName, lastName, company, role, pin } = input;
 
       const updates: Partial<Omit<User, 'user_id' | 'short_id'>> = {};
-      if (firstName !== undefined) updates.first_name = firstName;
-      if (lastName !== undefined) updates.last_name = lastName;
-      if (company !== undefined) updates.company = company;
-      if (role !== undefined) updates.role = role;
-      if (pin !== undefined) updates.pin = pin;
+      // if (firstName !== undefined) updates.first_name = firstName;
+      // if (lastName !== undefined) updates.last_name = lastName;
+      // if (company !== undefined) updates.company = company;
+      // if (role !== undefined) updates.role = role;
+      // if (pin !== undefined) updates.pin = pin;
 
       return handleUpdateUser(userId, updates);
     }

@@ -27,11 +27,10 @@ export class DatabaseStack extends Construct {
       removalPolicy: this.getRemovalPolicy(props.environmentName),
     });
 
-    // Add GSI for querying by shortId
     this.table.addGlobalSecondaryIndex({
-      indexName: 'ShortIdIndex',
+      indexName: 'cognito_sub-index',
       partitionKey: {
-        name: 'short_id',
+        name: 'cognito_sub',
         type: dynamodb.AttributeType.STRING,
       },
       projectionType: dynamodb.ProjectionType.ALL,

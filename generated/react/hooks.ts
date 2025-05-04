@@ -47,9 +47,7 @@ export type MutationUpdateUserArgs = {
 
 
 export type MutationViewProfileArgs = {
-  pin: Scalars['Int']['input'];
-  shortId: Scalars['String']['input'];
-  viewerId: Scalars['ID']['input'];
+  id: Scalars['String']['input'];
 };
 
 export type ProfileAccess = {
@@ -57,8 +55,6 @@ export type ProfileAccess = {
   PK: Scalars['String']['output'];
   SK: Scalars['String']['output'];
   timestamp: Scalars['String']['output'];
-  viewed_id: Scalars['String']['output'];
-  viewer_id: Scalars['String']['output'];
 };
 
 export type Query = {
@@ -125,11 +121,10 @@ export type UpdateUserInput = {
 
 export type User = {
   __typename?: 'User';
+  cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
-  first_name?: Maybe<Scalars['String']['output']>;
-  last_name?: Maybe<Scalars['String']['output']>;
-  pin?: Maybe<Scalars['Int']['output']>;
-  role?: Maybe<Scalars['String']['output']>;
-  short_id: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
+  job_title?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
   user_id: Scalars['ID']['output'];
 };

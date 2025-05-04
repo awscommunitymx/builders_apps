@@ -16,20 +16,21 @@ const docClient = DynamoDBDocumentClient.from(client);
 const tableName = process.env.TABLE_NAME!;
 
 export default async function handleViewProfile(
-  shortId: string,
-  pin: number,
-  viewerId: string
+  id: string,
+  authenticatedUserSub: string
 ): Promise<User | null> {
   // We no longer reference `event` here. Use passed-in params.
-  logger.info('Handling viewProfile', { shortId, viewerId });
+  logger.info('Handling viewProfile', { id });
   metrics.addMetric('ViewProfileAttempt', MetricUnit.Count, 1);
 
   // Query user by shortId
   const queryParams = {
     TableName: tableName,
-    IndexName: 'ShortIdIndex',
-    KeyConditionExpression: 'short_id = :shortId',
-    ExpressionAttributeValues: { ':shortId': shortId },
+    KeyConditionExpression: 'PK = :pk AND SK = :sk',
+    ExpressionAttributeValues: {
+      ':pk': `USER#${id}`,
+      ':sk': 'PROFILE',
+    },
     Limit: 1,
   };
 
@@ -38,24 +39,37 @@ export default async function handleViewProfile(
   try {
     const queryResult = await docClient.send(new QueryCommand(queryParams));
     if (!queryResult.Items || queryResult.Items.length === 0) {
-      logger.info('User not found', { shortId });
+      logger.info('User not found', { id });
       metrics.addMetric('UserNotFound', MetricUnit.Count, 1);
-      return null;
+      throw new Error('User not found');
     }
     const user = queryResult.Items[0] as User;
-    if (user.pin !== pin) {
-      logger.warn('Incorrect PIN', { shortId, userId: user.user_id });
-      metrics.addMetric('IncorrectPin', MetricUnit.Count, 1);
-      throw new Error('Incorrect PIN');
+
+    // Query the authenticaded user by cognito_sub in the cognito_sub-index gsi
+    const queryParamsAuthUser = {
+      TableName: tableName,
+      IndexName: 'cognito_sub-index',
+      KeyConditionExpression: 'cognito_sub = :cognito_sub',
+      ExpressionAttributeValues: {
+        ':cognito_sub': authenticatedUserSub,
+      },
+    };
+
+    const queryResultAuthUser = await docClient.send(new QueryCommand(queryParamsAuthUser));
+    if (!queryResultAuthUser.Items || queryResultAuthUser.Items.length === 0) {
+      logger.info('Authenticated user not found', { authenticatedUserSub });
+      metrics.addMetric('AuthenticatedUserNotFound', MetricUnit.Count, 1);
+      return null;
     }
+    const authenticatedUser = queryResultAuthUser.Items[0] as User;
+    logger.info('Authenticated user found', { authenticatedUser });
+    metrics.addMetric('AuthenticatedUserFound', MetricUnit.Count, 1);
 
     // record view
     const viewItem: ProfileAccess = {
-      PK: `VIEW#${viewerId}`,
-      SK: `PROFILE#${user.user_id}`,
+      PK: `VIEWED#${id}`,
+      SK: `VIEWER#${authenticatedUser.user_id}`,
       timestamp: new Date().toISOString(),
-      viewer_id: viewerId,
-      viewed_id: user.user_id,
     };
     await docClient.send(new PutCommand({ TableName: tableName, Item: viewItem }));
     metrics.addMetric('ProfileViewRecorded', MetricUnit.Count, 1);
