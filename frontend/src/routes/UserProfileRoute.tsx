@@ -2,7 +2,7 @@ import { useParams } from 'react-router';
 import { useState } from 'react';
 import { UserProfile } from '../components/UserProfile';
 import { gql, useMutation } from '@apollo/client';
-import { AppLayoutToolbar, BreadcrumbGroup, Spinner } from '@cloudscape-design/components';
+import { AppLayoutToolbar, BreadcrumbGroup, Button, Spinner } from '@cloudscape-design/components';
 
 const GET_USER = gql`
   mutation viewProfile($id: String!) {
@@ -27,6 +27,12 @@ export function UserProfileRoute() {
     mutateFunction();
   });
 
+  const actionButton = (
+    <Button variant="primary" iconName="download" ariaLabel="Descargar tarjeta de contacto">
+      Descargar contacto
+    </Button>
+  );
+
   // return <UserProfile initialId={id} loading={loading} error={error} user={data?.viewProfile} />;
   return (
     <AppLayoutToolbar
@@ -47,6 +53,7 @@ export function UserProfileRoute() {
           loading={loading}
           error={error}
           user={data?.viewProfile}
+          actionButton={actionButton}
         />
       }
     ></AppLayoutToolbar>

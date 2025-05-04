@@ -17,9 +17,15 @@ export interface UserProfileProps {
   loading?: boolean;
   error?: Error | null;
   user?: User | null;
+  actionButton?: React.ReactNode;
 }
 
-export function UserProfile({ loading = false, error = null, user = null }: UserProfileProps) {
+export function UserProfile({
+  loading = false,
+  error = null,
+  user = null,
+  actionButton = null,
+}: UserProfileProps) {
   return (
     <ContentLayout
       header={
@@ -28,13 +34,7 @@ export function UserProfile({ loading = false, error = null, user = null }: User
             variant="h1"
             actions={
               // Descargar tarjeta de contacto
-              <Button
-                variant="primary"
-                iconName="download"
-                ariaLabel="Descargar tarjeta de contacto"
-              >
-                Descargar contacto
-              </Button>
+              actionButton
             }
           >
             {user?.name || <Spinner />}
