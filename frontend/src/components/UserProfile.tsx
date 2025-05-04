@@ -37,7 +37,7 @@ export function UserProfile({ loading = false, error = null, user = null }: User
               </Button>
             }
           >
-            {user?.name || 'User Profile'}
+            {user?.name || <Spinner />}
           </Header>
         </SpaceBetween>
       }

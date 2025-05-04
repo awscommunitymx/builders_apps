@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={<Layout />}>
                 <Route index element={<App />} />
-                <Route path="/uid/:id" element={<UserProfileRoute />} />
+                <Route path="/profile/:id" element={<UserProfileRoute />} />
                 <Route path="/profile" element={<MyProfileRoute />} />
               </Route>
             </Routes>
