@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import Header from '@cloudscape-design/components/header';
 import ContentLayout from '@cloudscape-design/components/content-layout';
-import { ColumnLayout, Container, Link, SpaceBetween } from '@cloudscape-design/components';
+import {
+  AppLayoutToolbar,
+  BreadcrumbGroup,
+  ColumnLayout,
+  Container,
+  Link,
+  SpaceBetween,
+} from '@cloudscape-design/components';
 
 import iamUrl from './assets/iam.svg';
 import eventbridgeUrl from './assets/EventBridge.svg';
@@ -25,11 +32,13 @@ interface BoardChangeDetail {
   items: BoardItemType[];
 }
 
-function boardItem(text: string, imgUrl: string) {
+function boardItem(text: string, imgUrl: string, url: string) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <img src={imgUrl} alt="Logo" style={{ width: '30px', height: '30px' }} />
-      <Link fontSize="heading-s">{text}</Link>
+      <Link fontSize="heading-s" href={url}>
+        {text}
+      </Link>
     </div>
   );
 }
@@ -39,34 +48,42 @@ function App() {
     {
       title: 'Perfil',
       imgUrl: iamUrl,
+      url: '/profile',
     },
     {
       title: 'Agenda',
       imgUrl: eventbridgeUrl,
+      url: '/agenda',
     },
   ];
 
   return (
-    <ContentLayout
-      defaultPadding
-      header={
-        <SpaceBetween size="m">
-          <Header variant="h1">Página de inicio de la Consola</Header>
-        </SpaceBetween>
-      }
-    >
-      <Container
-        header={
-          <Header variant="h1">
-            Visitados recientemente <Link variant="info">Info</Link>
-          </Header>
+    <>
+      <AppLayoutToolbar
+        navigationHide={true}
+        content={
+          <ContentLayout
+            header={
+              <SpaceBetween size="m">
+                <Header variant="h1">Página de inicio de la Consola</Header>
+              </SpaceBetween>
+            }
+          >
+            <Container
+              header={
+                <Header variant="h1">
+                  Visitados recientemente <Link variant="info">Info</Link>
+                </Header>
+              }
+            >
+              <ColumnLayout borders="horizontal" columns={1}>
+                {services.map((service) => boardItem(service.title, service.imgUrl, service.url))}
+              </ColumnLayout>
+            </Container>
+          </ContentLayout>
         }
-      >
-        <ColumnLayout borders="horizontal" columns={1}>
-          {services.map((service) => boardItem(service.title, service.imgUrl))}
-        </ColumnLayout>
-      </Container>
-    </ContentLayout>
+      ></AppLayoutToolbar>
+    </>
   );
 }
 
