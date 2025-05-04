@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { useState } from 'react';
 import { UserProfile } from '../components/UserProfile';
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { gql, useMutation } from '@apollo/client';
 
 const GET_USER = gql`
   mutation viewProfile($id: String!) {
