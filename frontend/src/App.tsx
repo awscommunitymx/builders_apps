@@ -7,6 +7,7 @@ import {
   ColumnLayout,
   Container,
   Link,
+  SideNavigation,
   SpaceBetween,
 } from '@cloudscape-design/components';
 
@@ -60,7 +61,19 @@ function App() {
   return (
     <>
       <AppLayoutToolbar
-        navigationHide={true}
+        toolsHide={true}
+        navigation={
+          <SideNavigation
+            header={{
+              href: '#',
+              text: 'Builders App',
+            }}
+            items={[
+              { type: 'link', text: `Mi perfil`, href: `/profile` },
+              { type: 'link', text: `Agenda`, href: `/agenda` },
+            ]}
+          />
+        }
         content={
           <ContentLayout
             header={

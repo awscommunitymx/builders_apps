@@ -22,7 +22,6 @@ export interface UserProfileProps {
 export function UserProfile({ loading = false, error = null, user = null }: UserProfileProps) {
   return (
     <ContentLayout
-      defaultPadding
       header={
         <SpaceBetween size="m">
           <Header
