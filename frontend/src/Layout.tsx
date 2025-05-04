@@ -1,8 +1,37 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { Outlet } from 'react-router';
 import { generateLoginUrl } from './auth-utils';
+import { useEffect, useState } from 'react';
 
 export function Layout() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if access_token exists in localStorage
+    const accessToken = localStorage.getItem('access_token');
+    setIsLoggedIn(!!accessToken);
+  }, []);
+
+  const getUtilityItems = () => {
+    if (isLoggedIn) {
+      return [
+        {
+          type: 'button' as const,
+          text: 'My Profile',
+          href: '/profile', // Adjust this path as needed
+        },
+      ];
+    } else {
+      return [
+        {
+          type: 'button' as const,
+          text: 'Login',
+          href: generateLoginUrl(),
+        },
+      ];
+    }
+  };
+
   return (
     <div>
       <TopNavigation
@@ -14,13 +43,7 @@ export function Layout() {
             alt: 'Service',
           },
         }}
-        utilities={[
-          {
-            type: 'button',
-            text: 'Login',
-            href: generateLoginUrl(),
-          },
-        ]}
+        utilities={getUtilityItems()}
       />
       <Outlet /> {/* This renders the current route's component */}
     </div>
