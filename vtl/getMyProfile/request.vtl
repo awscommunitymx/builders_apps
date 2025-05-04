@@ -1,0 +1,12 @@
+{
+  "version": "2018-05-29",
+  "operation": "Query",
+  "index": "cognito_sub-index",
+  "query": {
+    "expression": "cognito_sub = :cognito_sub",
+    "expressionValues": {
+      ":cognito_sub": $util.dynamodb.toDynamoDBJson($ctx.identity.sub)
+    }
+  },
+  "limit": 1
+}

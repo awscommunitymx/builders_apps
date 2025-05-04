@@ -14,8 +14,7 @@ type ProfileAccess {
 }
 
 type Query {
-  getUserByShortId(shortId: String!): User
-  getProfileAccesses(userId: ID!): [ProfileAccess]
+  getMyProfile: User
 }
 
 input UpdateUserInput {

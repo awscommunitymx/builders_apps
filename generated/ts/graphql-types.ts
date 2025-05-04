@@ -60,18 +60,7 @@ export type ProfileAccess = {
 
 export type Query = {
   __typename?: 'Query';
-  getProfileAccesses?: Maybe<Array<Maybe<ProfileAccess>>>;
-  getUserByShortId?: Maybe<User>;
-};
-
-
-export type QueryGetProfileAccessesArgs = {
-  userId: Scalars['ID']['input'];
-};
-
-
-export type QueryGetUserByShortIdArgs = {
-  shortId: Scalars['String']['input'];
+  getMyProfile?: Maybe<User>;
 };
 
 export type Room = {
@@ -270,8 +259,7 @@ export type ProfileAccessResolvers<ContextType = any, ParentType extends Resolve
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  getProfileAccesses?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProfileAccess']>>>, ParentType, ContextType, RequireFields<QueryGetProfileAccessesArgs, 'userId'>>;
-  getUserByShortId?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserByShortIdArgs, 'shortId'>>;
+  getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
 export type RoomResolvers<ContextType = any, ParentType extends ResolversParentTypes['Room'] = ResolversParentTypes['Room']> = {

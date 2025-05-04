@@ -76,16 +76,11 @@ export class ApiStack extends Construct {
     dynamoDataSource: appsync.DynamoDbDataSource,
     lambdaDataSource: appsync.LambdaDataSource
   ): void {
-    // Define resolver for getUserByShortId
-    dynamoDataSource.createResolver('GetUserByShortIdResolver', {
+    dynamoDataSource.createResolver('GetMyProfileResolver', {
       typeName: 'Query',
-      fieldName: 'getUserByShortId',
-      requestMappingTemplate: appsync.MappingTemplate.fromFile(
-        './vtl/getUserByShortId/request.vtl'
-      ),
-      responseMappingTemplate: appsync.MappingTemplate.fromFile(
-        './vtl/getUserByShortId/response.vtl'
-      ),
+      fieldName: 'getMyProfile',
+      requestMappingTemplate: appsync.MappingTemplate.fromFile('./vtl/getMyProfile/request.vtl'),
+      responseMappingTemplate: appsync.MappingTemplate.fromFile('./vtl/getMyProfile/response.vtl'),
     });
 
     // Create resolver for viewProfile
@@ -97,18 +92,6 @@ export class ApiStack extends Construct {
     lambdaDataSource.createResolver('GraphQLResolverUpdateUser', {
       typeName: 'Mutation',
       fieldName: 'updateUser',
-    });
-
-    // Get access logs resolver
-    dynamoDataSource.createResolver('GetProfileAccessesResolver', {
-      typeName: 'Query',
-      fieldName: 'getProfileAccesses',
-      requestMappingTemplate: appsync.MappingTemplate.fromFile(
-        './vtl/getProfileAccesses/request.vtl'
-      ),
-      responseMappingTemplate: appsync.MappingTemplate.fromFile(
-        './vtl/getProfileAccesses/response.vtl'
-      ),
     });
   }
 

@@ -59,18 +59,7 @@ export type ProfileAccess = {
 
 export type Query = {
   __typename?: 'Query';
-  getProfileAccesses?: Maybe<Array<Maybe<ProfileAccess>>>;
-  getUserByShortId?: Maybe<User>;
-};
-
-
-export type QueryGetProfileAccessesArgs = {
-  userId: Scalars['ID']['input'];
-};
-
-
-export type QueryGetUserByShortIdArgs = {
-  shortId: Scalars['String']['input'];
+  getMyProfile?: Maybe<User>;
 };
 
 export type Room = {
