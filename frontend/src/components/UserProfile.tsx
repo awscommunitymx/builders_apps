@@ -4,10 +4,11 @@ import '@cloudscape-design/global-styles/index.css';
 import {
   Header,
   ContentLayout,
-  Cards,
   SpaceBetween,
-  TextContent,
-  Alert,
+  Container,
+  KeyValuePairs,
+  CopyToClipboard,
+  Button,
 } from '@cloudscape-design/components';
 
 export interface UserProfileProps {
@@ -20,48 +21,62 @@ export interface UserProfileProps {
 export function UserProfile({ loading = false, error = null, user = null }: UserProfileProps) {
   return (
     <ContentLayout
+      defaultPadding
       header={
         <SpaceBetween size="m">
-          <Header variant="h1">User Profile</Header>
+          <Header
+            variant="h1"
+            actions={
+              // Descargar tarjeta de contacto
+              <Button
+                variant="primary"
+                iconName="download"
+                ariaLabel="Descargar tarjeta de contacto"
+              >
+                Descargar contacto
+              </Button>
+            }
+          >
+            {user?.name || 'User Profile'}
+          </Header>
         </SpaceBetween>
       }
     >
-      <SpaceBetween size="l">
-        {error && <Alert type="error">Error loading profile: {error.message}</Alert>}
-        {loading && <Alert type="info">Loading profile...</Alert>}
-        {user && (
-          <Cards
-            cardDefinition={{
-              header: (item: User) => <Header>{item.name}</Header>,
-              sections: [
-                {
-                  id: 'details',
-                  header: 'Profile Details',
-                  content: (item: User) => (
-                    <SpaceBetween size="s">
-                      <TextContent>
-                        <strong>Company:</strong> {item.company || 'N/A'}
-                      </TextContent>
-                      <TextContent>
-                        <strong>Role:</strong> {item.job_title || 'N/A'}
-                      </TextContent>
-                      <TextContent>
-                        <strong>Email:</strong> {item.email || 'N/A'}
-                      </TextContent>
-                      <TextContent>
-                        <strong>Cell Phone:</strong> {item.cell_phone || 'N/A'}
-                      </TextContent>
-                    </SpaceBetween>
-                  ),
-                },
-              ],
-            }}
-            cardsPerRow={[{ cards: 1, minWidth: 0 }]}
-            items={[user]}
-            loadingText="Loading profile"
-          />
-        )}
-      </SpaceBetween>
+      <Container header={<Header variant="h2">Resumen</Header>}>
+        <KeyValuePairs
+          columns={1}
+          items={[
+            {
+              label: 'ARN',
+              value: (
+                <CopyToClipboard
+                  copyButtonAriaLabel="Copy ARN"
+                  copyErrorText="ARN failed to copy"
+                  copySuccessText="ARN copied"
+                  textToCopy={`arn:aws:iam::${user?.user_id}:user/${user?.name.toLowerCase().replace(/\s/g, '')}`}
+                  variant="inline"
+                />
+              ),
+            },
+            {
+              label: 'Nombre',
+              value: user?.name,
+            },
+            {
+              label: 'Email',
+              value: user?.email,
+            },
+            {
+              label: 'Teléfono',
+              value: user?.cell_phone,
+            },
+            {
+              label: 'Compañía',
+              value: user?.company,
+            },
+          ]}
+        />
+      </Container>
     </ContentLayout>
   );
 }
