@@ -226,25 +226,95 @@ export class UserStepFunctionStack extends Construct {
                       },
                       resultPath: '$.processedPhoneNumber',
                     })
-                  ).next(
-                    new DynamoUpdateItem(this, 'SetCellPhone', {
-                      table: props.dynamoTable,
-                      key: {
-                        PK: DynamoAttributeValue.fromString(
-                          JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-                        ),
-                        SK: DynamoAttributeValue.fromString('PROFILE'),
-                      },
-                      expressionAttributeValues: {
-                        ':cell_phone': DynamoAttributeValue.fromString(
-                          JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
-                        ),
-                      },
-                      updateExpression: 'SET cell_phone = :cell_phone',
-                      conditionExpression: 'attribute_exists(PK)',
-                      resultPath: JsonPath.DISCARD,
-                    })
                   )
+                    .next(
+                      // First, get the existing item to check the current phone number
+                      new CallAwsService(this, 'GetExistingUserForPhone', {
+                        service: 'dynamodb',
+                        action: 'getItem',
+                        iamResources: [props.dynamoTable.tableArn],
+                        iamAction: 'dynamodb:GetItem',
+                        parameters: {
+                          TableName: props.dynamoTable.tableName,
+                          Key: {
+                            PK: {
+                              S: JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id')),
+                            },
+                            SK: {
+                              S: 'PROFILE',
+                            },
+                          },
+                        },
+                        resultPath: '$.existingUserForPhone',
+                      })
+                    )
+                    .next(
+                      new DynamoUpdateItem(this, 'SetCellPhone', {
+                        table: props.dynamoTable,
+                        key: {
+                          PK: DynamoAttributeValue.fromString(
+                            JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                          ),
+                          SK: DynamoAttributeValue.fromString('PROFILE'),
+                        },
+                        expressionAttributeValues: {
+                          ':cell_phone': DynamoAttributeValue.fromString(
+                            JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
+                          ),
+                        },
+                        updateExpression: 'SET cell_phone = :cell_phone',
+                        conditionExpression: 'attribute_exists(PK)',
+                        resultPath: JsonPath.DISCARD,
+                      })
+                    )
+                    .next(
+                      new Choice(this, 'PhoneNumberChanged')
+                        .when(
+                          // Check if the phone number has changed
+                          Condition.or(
+                            // If the cell_phone attribute doesn't exist yet
+                            Condition.not(
+                              Condition.isPresent('$.existingUserForPhone.Item.cell_phone')
+                            ),
+                            // Or if the value is different from the processed phone number
+                            Condition.not(
+                              Condition.stringEqualsJsonPath(
+                                JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
+                                JsonPath.stringAt('$.existingUserForPhone.Item.cell_phone.S')
+                              )
+                            )
+                          ),
+                          // Update the user's phone number in Cognito
+                          new CallAwsService(this, 'UpdateCognitoUserPhone', {
+                            service: 'cognitoidentityprovider',
+                            action: 'adminUpdateUserAttributes',
+                            iamAction: 'cognito-idp:AdminUpdateUserAttributes',
+                            iamResources: [
+                              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
+                                cdk.Stack.of(this).account
+                              }:userpool/${props.userPool.userPoolId}`,
+                            ],
+                            parameters: {
+                              UserPoolId: props.userPool.userPoolId,
+                              Username: JsonPath.stringAt('$.existingUserForPhone.Item.email.S'),
+                              UserAttributes: [
+                                {
+                                  Name: 'phone_number',
+                                  Value: JsonPath.stringAt(
+                                    '$.processedPhoneNumber.processedPhoneNumber'
+                                  ),
+                                },
+                                {
+                                  Name: 'phone_number_verified',
+                                  Value: 'true',
+                                },
+                              ],
+                            },
+                            resultPath: JsonPath.DISCARD,
+                          })
+                        )
+                        .otherwise(new Succeed(this, 'PhoneNumberNotChanged'))
+                    )
                 )
                 .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
             )
