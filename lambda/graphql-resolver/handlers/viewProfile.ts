@@ -41,7 +41,7 @@ export default async function handleViewProfile(
     if (!queryResult.Items || queryResult.Items.length === 0) {
       logger.info('User not found', { id });
       metrics.addMetric('UserNotFound', MetricUnit.Count, 1);
-      throw new Error('User not found');
+      throw new Error('Usuario no encontrado');
     }
     const user = queryResult.Items[0] as User;
 

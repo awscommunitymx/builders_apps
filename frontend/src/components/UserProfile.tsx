@@ -10,6 +10,7 @@ import {
   CopyToClipboard,
   Button,
   Spinner,
+  Flashbar,
 } from '@cloudscape-design/components';
 
 export interface UserProfileProps {
@@ -29,56 +30,70 @@ export function UserProfile({
   return (
     <ContentLayout
       header={
-        <SpaceBetween size="m">
-          <Header
-            variant="h1"
-            actions={
-              // Descargar tarjeta de contacto
-              actionButton
-            }
-          >
-            {user?.name || <Spinner />}
-          </Header>
-        </SpaceBetween>
+        !error && (
+          <SpaceBetween size="m">
+            <Header
+              variant="h1"
+              actions={
+                // Descargar tarjeta de contacto
+                actionButton
+              }
+            >
+              {user?.name || <Spinner />}
+            </Header>
+          </SpaceBetween>
+        )
       }
     >
-      <Container header={<Header variant="h2">Resumen</Header>}>
-        <KeyValuePairs
-          columns={1}
+      {error ? (
+        <Flashbar
           items={[
             {
-              label: 'ARN',
-              value: loading ? (
-                <Spinner />
-              ) : (
-                <CopyToClipboard
-                  copyButtonAriaLabel="Copy ARN"
-                  copyErrorText="ARN failed to copy"
-                  copySuccessText="ARN copied"
-                  textToCopy={`arn:aws:iam::${user?.user_id}:user/${user?.name.toLowerCase().replace(/\s/g, '')}`}
-                  variant="inline"
-                />
-              ),
-            },
-            {
-              label: 'Nombre',
-              value: loading ? <Spinner /> : user?.name,
-            },
-            {
-              label: 'Email',
-              value: loading ? <Spinner /> : user?.email,
-            },
-            {
-              label: 'Teléfono',
-              value: loading ? <Spinner /> : user?.cell_phone,
-            },
-            {
-              label: 'Compañía',
-              value: loading ? <Spinner /> : user?.company,
+              type: 'error',
+              content: error.message || 'Ocurrió un error al cargar los datos del usuario',
+              dismissible: true,
             },
           ]}
         />
-      </Container>
+      ) : (
+        <Container header={<Header variant="h2">Resumen</Header>}>
+          <KeyValuePairs
+            columns={1}
+            items={[
+              {
+                label: 'ARN',
+                value: loading ? (
+                  <Spinner />
+                ) : (
+                  <CopyToClipboard
+                    copyButtonAriaLabel="Copy ARN"
+                    copyErrorText="ARN failed to copy"
+                    copySuccessText="ARN copied"
+                    textToCopy={`arn:aws:iam::${user?.user_id}:user/${user?.name.toLowerCase().replace(/\s/g, '')}`}
+                    variant="inline"
+                  />
+                ),
+              },
+              {
+                label: 'Nombre',
+                value: loading ? <Spinner /> : user?.name,
+              },
+              {
+                label: 'Email',
+                value: loading ? <Spinner /> : user?.email,
+              },
+              {
+                label: 'Teléfono',
+                value: loading ? <Spinner /> : user?.cell_phone,
+              },
+              {
+                label: 'Compañía',
+                value: loading ? <Spinner /> : user?.company,
+              },
+            ]}
+          />
+        </Container>
+      )}
     </ContentLayout>
   );
 }
