@@ -60,36 +60,46 @@ export function UserProfile({
           <KeyValuePairs
             columns={1}
             items={[
-              {
-                label: 'ARN',
-                value: loading ? (
-                  <Spinner />
-                ) : (
-                  <CopyToClipboard
-                    copyButtonAriaLabel="Copy ARN"
-                    copyErrorText="ARN failed to copy"
-                    copySuccessText="ARN copied"
-                    textToCopy={`arn:aws:iam::${user?.user_id}:user/${user?.name.toLowerCase().replace(/\s/g, '')}`}
-                    variant="inline"
-                  />
-                ),
-              },
-              {
-                label: 'Nombre',
-                value: loading ? <Spinner /> : user?.name,
-              },
-              {
-                label: 'Email',
-                value: loading ? <Spinner /> : user?.email,
-              },
-              {
-                label: 'Teléfono',
-                value: loading ? <Spinner /> : user?.cell_phone,
-              },
-              {
-                label: 'Compañía',
-                value: loading ? <Spinner /> : user?.company,
-              },
+              ...[
+                {
+                  label: 'ARN',
+                  value: loading ? (
+                    <Spinner />
+                  ) : (
+                    <CopyToClipboard
+                      copyButtonAriaLabel="Copy ARN"
+                      copyErrorText="ARN failed to copy"
+                      copySuccessText="ARN copied"
+                      textToCopy={`arn:aws:iam::${user?.user_id}:user/${user?.name.toLowerCase().replace(/\s/g, '')}`}
+                      variant="inline"
+                    />
+                  ),
+                },
+                {
+                  label: 'Nombre',
+                  value: loading ? <Spinner /> : user?.name,
+                },
+                {
+                  label: 'Email',
+                  value: loading ? <Spinner /> : user?.email,
+                },
+                {
+                  label: 'Teléfono',
+                  value: loading ? <Spinner /> : user?.cell_phone,
+                },
+                {
+                  label: 'Compañía',
+                  value: loading ? <Spinner /> : user?.company,
+                },
+              ],
+              ...(user?.job_title
+                ? [
+                    {
+                      label: 'Puesto',
+                      value: loading ? <Spinner /> : user?.job_title,
+                    },
+                  ]
+                : []),
             ]}
           />
         </Container>
