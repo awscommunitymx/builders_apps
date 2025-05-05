@@ -20,6 +20,8 @@ export interface AppStackProps extends cdk.StackProps {
   authDomain: string;
   webhookDomain: string;
   eventbriteApiKeySecretArn: string;
+  algoliaApiKeySecretArn: string;
+  algoliaAppIdSecretArn: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -135,6 +137,8 @@ export class BackendStack extends cdk.Stack {
       hostedZone: hostedZone,
       certificate: domainCert,
       eventbriteApiKeySecretArn: props.eventbriteApiKeySecretArn,
+      algoliaApiKeySecretArn: props.algoliaApiKeySecretArn,
+      algoliaAppIdSecretArn: props.algoliaAppIdSecretArn,
     });
 
     // Expose API URL and Key

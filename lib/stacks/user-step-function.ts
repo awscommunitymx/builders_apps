@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { JsonPath, Parallel } from 'aws-cdk-lib/aws-stepfunctions';
+import { JsonPath, Parallel, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import {
   StateMachine,
   Choice,
@@ -38,6 +38,8 @@ interface UserStepFunctionStackProps {
   hostedZone: IHostedZone;
   certificate: ICertificate;
   eventbriteApiKeySecretArn: string;
+  algoliaApiKeySecretArn: string;
+  algoliaAppIdSecretArn: string;
 }
 
 export class UserStepFunctionStack extends Construct {
@@ -63,6 +65,60 @@ export class UserStepFunctionStack extends Construct {
       secretCompleteArn: props.eventbriteApiKeySecretArn,
     });
 
+    // Create Algolia secrets in Secrets Manager if provided
+    let algoliaApiKey, algoliaAppId;
+    if (props.algoliaApiKeySecretArn && props.algoliaAppIdSecretArn) {
+      algoliaApiKey = Secret.fromSecretAttributes(this, 'AlgoliaApiKey', {
+        secretCompleteArn: props.algoliaApiKeySecretArn,
+      });
+
+      algoliaAppId = Secret.fromSecretAttributes(this, 'AlgoliaAppId', {
+        secretCompleteArn: props.algoliaAppIdSecretArn,
+      });
+    }
+
+    // Create the Lambda function for Algolia updates
+    const algoliaUpdateLambda = new NodejsFunction(this, 'AlgoliaUpdateFunction', {
+      functionName: `algolia-update-${props.environmentName}`,
+      runtime: Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/algolia-update/index.ts'),
+      description: 'Updates Algolia index with user data',
+      timeout: Duration.seconds(30),
+      memorySize: 256,
+      environment: {
+        ALGOLIA_API_KEY_SECRET: algoliaApiKey?.secretName || 'algolia/api_key',
+        ALGOLIA_APP_ID_SECRET: algoliaAppId?.secretName || 'algolia/app_id',
+        ALGOLIA_INDEX_NAME: `${props.environmentName}_attendees`,
+      },
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          'algoliasearch',
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+        ],
+      },
+    });
+
+    // Grant the Lambda function permission to read Algolia secrets
+    if (algoliaApiKey && algoliaAppId) {
+      algoliaApiKey.grantRead(algoliaUpdateLambda);
+      algoliaAppId.grantRead(algoliaUpdateLambda);
+    } else {
+      // If no ARNs provided, grant permission to read secrets by name
+      const secretsManagerPolicy = new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [
+          `arn:aws:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:algolia/api_key*`,
+          `arn:aws:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:algolia/app_id*`,
+        ],
+      });
+      algoliaUpdateLambda.addToRolePolicy(secretsManagerPolicy);
+    }
+
     // Create the Lambda function for making API calls to Eventbrite
     const eventbriteApiCallLambda = new NodejsFunction(this, 'EventbriteApiCallFunction', {
       functionName: `eventbrite-api-call-${props.environmentName}`,
@@ -86,6 +142,46 @@ export class UserStepFunctionStack extends Construct {
       lambdaFunction: eventbriteApiCallLambda,
       outputPath: '$.Payload',
     });
+
+    // Create task to call Algolia update Lambda
+    const updateAlgoliaTask = new LambdaInvoke(this, 'UpdateAlgoliaIndex', {
+      lambdaFunction: algoliaUpdateLambda,
+      inputPath: '$',
+      resultPath: '$.algoliaResult',
+      payloadResponseOnly: true,
+      payload: TaskInput.fromObject({
+        user: JsonPath.stringAt('$.body'),
+        action: JsonPath.stringAt('$.config.action'),
+      }),
+    });
+
+    const updateAlgoliaAfterProfileUpdate = new LambdaInvoke(
+      this,
+      'UpdateAlgoliaAfterProfileUpdate',
+      {
+        lambdaFunction: algoliaUpdateLambda,
+        inputPath: '$',
+        resultPath: '$.algoliaUpdateResult',
+        payloadResponseOnly: true,
+        payload: TaskInput.fromObject({
+          user: {
+            user_id: JsonPath.stringAt('$.body.order_id'),
+            email: JsonPath.stringAt('$.body.profile.email'),
+            first_name: JsonPath.stringAt('$.body.profile.first_name'),
+            last_name: JsonPath.stringAt('$.body.profile.last_name'),
+            company: JsonPath.stringAt('$.body.profile.company'),
+            job_title: JsonPath.stringAt('$.body.profile.job_title'),
+            cell_phone: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
+            gender: JsonPath.stringAt('$.body.profile.gender'),
+            ticket_class_id: JsonPath.stringAt('$.body.ticket_class_id'),
+          },
+          action: JsonPath.stringAt('$.config.action'),
+        }),
+      }
+    );
+
+    // Define what happens after Algolia update
+    const algoliaUpdateSucceeded = new Succeed(this, 'AlgoliaUpdateSucceeded');
 
     const unknownWebhookTypeFail = new Fail(this, 'UnknownWebhookTypeFail');
     const apiFailure = new Fail(this, 'ApiFailure');
@@ -161,8 +257,27 @@ export class UserStepFunctionStack extends Construct {
           },
           updateExpression: 'SET cognito_sub = :sub',
           conditionExpression: 'attribute_exists(PK)',
+          resultPath: JsonPath.DISCARD,
         })
-      );
+      )
+      .next(
+        // Update Algolia with new user data
+        new LambdaInvoke(this, 'UpdateAlgoliaAfterCreate', {
+          lambdaFunction: algoliaUpdateLambda,
+          inputPath: '$',
+          resultPath: '$.algoliaResult',
+          payloadResponseOnly: true,
+          payload: TaskInput.fromObject({
+            user: {
+              user_id: JsonPath.stringAt('$.body.id'),
+              email: JsonPath.stringAt('$.body.email'),
+              name: JsonPath.stringAt('$.body.name'),
+            },
+            action: 'create',
+          }),
+        })
+      )
+      .next(orderPlacedSuccess);
 
     const processAttendeesUpdateChoice = new Choice(this, 'ProcessAttendeesUpdate')
       .when(
@@ -451,6 +566,11 @@ export class UserStepFunctionStack extends Construct {
         resultPath: JsonPath.DISCARD,
       })
     ).next(processAttendeesUpdateChoice);
+    // .next(
+    //   // Update Algolia after profile update
+    //   updateAlgoliaAfterProfileUpdate
+    // );
+    // .next(attendeeUpdatedSuccess);
 
     const handlerChoice = new Choice(this, 'HandlerChoice')
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)

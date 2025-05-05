@@ -26,6 +26,10 @@ const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
 const hostedZoneName = 'app.awscommunity.mx';
 const eventbriteApiKeySecretArn =
   'arn:aws:secretsmanager:us-east-1:662722197286:secret:eventbrite/api_key-U2D38z';
+const algoliaAppIdSecretArn =
+  'arn:aws:secretsmanager:us-east-1:662722197286:secret:algolia/app_id-kesk9o';
+const algoliaApiKeySecretArn =
+  'arn:aws:secretsmanager:us-east-1:662722197286:secret:algolia/api_key-4ccgmn';
 
 const frontendDomain =
   environmentName == 'production' ? hostedZoneName : `${environmentName}.${hostedZoneName}`;
@@ -57,6 +61,8 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   authDomain: authDomain,
   webhookDomain: webhookDomain,
   eventbriteApiKeySecretArn: eventbriteApiKeySecretArn,
+  algoliaApiKeySecretArn: algoliaApiKeySecretArn,
+  algoliaAppIdSecretArn: algoliaAppIdSecretArn,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {
