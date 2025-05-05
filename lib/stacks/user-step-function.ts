@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { JsonPath, Parallel, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
+import { JsonPath, Parallel, Pass, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import {
   StateMachine,
   Choice,
@@ -167,13 +167,8 @@ export class UserStepFunctionStack extends Construct {
           user: {
             user_id: JsonPath.stringAt('$.body.order_id'),
             email: JsonPath.stringAt('$.body.profile.email'),
-            first_name: JsonPath.stringAt('$.body.profile.first_name'),
-            last_name: JsonPath.stringAt('$.body.profile.last_name'),
-            company: JsonPath.stringAt('$.body.profile.company'),
-            job_title: JsonPath.stringAt('$.body.profile.job_title'),
+            name: JsonPath.stringAt('$.body.profile.name'),
             cell_phone: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
-            gender: JsonPath.stringAt('$.body.profile.gender'),
-            ticket_class_id: JsonPath.stringAt('$.body.ticket_class_id'),
           },
           action: JsonPath.stringAt('$.config.action'),
         }),
@@ -302,49 +297,169 @@ export class UserStepFunctionStack extends Construct {
             updateExpression: 'SET company = :company',
             resultPath: JsonPath.DISCARD,
           })
-        ).next(
-          new Parallel(this, 'ProcessAttendeesUpdateParallel')
-            .branch(
-              new Choice(this, 'JobTitlePresent')
-                .when(
-                  Condition.isPresent('$.body.profile.job_title'),
-                  new DynamoUpdateItem(this, 'SetJobTitle', {
-                    table: props.dynamoTable,
-                    key: {
-                      PK: DynamoAttributeValue.fromString(
-                        JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-                      ),
-                      SK: DynamoAttributeValue.fromString('PROFILE'),
-                    },
-                    expressionAttributeValues: {
-                      ':job_title': DynamoAttributeValue.fromString(
-                        JsonPath.stringAt('$.body.profile.job_title')
-                      ),
-                    },
-                    updateExpression: 'SET job_title = :job_title',
-                    conditionExpression: 'attribute_exists(PK)',
-                    resultPath: JsonPath.DISCARD,
-                  })
-                )
-                .otherwise(new Succeed(this, 'JobTitleNotPresent'))
-            )
-            .branch(
-              new Choice(this, 'CellPhonePresent')
-                .when(
-                  Condition.isPresent('$.body.profile.cell_phone'),
-                  Chain.start(
-                    new LambdaInvoke(this, 'ProcessPhoneNumber', {
-                      lambdaFunction: processPhoneNumberLambda,
-                      inputPath: '$.body.profile.cell_phone',
-                      resultSelector: {
-                        'processedPhoneNumber.$': '$.Payload.processedPhoneNumber',
+        )
+          .next(
+            new Parallel(this, 'ProcessAttendeesUpdateParallel', {})
+              .branch(
+                new Choice(this, 'JobTitlePresent')
+                  .when(
+                    Condition.isPresent('$.body.profile.job_title'),
+                    new DynamoUpdateItem(this, 'SetJobTitle', {
+                      table: props.dynamoTable,
+                      key: {
+                        PK: DynamoAttributeValue.fromString(
+                          JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                        ),
+                        SK: DynamoAttributeValue.fromString('PROFILE'),
                       },
-                      resultPath: '$.processedPhoneNumber',
+                      expressionAttributeValues: {
+                        ':job_title': DynamoAttributeValue.fromString(
+                          JsonPath.stringAt('$.body.profile.job_title')
+                        ),
+                      },
+                      updateExpression: 'SET job_title = :job_title',
+                      conditionExpression: 'attribute_exists(PK)',
+                      resultPath: JsonPath.DISCARD,
                     })
                   )
-                    .next(
-                      // First, get the existing item to check the current phone number
-                      new CallAwsService(this, 'GetExistingUserForPhone', {
+                  .otherwise(new Succeed(this, 'JobTitleNotPresent'))
+              )
+              .branch(
+                new Choice(this, 'CellPhonePresent')
+                  .when(
+                    Condition.isPresent('$.body.profile.cell_phone'),
+                    Chain.start(
+                      new LambdaInvoke(this, 'ProcessPhoneNumber', {
+                        lambdaFunction: processPhoneNumberLambda,
+                        inputPath: '$.body.profile.cell_phone',
+                        resultSelector: {
+                          'processedPhoneNumber.$': '$.Payload.processedPhoneNumber',
+                        },
+                        resultPath: '$.processedPhoneNumber',
+                      })
+                    )
+                      .next(
+                        // First, get the existing item to check the current phone number
+                        new CallAwsService(this, 'GetExistingUserForPhone', {
+                          service: 'dynamodb',
+                          action: 'getItem',
+                          iamResources: [props.dynamoTable.tableArn],
+                          iamAction: 'dynamodb:GetItem',
+                          parameters: {
+                            TableName: props.dynamoTable.tableName,
+                            Key: {
+                              PK: {
+                                S: JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id')),
+                              },
+                              SK: {
+                                S: 'PROFILE',
+                              },
+                            },
+                          },
+                          resultPath: '$.existingUserForPhone',
+                        })
+                      )
+                      .next(
+                        new DynamoUpdateItem(this, 'SetCellPhone', {
+                          table: props.dynamoTable,
+                          key: {
+                            PK: DynamoAttributeValue.fromString(
+                              JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                            ),
+                            SK: DynamoAttributeValue.fromString('PROFILE'),
+                          },
+                          expressionAttributeValues: {
+                            ':cell_phone': DynamoAttributeValue.fromString(
+                              JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
+                            ),
+                          },
+                          updateExpression: 'SET cell_phone = :cell_phone',
+                          conditionExpression: 'attribute_exists(PK)',
+                          resultPath: JsonPath.DISCARD,
+                        })
+                      )
+                      .next(
+                        new Choice(this, 'PhoneNumberChanged')
+                          .when(
+                            // Check if the phone number has changed
+                            Condition.or(
+                              // If the cell_phone attribute doesn't exist yet
+                              Condition.not(
+                                Condition.isPresent('$.existingUserForPhone.Item.cell_phone')
+                              ),
+                              // Or if the value is different from the processed phone number
+                              Condition.not(
+                                Condition.stringEqualsJsonPath(
+                                  JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
+                                  JsonPath.stringAt('$.existingUserForPhone.Item.cell_phone.S')
+                                )
+                              )
+                            ),
+                            // Update the user's phone number in Cognito
+                            new CallAwsService(this, 'UpdateCognitoUserPhone', {
+                              service: 'cognitoidentityprovider',
+                              action: 'adminUpdateUserAttributes',
+                              iamAction: 'cognito-idp:AdminUpdateUserAttributes',
+                              iamResources: [
+                                `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
+                                  cdk.Stack.of(this).account
+                                }:userpool/${props.userPool.userPoolId}`,
+                              ],
+                              parameters: {
+                                UserPoolId: props.userPool.userPoolId,
+                                Username: JsonPath.stringAt('$.existingUserForPhone.Item.email.S'),
+                                UserAttributes: [
+                                  {
+                                    Name: 'phone_number',
+                                    Value: JsonPath.stringAt(
+                                      '$.processedPhoneNumber.processedPhoneNumber'
+                                    ),
+                                  },
+                                  {
+                                    Name: 'phone_number_verified',
+                                    Value: 'true',
+                                  },
+                                ],
+                              },
+                              resultPath: JsonPath.DISCARD,
+                            })
+                          )
+                          .otherwise(new Succeed(this, 'PhoneNumberNotChanged'))
+                      )
+                  )
+                  .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
+              )
+              .branch(
+                new Choice(this, 'GenderPresent')
+                  .when(
+                    Condition.isPresent('$.body.profile.gender'),
+                    new DynamoUpdateItem(this, 'SetGender', {
+                      table: props.dynamoTable,
+                      key: {
+                        PK: DynamoAttributeValue.fromString(
+                          JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                        ),
+                        SK: DynamoAttributeValue.fromString('PROFILE'),
+                      },
+                      expressionAttributeValues: {
+                        ':gender': DynamoAttributeValue.fromString(
+                          JsonPath.stringAt('$.body.profile.gender')
+                        ),
+                      },
+                      updateExpression: 'SET gender = :gender',
+                      conditionExpression: 'attribute_exists(PK)',
+                      resultPath: JsonPath.DISCARD,
+                    })
+                  )
+                  .otherwise(new Succeed(this, 'GenderNotPresent'))
+              )
+              .branch(
+                new Choice(this, 'EmailPresent')
+                  .when(
+                    Condition.isPresent('$.body.profile.email'),
+                    Chain.start(
+                      // First, get the existing item to get the current email
+                      new CallAwsService(this, 'GetExistingUser', {
                         service: 'dynamodb',
                         action: 'getItem',
                         iamResources: [props.dynamoTable.tableArn],
@@ -360,191 +475,83 @@ export class UserStepFunctionStack extends Construct {
                             },
                           },
                         },
-                        resultPath: '$.existingUserForPhone',
+                        resultPath: '$.existingUser',
                       })
-                    )
-                    .next(
-                      new DynamoUpdateItem(this, 'SetCellPhone', {
-                        table: props.dynamoTable,
-                        key: {
-                          PK: DynamoAttributeValue.fromString(
-                            JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-                          ),
-                          SK: DynamoAttributeValue.fromString('PROFILE'),
-                        },
-                        expressionAttributeValues: {
-                          ':cell_phone': DynamoAttributeValue.fromString(
-                            JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
-                          ),
-                        },
-                        updateExpression: 'SET cell_phone = :cell_phone',
-                        conditionExpression: 'attribute_exists(PK)',
-                        resultPath: JsonPath.DISCARD,
-                      })
-                    )
-                    .next(
-                      new Choice(this, 'PhoneNumberChanged')
+                    ).next(
+                      new Choice(this, 'EmailChanged')
                         .when(
-                          // Check if the phone number has changed
-                          Condition.or(
-                            // If the cell_phone attribute doesn't exist yet
-                            Condition.not(
-                              Condition.isPresent('$.existingUserForPhone.Item.cell_phone')
-                            ),
-                            // Or if the value is different from the processed phone number
-                            Condition.not(
-                              Condition.stringEqualsJsonPath(
-                                JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
-                                JsonPath.stringAt('$.existingUserForPhone.Item.cell_phone.S')
-                              )
+                          // Check if the email has changed
+                          Condition.not(
+                            Condition.stringEqualsJsonPath(
+                              JsonPath.stringAt('$.body.profile.email'),
+                              JsonPath.stringAt('$.existingUser.Item.email.S')
                             )
                           ),
-                          // Update the user's phone number in Cognito
-                          new CallAwsService(this, 'UpdateCognitoUserPhone', {
-                            service: 'cognitoidentityprovider',
-                            action: 'adminUpdateUserAttributes',
-                            iamAction: 'cognito-idp:AdminUpdateUserAttributes',
-                            iamResources: [
-                              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
-                                cdk.Stack.of(this).account
-                              }:userpool/${props.userPool.userPoolId}`,
-                            ],
-                            parameters: {
-                              UserPoolId: props.userPool.userPoolId,
-                              Username: JsonPath.stringAt('$.existingUserForPhone.Item.email.S'),
-                              UserAttributes: [
-                                {
-                                  Name: 'phone_number',
-                                  Value: JsonPath.stringAt(
-                                    '$.processedPhoneNumber.processedPhoneNumber'
-                                  ),
-                                },
-                                {
-                                  Name: 'phone_number_verified',
-                                  Value: 'true',
-                                },
+                          Chain.start(
+                            // Update email in DynamoDB
+                            new DynamoUpdateItem(this, 'UpdateEmail', {
+                              table: props.dynamoTable,
+                              key: {
+                                PK: DynamoAttributeValue.fromString(
+                                  JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                                ),
+                                SK: DynamoAttributeValue.fromString('PROFILE'),
+                              },
+                              expressionAttributeValues: {
+                                ':email': DynamoAttributeValue.fromString(
+                                  JsonPath.stringAt('$.body.profile.email')
+                                ),
+                              },
+                              updateExpression: 'SET email = :email',
+                              conditionExpression: 'attribute_exists(PK)',
+                              resultPath: JsonPath.DISCARD,
+                            })
+                          ).next(
+                            // Update the user's email in Cognito
+                            new CallAwsService(this, 'UpdateCognitoUserEmail', {
+                              service: 'cognitoidentityprovider',
+                              action: 'adminUpdateUserAttributes',
+                              iamAction: 'cognito-idp:AdminUpdateUserAttributes',
+                              iamResources: [
+                                `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
+                                  cdk.Stack.of(this).account
+                                }:userpool/${props.userPool.userPoolId}`,
                               ],
-                            },
-                            resultPath: JsonPath.DISCARD,
-                          })
-                        )
-                        .otherwise(new Succeed(this, 'PhoneNumberNotChanged'))
-                    )
-                )
-                .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
-            )
-            .branch(
-              new Choice(this, 'GenderPresent')
-                .when(
-                  Condition.isPresent('$.body.profile.gender'),
-                  new DynamoUpdateItem(this, 'SetGender', {
-                    table: props.dynamoTable,
-                    key: {
-                      PK: DynamoAttributeValue.fromString(
-                        JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-                      ),
-                      SK: DynamoAttributeValue.fromString('PROFILE'),
-                    },
-                    expressionAttributeValues: {
-                      ':gender': DynamoAttributeValue.fromString(
-                        JsonPath.stringAt('$.body.profile.gender')
-                      ),
-                    },
-                    updateExpression: 'SET gender = :gender',
-                    conditionExpression: 'attribute_exists(PK)',
-                    resultPath: JsonPath.DISCARD,
-                  })
-                )
-                .otherwise(new Succeed(this, 'GenderNotPresent'))
-            )
-            .branch(
-              new Choice(this, 'EmailPresent')
-                .when(
-                  Condition.isPresent('$.body.profile.email'),
-                  Chain.start(
-                    // First, get the existing item to get the current email
-                    new CallAwsService(this, 'GetExistingUser', {
-                      service: 'dynamodb',
-                      action: 'getItem',
-                      iamResources: [props.dynamoTable.tableArn],
-                      iamAction: 'dynamodb:GetItem',
-                      parameters: {
-                        TableName: props.dynamoTable.tableName,
-                        Key: {
-                          PK: {
-                            S: JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id')),
-                          },
-                          SK: {
-                            S: 'PROFILE',
-                          },
-                        },
-                      },
-                      resultPath: '$.existingUser',
-                    })
-                  ).next(
-                    new Choice(this, 'EmailChanged')
-                      .when(
-                        // Check if the email has changed
-                        Condition.not(
-                          Condition.stringEqualsJsonPath(
-                            JsonPath.stringAt('$.body.profile.email'),
-                            JsonPath.stringAt('$.existingUser.Item.email.S')
+                              parameters: {
+                                UserPoolId: props.userPool.userPoolId,
+                                Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
+                                UserAttributes: [
+                                  {
+                                    Name: 'email',
+                                    Value: JsonPath.stringAt('$.body.profile.email'),
+                                  },
+                                  {
+                                    Name: 'email_verified',
+                                    Value: 'true',
+                                  },
+                                ],
+                              },
+                              resultPath: JsonPath.DISCARD,
+                            })
                           )
-                        ),
-                        Chain.start(
-                          // Update email in DynamoDB
-                          new DynamoUpdateItem(this, 'UpdateEmail', {
-                            table: props.dynamoTable,
-                            key: {
-                              PK: DynamoAttributeValue.fromString(
-                                JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-                              ),
-                              SK: DynamoAttributeValue.fromString('PROFILE'),
-                            },
-                            expressionAttributeValues: {
-                              ':email': DynamoAttributeValue.fromString(
-                                JsonPath.stringAt('$.body.profile.email')
-                              ),
-                            },
-                            updateExpression: 'SET email = :email',
-                            conditionExpression: 'attribute_exists(PK)',
-                            resultPath: JsonPath.DISCARD,
-                          })
-                        ).next(
-                          // Update the user's email in Cognito
-                          new CallAwsService(this, 'UpdateCognitoUserEmail', {
-                            service: 'cognitoidentityprovider',
-                            action: 'adminUpdateUserAttributes',
-                            iamAction: 'cognito-idp:AdminUpdateUserAttributes',
-                            iamResources: [
-                              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
-                                cdk.Stack.of(this).account
-                              }:userpool/${props.userPool.userPoolId}`,
-                            ],
-                            parameters: {
-                              UserPoolId: props.userPool.userPoolId,
-                              Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
-                              UserAttributes: [
-                                {
-                                  Name: 'email',
-                                  Value: JsonPath.stringAt('$.body.profile.email'),
-                                },
-                                {
-                                  Name: 'email_verified',
-                                  Value: 'true',
-                                },
-                              ],
-                            },
-                            resultPath: JsonPath.DISCARD,
-                          })
                         )
-                      )
-                      .otherwise(new Succeed(this, 'EmailNotChanged'))
+                        .otherwise(new Succeed(this, 'EmailNotChanged'))
+                    )
                   )
-                )
-                .otherwise(new Succeed(this, 'EmailNotPresent'))
-            )
-        )
+                  .otherwise(new Succeed(this, 'EmailNotPresent'))
+              )
+          )
+          .next(
+            new Pass(this, 'ProcessAttendeesUpdateComplete', {
+              parameters: {
+                'body.$': '$[1].body',
+                'config.$': '$[1].config',
+                'processedPhoneNumber.$': '$[1].processedPhoneNumber',
+              },
+            })
+          )
+          .next(updateAlgoliaAfterProfileUpdate)
+          .next(attendeeUpdatedSuccess)
       );
 
     const processAttendeesUpdate = Chain.start(
@@ -566,11 +573,6 @@ export class UserStepFunctionStack extends Construct {
         resultPath: JsonPath.DISCARD,
       })
     ).next(processAttendeesUpdateChoice);
-    // .next(
-    //   // Update Algolia after profile update
-    //   updateAlgoliaAfterProfileUpdate
-    // );
-    // .next(attendeeUpdatedSuccess);
 
     const handlerChoice = new Choice(this, 'HandlerChoice')
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
