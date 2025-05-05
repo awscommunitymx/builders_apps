@@ -82,6 +82,21 @@ export const handler: Handler<AlgoliaUpdateEvent> = async (event) => {
       const algoliaKey = FIELD_MAPPING[key] || key;
       if (value !== undefined && value !== null) {
         algoliaObject[algoliaKey] = value;
+
+        // Process phone number to add multiple formats
+        if (key === 'cell_phone' && typeof value === 'string' && value.trim() !== '') {
+          const phoneNumber = value.trim();
+
+          // Store the version without the + sign
+          if (phoneNumber.startsWith('+')) {
+            algoliaObject['phoneWithoutPlus'] = phoneNumber.substring(1);
+
+            // Store the last 10 digits of the phone number
+            if (phoneNumber.length > 10) {
+              algoliaObject['phoneTenDigits'] = phoneNumber.substring(phoneNumber.length - 10);
+            }
+          }
+        }
       }
     });
 
