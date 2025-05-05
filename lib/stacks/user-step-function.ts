@@ -272,6 +272,93 @@ export class UserStepFunctionStack extends Construct {
                 )
                 .otherwise(new Succeed(this, 'GenderNotPresent'))
             )
+            .branch(
+              new Choice(this, 'EmailPresent')
+                .when(
+                  Condition.isPresent('$.body.profile.email'),
+                  Chain.start(
+                    // First, get the existing item to get the current email
+                    new CallAwsService(this, 'GetExistingUser', {
+                      service: 'dynamodb',
+                      action: 'getItem',
+                      iamResources: [props.dynamoTable.tableArn],
+                      iamAction: 'dynamodb:GetItem',
+                      parameters: {
+                        TableName: props.dynamoTable.tableName,
+                        Key: {
+                          PK: {
+                            S: JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id')),
+                          },
+                          SK: {
+                            S: 'PROFILE',
+                          },
+                        },
+                      },
+                      resultPath: '$.existingUser',
+                    })
+                  ).next(
+                    new Choice(this, 'EmailChanged')
+                      .when(
+                        // Check if the email has changed
+                        Condition.not(
+                          Condition.stringEqualsJsonPath(
+                            JsonPath.stringAt('$.body.profile.email'),
+                            JsonPath.stringAt('$.existingUser.Item.email.S')
+                          )
+                        ),
+                        Chain.start(
+                          // Update email in DynamoDB
+                          new DynamoUpdateItem(this, 'UpdateEmail', {
+                            table: props.dynamoTable,
+                            key: {
+                              PK: DynamoAttributeValue.fromString(
+                                JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                              ),
+                              SK: DynamoAttributeValue.fromString('PROFILE'),
+                            },
+                            expressionAttributeValues: {
+                              ':email': DynamoAttributeValue.fromString(
+                                JsonPath.stringAt('$.body.profile.email')
+                              ),
+                            },
+                            updateExpression: 'SET email = :email',
+                            conditionExpression: 'attribute_exists(PK)',
+                            resultPath: JsonPath.DISCARD,
+                          })
+                        ).next(
+                          // Update the user's email in Cognito
+                          new CallAwsService(this, 'UpdateCognitoUserEmail', {
+                            service: 'cognitoidentityprovider',
+                            action: 'adminUpdateUserAttributes',
+                            iamAction: 'cognito-idp:AdminUpdateUserAttributes',
+                            iamResources: [
+                              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
+                                cdk.Stack.of(this).account
+                              }:userpool/${props.userPool.userPoolId}`,
+                            ],
+                            parameters: {
+                              UserPoolId: props.userPool.userPoolId,
+                              Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
+                              UserAttributes: [
+                                {
+                                  Name: 'email',
+                                  Value: JsonPath.stringAt('$.body.profile.email'),
+                                },
+                                {
+                                  Name: 'email_verified',
+                                  Value: 'true',
+                                },
+                              ],
+                            },
+                            resultPath: JsonPath.DISCARD,
+                          })
+                        )
+                      )
+                      .otherwise(new Succeed(this, 'EmailNotChanged'))
+                  )
+                )
+                .otherwise(new Succeed(this, 'EmailNotPresent'))
+            )
         )
       );
 
