@@ -47,6 +47,17 @@ export class UserStepFunctionStack extends Construct {
   constructor(scope: Construct, id: string, props: UserStepFunctionStackProps) {
     super(scope, id);
 
+    // Create the Lambda function for phone number processing
+    const processPhoneNumberLambda = new NodejsFunction(this, 'ProcessPhoneNumberFunction', {
+      functionName: `process-phone-number-${props.environmentName}`,
+      runtime: Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/process-phone-number/index.ts'),
+      description: 'Processes phone numbers to ensure correct country code format',
+      timeout: Duration.seconds(10),
+      memorySize: 128,
+    });
+
     // Create Eventbrite API Key secret in Secrets Manager
     const eventbriteApiKey = Secret.fromSecretAttributes(this, 'EventbriteApiKey', {
       secretCompleteArn: props.eventbriteApiKeySecretArn,
@@ -206,23 +217,34 @@ export class UserStepFunctionStack extends Construct {
               new Choice(this, 'CellPhonePresent')
                 .when(
                   Condition.isPresent('$.body.profile.cell_phone'),
-                  new DynamoUpdateItem(this, 'SetCellPhone', {
-                    table: props.dynamoTable,
-                    key: {
-                      PK: DynamoAttributeValue.fromString(
-                        JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
-                      ),
-                      SK: DynamoAttributeValue.fromString('PROFILE'),
-                    },
-                    expressionAttributeValues: {
-                      ':cell_phone': DynamoAttributeValue.fromString(
-                        JsonPath.stringAt('$.body.profile.cell_phone')
-                      ),
-                    },
-                    updateExpression: 'SET cell_phone = :cell_phone',
-                    conditionExpression: 'attribute_exists(PK)',
-                    resultPath: JsonPath.DISCARD,
-                  })
+                  Chain.start(
+                    new LambdaInvoke(this, 'ProcessPhoneNumber', {
+                      lambdaFunction: processPhoneNumberLambda,
+                      inputPath: '$.body.profile.cell_phone',
+                      resultSelector: {
+                        'processedPhoneNumber.$': '$.Payload.processedPhoneNumber',
+                      },
+                      resultPath: '$.processedPhoneNumber',
+                    })
+                  ).next(
+                    new DynamoUpdateItem(this, 'SetCellPhone', {
+                      table: props.dynamoTable,
+                      key: {
+                        PK: DynamoAttributeValue.fromString(
+                          JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                        ),
+                        SK: DynamoAttributeValue.fromString('PROFILE'),
+                      },
+                      expressionAttributeValues: {
+                        ':cell_phone': DynamoAttributeValue.fromString(
+                          JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
+                        ),
+                      },
+                      updateExpression: 'SET cell_phone = :cell_phone',
+                      conditionExpression: 'attribute_exists(PK)',
+                      resultPath: JsonPath.DISCARD,
+                    })
+                  )
                 )
                 .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
             )
