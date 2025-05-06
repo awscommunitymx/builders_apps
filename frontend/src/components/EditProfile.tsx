@@ -12,6 +12,9 @@ import {
   Input,
   Button,
   Checkbox,
+  Box,
+  Link,
+  Popover,
 } from '@cloudscape-design/components';
 import { gql, useMutation } from '@apollo/client';
 
@@ -216,7 +219,24 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                 />
               </FormField>
               <FormField
-                label="PIN"
+                label={
+                  <SpaceBetween direction="horizontal" size="xs">
+                    PIN
+                    <Box color="text-status-info" display="inline">
+                      <Popover
+                        header="Tu PIN"
+                        size="medium"
+                        triggerType="text"
+                        content="El PIN es un código de 4 dígitos que permitirá a otros builders acceder a tu perfil y contactarte. Puedes cambiarlo en cualquier momento."
+                        renderWithPortal={true}
+                      >
+                        <Box color="text-status-info" fontSize="body-s" fontWeight="bold">
+                          Info
+                        </Box>
+                      </Popover>
+                    </Box>
+                  </SpaceBetween>
+                }
                 description="Ingresa exactamente 4 dígitos numéricos"
                 errorText={pinError}
               >
