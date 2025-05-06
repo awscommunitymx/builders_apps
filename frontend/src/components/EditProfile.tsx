@@ -43,8 +43,8 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
   const [company, setCompany] = useState(user?.company || '');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [shareEmail, setShareEmail] = useState(true);
-  const [sharePhone, setSharePhone] = useState(true);
+  const [shareEmail, setShareEmail] = useState(user?.share_email || false);
+  const [sharePhone, setSharePhone] = useState(user?.share_phone || false);
   const [pin, setPin] = useState(user?.pin?.toString() || '');
   const [pinError, setPinError] = useState<string | null>(null);
 
