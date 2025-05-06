@@ -119,9 +119,11 @@ export function UserProfile({
                       ) : (
                         <SpaceBetween direction="vertical" size="xs">
                           {user?.email}
-                          <StatusIndicator type={user?.share_email ? 'success' : 'error'}>
-                            {user?.share_email ? 'Compartiendo' : 'No se comparte'}
-                          </StatusIndicator>
+                          {isMyProfile && (
+                            <StatusIndicator type={user?.share_email ? 'success' : 'error'}>
+                              {user?.share_email ? 'Compartiendo' : 'No se comparte'}
+                            </StatusIndicator>
+                          )}
                         </SpaceBetween>
                       ),
                     },
@@ -136,9 +138,11 @@ export function UserProfile({
                       ) : (
                         <SpaceBetween direction="vertical" size="xs">
                           {user?.cell_phone}
-                          <StatusIndicator type={user?.share_phone ? 'success' : 'error'}>
-                            {user?.share_phone ? 'Compartiendo' : 'No se comparte'}
-                          </StatusIndicator>
+                          {isMyProfile && (
+                            <StatusIndicator type={user?.share_phone ? 'success' : 'error'}>
+                              {user?.share_phone ? 'Compartiendo' : 'No se comparte'}
+                            </StatusIndicator>
+                          )}
                         </SpaceBetween>
                       ),
                     },
