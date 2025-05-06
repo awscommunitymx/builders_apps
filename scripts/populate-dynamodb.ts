@@ -33,6 +33,7 @@ const generateUsers = (count: number = 3) => {
       gender: gender === 'male' ? 'Male' : 'Female',
       job_title: faker.person.jobTitle(),
       ticket_class_id: generateRandomNumbers(10),
+      short_id: faker.string.alphanumeric(5).toUpperCase(),
     };
   });
 };

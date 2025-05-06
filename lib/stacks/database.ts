@@ -36,6 +36,15 @@ export class DatabaseStack extends Construct {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    this.table.addGlobalSecondaryIndex({
+      indexName: 'short_id-index',
+      partitionKey: {
+        name: 'short_id',
+        type: dynamodb.AttributeType.STRING,
+      },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // Export the table name
     new cdk.CfnOutput(this, 'TableName', {
       value: this.table.tableName,
