@@ -60,6 +60,17 @@ export class UserStepFunctionStack extends Construct {
       memorySize: 128,
     });
 
+    // Create the Lambda function for generating short IDs
+    const generateShortIdLambda = new NodejsFunction(this, 'GenerateShortIdFunction', {
+      functionName: `generate-short-id-${props.environmentName}`,
+      runtime: Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/generate-short-id/index.ts'),
+      description: 'Generates a unique 5-character short ID for users',
+      timeout: Duration.seconds(10),
+      memorySize: 128,
+    });
+
     // Create Eventbrite API Key secret in Secrets Manager
     const eventbriteApiKey = Secret.fromSecretAttributes(this, 'EventbriteApiKey', {
       secretCompleteArn: props.eventbriteApiKeySecretArn,
@@ -183,23 +194,34 @@ export class UserStepFunctionStack extends Construct {
     const orderPlacedSuccess = new Succeed(this, 'OrderPlacedSuccess');
     const attendeeUpdatedSuccess = new Succeed(this, 'AttendeeUpdatedSuccess');
 
+    const generateShortIdTask = new LambdaInvoke(this, 'GenerateShortId', {
+      lambdaFunction: generateShortIdLambda,
+      resultPath: '$.shortIdResult',
+      payloadResponseOnly: true,
+    });
+
     // Add the createCognitoUserTask to the Map state
-    const processAttendees = Chain.start(
-      new DynamoPutItem(this, 'CreateUser', {
-        table: props.dynamoTable,
-        item: {
-          PK: DynamoAttributeValue.fromString(
-            JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
-          ),
-          SK: DynamoAttributeValue.fromString('PROFILE'),
-          email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.email')),
-          name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
-          user_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.id')),
-        },
-        conditionExpression: 'attribute_not_exists(PK)',
-        resultPath: JsonPath.DISCARD,
-      })
-    )
+    const processAttendees = Chain.start(generateShortIdTask)
+      .next(
+        new DynamoPutItem(this, 'CreateUser', {
+          table: props.dynamoTable,
+          item: {
+            PK: DynamoAttributeValue.fromString(
+              JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
+            ),
+            SK: DynamoAttributeValue.fromString('PROFILE'),
+            email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.email')),
+            name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
+            user_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.id')),
+            short_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.shortIdResult')),
+          },
+          conditionExpression: 'attribute_not_exists(PK)',
+          resultPath: JsonPath.DISCARD,
+        }).addCatch(generateShortIdTask, {
+          errors: ['ConditionalCheckFailedException'],
+          resultPath: JsonPath.DISCARD,
+        })
+      )
       .next(
         new CallAwsService(this, 'CreateCognitoUser', {
           action: 'adminCreateUser',
