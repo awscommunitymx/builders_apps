@@ -80,14 +80,6 @@ export function UserProfile({
                   value: loading ? <Spinner /> : user?.name,
                 },
                 {
-                  label: 'Email',
-                  value: loading ? <Spinner /> : user?.email,
-                },
-                {
-                  label: 'Teléfono',
-                  value: loading ? <Spinner /> : user?.cell_phone,
-                },
-                {
                   label: 'Compañía',
                   value: loading ? <Spinner /> : user?.company,
                 },
@@ -97,6 +89,22 @@ export function UserProfile({
                     {
                       label: 'Puesto',
                       value: loading ? <Spinner /> : user?.job_title,
+                    },
+                  ]
+                : []),
+              ...(user?.email
+                ? [
+                    {
+                      label: 'Email',
+                      value: loading ? <Spinner /> : user?.email,
+                    },
+                  ]
+                : []),
+              ...(user?.cell_phone
+                ? [
+                    {
+                      label: 'Teléfono',
+                      value: loading ? <Spinner /> : user?.cell_phone,
                     },
                   ]
                 : []),

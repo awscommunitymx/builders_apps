@@ -50,6 +50,18 @@ export default async function handleViewProfile(
       throw new Error('Usuario no inicializado');
     }
 
+    // Remove sensitive data
+    delete user.initialized;
+    delete user.pin;
+
+    if (!user.share_email) {
+      delete user.email;
+    }
+
+    if (!user.share_phone) {
+      delete user.cell_phone;
+    }
+
     // Query the authenticaded user by cognito_sub in the cognito_sub-index gsi
     const queryParamsAuthUser = {
       TableName: tableName,
