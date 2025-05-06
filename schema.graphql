@@ -42,7 +42,7 @@ mutation UpdateUser($input: UpdateUserInput!) {
 }
 
 type Mutation {
-  viewProfile(id: String!): User
+  viewProfile(id: String!, pin: String!): User
   updateUser(input: UpdateUserInput!): User
 }
 

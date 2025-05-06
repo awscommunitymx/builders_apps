@@ -1,18 +1,28 @@
 import { useParams } from 'react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserProfile } from '../components/UserProfile';
 import { gql, useMutation } from '@apollo/client';
-import { AppLayoutToolbar, BreadcrumbGroup, Button, Spinner } from '@cloudscape-design/components';
+import {
+  Alert,
+  AppLayoutToolbar,
+  Box,
+  BreadcrumbGroup,
+  Button,
+  Flashbar,
+  Input,
+  Modal,
+  SpaceBetween,
+  Spinner,
+} from '@cloudscape-design/components';
 
 const GET_USER = gql`
-  mutation viewProfile($id: String!) {
-    viewProfile(id: $id) {
+  mutation viewProfile($id: String!, $pin: String!) {
+    viewProfile(id: $id, pin: $pin) {
       name
       job_title
       email
       cell_phone
       company
-      pin
     }
   }
 `;
@@ -24,9 +34,18 @@ export function UserProfileRoute() {
     variables: { id },
   });
 
-  useState(() => {
-    mutateFunction();
-  });
+  const [showPinPrompt, setShowPinPrompt] = useState(true);
+  const [pin, setPin] = useState('');
+
+  const handlePinSubmit = () => {
+    mutateFunction({ variables: { id, pin } });
+  };
+
+  useEffect(() => {
+    if (data) {
+      setShowPinPrompt(false);
+    }
+  }, [data]);
 
   const actionButton = (
     <Button variant="primary" iconName="download" ariaLabel="Descargar tarjeta de contacto">
@@ -36,28 +55,63 @@ export function UserProfileRoute() {
 
   // return <UserProfile initialId={id} loading={loading} error={error} user={data?.viewProfile} />;
   return (
-    <AppLayoutToolbar
-      navigationHide={true}
-      toolsHide={true}
-      breadcrumbs={
-        <BreadcrumbGroup
-          items={[
-            { text: 'Inicio', href: '/' },
-            { text: 'Perfil', href: '/profile' },
-            { text: loading ? <Spinner /> : data?.viewProfile.name, href: `/profile/${id}` },
-          ]}
-        />
-      }
-      content={
-        <UserProfile
-          initialId={data?.getMyProfile?.user_id}
-          loading={loading}
-          error={error}
-          user={data?.viewProfile}
-          actionButton={actionButton}
-        />
-      }
-    ></AppLayoutToolbar>
+    <>
+      {showPinPrompt ? (
+        <Modal
+          onDismiss={() => {}}
+          visible={showPinPrompt}
+          footer={
+            <Box float="right">
+              <SpaceBetween direction="horizontal" size="xs">
+                <Button
+                  variant="primary"
+                  onClick={handlePinSubmit}
+                  disabled={pin.length !== 4}
+                  loading={loading}
+                >
+                  Enviar
+                </Button>
+              </SpaceBetween>
+            </Box>
+          }
+          header="Introduce el PIN para ver el perfil"
+        >
+          <Input value={pin} onChange={(e) => setPin(e.detail.value)} placeholder="PIN" />
+
+          {error && (
+            <>
+              <br />
+              <Alert type="error" header="Error">
+                {error.message}
+              </Alert>
+            </>
+          )}
+        </Modal>
+      ) : (
+        <AppLayoutToolbar
+          navigationHide={true}
+          toolsHide={true}
+          breadcrumbs={
+            <BreadcrumbGroup
+              items={[
+                { text: 'Inicio', href: '/' },
+                { text: 'Perfil', href: '/profile' },
+                { text: loading ? <Spinner /> : data?.viewProfile.name, href: `/profile/${id}` },
+              ]}
+            />
+          }
+          content={
+            <UserProfile
+              initialId={data?.getMyProfile?.user_id}
+              loading={loading}
+              error={error}
+              user={data?.viewProfile}
+              actionButton={actionButton}
+            />
+          }
+        ></AppLayoutToolbar>
+      )}
+    </>
   );
 }
 

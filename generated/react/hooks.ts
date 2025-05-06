@@ -48,6 +48,7 @@ export type MutationUpdateUserArgs = {
 
 export type MutationViewProfileArgs = {
   id: Scalars['String']['input'];
+  pin: Scalars['String']['input'];
 };
 
 export type ProfileAccess = {

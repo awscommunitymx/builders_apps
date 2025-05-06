@@ -31,8 +31,8 @@ export const handler = middy((async (event) => {
     const identity = event.identity as AppSyncIdentityCognito;
 
     if (event.info.fieldName === 'viewProfile') {
-      const { id } = event.arguments as MutationViewProfileArgs;
-      return handleViewProfile(id, identity.sub);
+      const { id, pin } = event.arguments as MutationViewProfileArgs;
+      return handleViewProfile(id, identity.sub, pin);
     }
 
     if (event.info.fieldName === 'updateUser') {

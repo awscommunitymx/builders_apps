@@ -18,11 +18,23 @@ const tableName = process.env.TABLE_NAME!;
 
 export default async function handleViewProfile(
   id: string,
-  authenticatedUserSub: string
+  authenticatedUserSub: string,
+  pin: string
 ): Promise<User | null> {
   // We no longer reference `event` here. Use passed-in params.
   logger.info('Handling viewProfile', { id });
   metrics.addMetric('ViewProfileAttempt', MetricUnit.Count, 1);
+
+  if (pin.length !== 4) {
+    logger.info('Invalid pin length', { id });
+    metrics.addMetric('InvalidPinLength', MetricUnit.Count, 1);
+    throw new Error('El PIN debe tener 4 dígitos');
+  }
+  if (!/^\d+$/.test(pin)) {
+    logger.info('Invalid pin format', { id });
+    metrics.addMetric('InvalidPinFormat', MetricUnit.Count, 1);
+    throw new Error('El PIN debe contener solo dígitos');
+  }
 
   // Query user by shortId
   const queryParams = {
@@ -49,6 +61,12 @@ export default async function handleViewProfile(
       logger.info('User not initialized', { id });
       metrics.addMetric('UserNotInitialized', MetricUnit.Count, 1);
       throw new Error('Usuario no inicializado');
+    }
+
+    if (user.pin?.toString() !== pin) {
+      logger.info('Invalid PIN', { id });
+      metrics.addMetric('InvalidPin', MetricUnit.Count, 1);
+      throw new Error('PIN incorrecto');
     }
 
     // Remove sensitive data
