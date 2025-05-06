@@ -11,6 +11,7 @@ import {
   Button,
   Spinner,
   Flashbar,
+  StatusIndicator,
 } from '@cloudscape-design/components';
 
 export interface UserProfileProps {
@@ -96,7 +97,16 @@ export function UserProfile({
                 ? [
                     {
                       label: 'Email',
-                      value: loading ? <Spinner /> : user?.email,
+                      value: loading ? (
+                        <Spinner />
+                      ) : (
+                        <SpaceBetween direction="vertical" size="xs">
+                          {user?.email}
+                          <StatusIndicator type={user?.share_email ? 'success' : 'error'}>
+                            {user?.share_email ? 'Compartiendo' : 'No se comparte'}
+                          </StatusIndicator>
+                        </SpaceBetween>
+                      ),
                     },
                   ]
                 : []),
@@ -104,7 +114,33 @@ export function UserProfile({
                 ? [
                     {
                       label: 'Teléfono',
-                      value: loading ? <Spinner /> : user?.cell_phone,
+                      value: loading ? (
+                        <Spinner />
+                      ) : (
+                        <SpaceBetween direction="vertical" size="xs">
+                          {user?.cell_phone}
+                          <StatusIndicator type={user?.share_phone ? 'success' : 'error'}>
+                            {user?.share_phone ? 'Compartiendo' : 'No se comparte'}
+                          </StatusIndicator>
+                        </SpaceBetween>
+                      ),
+                    },
+                  ]
+                : []),
+              ...(user?.pin
+                ? [
+                    {
+                      label: 'PIN',
+                      value: loading ? (
+                        <Spinner />
+                      ) : (
+                        <SpaceBetween direction="vertical" size="xs">
+                          {user?.pin}
+                          <StatusIndicator type={user?.initialized ? 'success' : 'error'}>
+                            {user?.initialized ? 'Configurado' : 'No configurado'}
+                          </StatusIndicator>
+                        </SpaceBetween>
+                      ),
                     },
                   ]
                 : []),

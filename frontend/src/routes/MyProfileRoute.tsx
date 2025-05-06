@@ -13,6 +13,10 @@ const GET_USER = gql`
       email
       company
       cell_phone
+      share_email
+      share_phone
+      pin
+      initialized
     }
   }
 `;
