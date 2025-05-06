@@ -113,7 +113,11 @@ export type User = {
   cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
+  initialized?: Maybe<Scalars['Boolean']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  pin?: Maybe<Scalars['Int']['output']>;
+  share_email?: Maybe<Scalars['Boolean']['output']>;
+  share_phone?: Maybe<Scalars['Boolean']['output']>;
   user_id: Scalars['ID']['output'];
 };

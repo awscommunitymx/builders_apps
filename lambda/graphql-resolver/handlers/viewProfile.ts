@@ -44,6 +44,11 @@ export default async function handleViewProfile(
       throw new Error('Usuario no encontrado');
     }
     const user = queryResult.Items[0] as User;
+    if (!user.initialized) {
+      logger.info('User not initialized', { id });
+      metrics.addMetric('UserNotInitialized', MetricUnit.Count, 1);
+      throw new Error('Usuario no inicializado');
+    }
 
     // Query the authenticaded user by cognito_sub in the cognito_sub-index gsi
     const queryParamsAuthUser = {

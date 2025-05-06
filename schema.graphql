@@ -4,7 +4,11 @@ type User {
   company: String
   job_title: String
   cell_phone: String
+  share_phone: Boolean
   email: String
+  share_email: Boolean
+  pin: Int
+  initialized: Boolean
 }
 
 type ProfileAccess {

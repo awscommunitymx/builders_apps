@@ -114,8 +114,12 @@ export type User = {
   cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
+  initialized?: Maybe<Scalars['Boolean']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  pin?: Maybe<Scalars['Int']['output']>;
+  share_email?: Maybe<Scalars['Boolean']['output']>;
+  share_phone?: Maybe<Scalars['Boolean']['output']>;
   user_id: Scalars['ID']['output'];
 };
 
@@ -297,8 +301,12 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   cell_phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  initialized?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   job_title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  pin?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  share_email?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  share_phone?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
