@@ -46,8 +46,10 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
   const [company, setCompany] = useState(user?.company || '');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [shareEmail, setShareEmail] = useState(false);
-  const [sharePhone, setSharePhone] = useState(false);
+  const [shareEmail, setShareEmail] = useState(true);
+  const [sharePhone, setSharePhone] = useState(true);
+  const [pin, setPin] = useState(user?.pin?.toString() || '');
+  const [pinError, setPinError] = useState<string | null>(null);
 
   const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER);
 
@@ -62,11 +64,37 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
     }
   }, [user]);
 
+  // Validar el PIN: solo 4 dígitos numéricos
+  const validatePin = (pinValue: string) => {
+    if (pinValue && !/^\d{4}$/.test(pinValue)) {
+      setPinError('El PIN debe contener exactamente 4 dígitos numéricos');
+      return false;
+    }
+    setPinError(null);
+    return true;
+  };
+
+  // Manejar cambios en el PIN con validación
+  const handlePinChange = (e: { detail: { value: string } }) => {
+    const value = e.detail.value;
+
+    // Solo permitir números y limitar a 4 caracteres
+    const numericValue = value.replace(/\D/g, '').substring(0, 4);
+
+    setPin(numericValue);
+    validatePin(numericValue);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user?.user_id) {
       setFormError('No se puede actualizar el perfil: ID de usuario no disponible.');
+      return;
+    }
+
+    // Validar el PIN antes de enviar
+    if (pin && !validatePin(pin)) {
       return;
     }
 
@@ -84,7 +112,7 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
             lastName,
             company,
             role: jobTitle, // Mapear job_title a role según esquema
-            // Nota: No podemos enviar email ni cell_phone según el esquema existente
+            pin: pin ? parseInt(pin, 10) : undefined, // Convertir a número si existe
           },
         },
       });
@@ -151,35 +179,29 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                     placeholder="Ingresa tu nombre completo"
                   />
                 </FormField>
-                <FormField
-                  label="Correo electrónico"
-                  description="Este campo no se puede editar actualmente."
-                >
+                <FormField label="Correo electrónico">
                   <Input
                     value={email}
                     disabled={true}
                     type="email"
                     placeholder="Correo electrónico"
                   />
+                  <Checkbox
+                    checked={shareEmail}
+                    onChange={({ detail }) => setShareEmail(detail.checked)}
+                  >
+                    Compartir mi correo electrónico
+                  </Checkbox>
                 </FormField>
-                <Checkbox
-                  checked={shareEmail}
-                  onChange={({ detail }) => setShareEmail(detail.checked)}
-                >
-                  Compartir mi correo electrónico
-                </Checkbox>
-                <FormField
-                  label="Teléfono"
-                  description="Este campo no se puede editar actualmente."
-                >
+                <FormField label="Teléfono">
                   <Input value={cellPhone} disabled={true} placeholder="Número de teléfono" />
+                  <Checkbox
+                    checked={sharePhone}
+                    onChange={({ detail }) => setSharePhone(detail.checked)}
+                  >
+                    Compartir mi número de teléfono
+                  </Checkbox>
                 </FormField>
-                <Checkbox
-                  checked={sharePhone}
-                  onChange={({ detail }) => setSharePhone(detail.checked)}
-                >
-                  Compartir mi número de teléfono
-                </Checkbox>
                 <FormField label="Compañía">
                   <Input
                     value={company}
@@ -194,6 +216,19 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                     onChange={(e) => setJobTitle(e.detail.value)}
                     disabled={loading}
                     placeholder="Ingresa tu puesto de trabajo o rol"
+                  />
+                </FormField>
+                <FormField
+                  label="PIN"
+                  description="Ingresa exactamente 4 dígitos numéricos"
+                  errorText={pinError}
+                >
+                  <Input
+                    value={pin}
+                    placeholder="PIN de acceso (4 dígitos)"
+                    onChange={handlePinChange}
+                    type="text"
+                    inputMode="numeric"
                   />
                 </FormField>
               </SpaceBetween>
