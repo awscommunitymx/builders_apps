@@ -153,8 +153,8 @@ export function UserProfile({
                       ) : (
                         <SpaceBetween direction="vertical" size="xs">
                           {user?.pin}
-                          <StatusIndicator type={user?.initialized ? 'success' : 'error'}>
-                            {user?.initialized ? 'Configurado' : 'No configurado'}
+                          <StatusIndicator type={user?.pin ? 'success' : 'error'}>
+                            {user?.pin ? 'Configurado' : 'No configurado'}
                           </StatusIndicator>
                         </SpaceBetween>
                       ),

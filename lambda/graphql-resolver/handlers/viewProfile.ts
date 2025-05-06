@@ -4,6 +4,7 @@ import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { ProfileAccess, User } from '@awscommunity/generated-ts';
+import { getAuthenticatedUser } from '../utils/getAuthenticatedUser';
 
 const SERVICE_NAME = 'view-profile-service';
 
@@ -63,24 +64,14 @@ export default async function handleViewProfile(
     }
 
     // Query the authenticaded user by cognito_sub in the cognito_sub-index gsi
-    const queryParamsAuthUser = {
-      TableName: tableName,
-      IndexName: 'cognito_sub-index',
-      KeyConditionExpression: 'cognito_sub = :cognito_sub',
-      ExpressionAttributeValues: {
-        ':cognito_sub': authenticatedUserSub,
-      },
-    };
-
-    const queryResultAuthUser = await docClient.send(new QueryCommand(queryParamsAuthUser));
-    if (!queryResultAuthUser.Items || queryResultAuthUser.Items.length === 0) {
-      logger.info('Authenticated user not found', { authenticatedUserSub });
-      metrics.addMetric('AuthenticatedUserNotFound', MetricUnit.Count, 1);
-      return null;
-    }
-    const authenticatedUser = queryResultAuthUser.Items[0] as User;
-    logger.info('Authenticated user found', { authenticatedUser });
-    metrics.addMetric('AuthenticatedUserFound', MetricUnit.Count, 1);
+    const authenticatedUser = await getAuthenticatedUser(
+      authenticatedUserSub,
+      tracer,
+      docClient,
+      logger,
+      metrics,
+      tableName
+    );
 
     // record view
     const viewItem: ProfileAccess = {

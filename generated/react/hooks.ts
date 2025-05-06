@@ -101,11 +101,10 @@ export type Speaker = {
 
 export type UpdateUserInput = {
   company?: InputMaybe<Scalars['String']['input']>;
-  firstName?: InputMaybe<Scalars['String']['input']>;
-  lastName?: InputMaybe<Scalars['String']['input']>;
   pin?: InputMaybe<Scalars['Int']['input']>;
   role?: InputMaybe<Scalars['String']['input']>;
-  userId: Scalars['ID']['input'];
+  share_email?: InputMaybe<Scalars['Boolean']['input']>;
+  share_phone?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type User = {

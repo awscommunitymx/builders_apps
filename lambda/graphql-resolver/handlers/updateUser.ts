@@ -3,7 +3,8 @@ import { DynamoDBDocumentClient, UpdateCommandInput, UpdateCommand } from '@aws-
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
-import { User } from '@awscommunity/generated-ts';
+import { UpdateUserInput, User } from '@awscommunity/generated-ts';
+import { getAuthenticatedUser } from '../utils/getAuthenticatedUser';
 
 const SERVICE_NAME = 'update-user-service';
 
@@ -16,31 +17,42 @@ const docClient = DynamoDBDocumentClient.from(client);
 const tableName = process.env.TABLE_NAME!;
 
 export default async function handleUpdateUser(
-  userId: string,
-  updates: Partial<Omit<User, 'user_id' | 'short_id'>>
+  authenticatedUserSub: string,
+  updates: UpdateUserInput
 ): Promise<User> {
-  logger.debug('Updating user', { userId, updates });
+  const authenticatedUser = await getAuthenticatedUser(
+    authenticatedUserSub,
+    tracer,
+    docClient,
+    logger,
+    metrics,
+    tableName
+  );
 
-  const exprAttrNames: Record<string, string> = {};
-  const exprAttrValues: Record<string, any> = {};
-  const setClauses: string[] = [];
-
-  Object.entries(updates).forEach(([attr, val], i) => {
-    const nameKey = `#n${i}`,
-      valKey = `:v${i}`;
-    exprAttrNames[nameKey] = attr;
-    exprAttrValues[valKey] = val;
-    setClauses.push(`${nameKey} = ${valKey}`);
-  });
-  if (setClauses.length === 0) throw new Error('No fields to update');
+  logger.debug('Handling updateUser', { authenticatedUserSub, updates });
 
   const updateParams: UpdateCommandInput = {
     TableName: tableName,
-    Key: { PK: `USER#${userId}`, SK: `META#${userId}` },
-    UpdateExpression: 'SET ' + setClauses.join(', '),
-    ExpressionAttributeNames: exprAttrNames,
-    ExpressionAttributeValues: exprAttrValues,
-    ReturnValues: 'ALL_NEW' as const,
+    Key: { PK: `USER#${authenticatedUser.user_id}`, SK: 'PROFILE' },
+    UpdateExpression:
+      'SET #company = :company, #pin = :pin, #role = :role, #share_email = :share_email, #share_phone = :share_phone, #initialized = :initialized',
+    ExpressionAttributeNames: {
+      '#company': 'company',
+      '#pin': 'pin',
+      '#role': 'role',
+      '#share_email': 'share_email',
+      '#share_phone': 'share_phone',
+      '#initialized': 'initialized',
+    },
+    ExpressionAttributeValues: {
+      ':company': updates.company,
+      ':pin': updates.pin,
+      ':role': updates.role,
+      ':share_email': updates.share_email,
+      ':share_phone': updates.share_phone,
+      ':initialized': true,
+    },
+    ConditionExpression: 'attribute_exists(PK)',
   };
 
   const result = await docClient.send(new UpdateCommand(updateParams));

@@ -22,12 +22,11 @@ type Query {
 }
 
 input UpdateUserInput {
-  userId: ID!
-  firstName: String
-  lastName: String
   company: String
   role: String
   pin: Int
+  share_email: Boolean
+  share_phone: Boolean
 }
 
 mutation UpdateUser($input: UpdateUserInput!) {

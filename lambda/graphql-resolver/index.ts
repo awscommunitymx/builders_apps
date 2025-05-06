@@ -4,7 +4,12 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
 import middy from '@middy/core';
-import { MutationViewProfileArgs, MutationUpdateUserArgs, User } from '@awscommunity/generated-ts';
+import {
+  MutationViewProfileArgs,
+  MutationUpdateUserArgs,
+  User,
+  UpdateUserInput,
+} from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
 
@@ -31,17 +36,9 @@ export const handler = middy((async (event) => {
     }
 
     if (event.info.fieldName === 'updateUser') {
-      const { input } = event.arguments as MutationUpdateUserArgs;
-      const { userId, firstName, lastName, company, role, pin } = input;
-
       const updates: Partial<Omit<User, 'user_id' | 'short_id'>> = {};
-      // if (firstName !== undefined) updates.first_name = firstName;
-      // if (lastName !== undefined) updates.last_name = lastName;
-      // if (company !== undefined) updates.company = company;
-      // if (role !== undefined) updates.role = role;
-      // if (pin !== undefined) updates.pin = pin;
-
-      return handleUpdateUser(userId, updates);
+      const { input } = event.arguments as MutationUpdateUserArgs;
+      return handleUpdateUser(identity.sub, input);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);
