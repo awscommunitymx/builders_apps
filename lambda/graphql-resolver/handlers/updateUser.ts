@@ -31,15 +31,19 @@ export default async function handleUpdateUser(
 
   logger.debug('Handling updateUser', { authenticatedUserSub, updates });
 
+  if (!updates.pin) {
+    throw new Error('El PIN es obligatorio');
+  }
+
   const updateParams: UpdateCommandInput = {
     TableName: tableName,
     Key: { PK: `USER#${authenticatedUser.user_id}`, SK: 'PROFILE' },
     UpdateExpression:
-      'SET #company = :company, #pin = :pin, #role = :role, #share_email = :share_email, #share_phone = :share_phone, #initialized = :initialized',
+      'SET #company = :company, #pin = :pin, #job_title = :job_title, #share_email = :share_email, #share_phone = :share_phone, #initialized = :initialized',
     ExpressionAttributeNames: {
       '#company': 'company',
       '#pin': 'pin',
-      '#role': 'role',
+      '#job_title': 'job_title',
       '#share_email': 'share_email',
       '#share_phone': 'share_phone',
       '#initialized': 'initialized',
@@ -47,7 +51,7 @@ export default async function handleUpdateUser(
     ExpressionAttributeValues: {
       ':company': updates.company,
       ':pin': updates.pin,
-      ':role': updates.role,
+      ':job_title': updates.role,
       ':share_email': updates.share_email,
       ':share_phone': updates.share_phone,
       ':initialized': true,

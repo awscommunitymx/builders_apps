@@ -11,7 +11,6 @@ import {
   FormField,
   Input,
   Button,
-  Select,
   Checkbox,
 } from '@cloudscape-design/components';
 import { gql, useMutation } from '@apollo/client';
@@ -21,11 +20,6 @@ const UPDATE_USER = gql`
   mutation UpdateUser($input: UpdateUserInput!) {
     updateUser(input: $input) {
       user_id
-      name
-      company
-      job_title
-      email
-      cell_phone
     }
   }
 `;
@@ -66,10 +60,18 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
 
   // Validar el PIN: solo 4 dígitos numéricos
   const validatePin = (pinValue: string) => {
-    if (pinValue && !/^\d{4}$/.test(pinValue)) {
-      setPinError('El PIN debe contener exactamente 4 dígitos numéricos');
+    const pinError = 'El PIN debe contener exactamente 4 dígitos numéricos';
+    if (pinValue === '') {
+      setPinError(pinError);
       return false;
     }
+
+    // If PIN is provided, it must be exactly 4 digits
+    if (!/^\d{4}$/.test(pinValue)) {
+      setPinError(pinError);
+      return false;
+    }
+
     setPinError(null);
     return true;
   };
@@ -90,29 +92,26 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
 
     if (!user?.user_id) {
       setFormError('No se puede actualizar el perfil: ID de usuario no disponible.');
+      console.error('User ID not available');
       return;
     }
 
     // Validar el PIN antes de enviar
-    if (pin && !validatePin(pin)) {
+    const isPinValid = validatePin(pin);
+    if (pin && !isPinValid) {
+      console.error('Invalid PIN');
       return;
     }
 
     try {
-      // Extraer el nombre y apellido del nombre completo
-      const nameParts = name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-
       await updateProfile({
         variables: {
           input: {
-            userId: user.user_id,
-            firstName,
-            lastName,
             company,
             role: jobTitle, // Mapear job_title a role según esquema
             pin: pin ? parseInt(pin, 10) : undefined, // Convertir a número si existe
+            share_email: shareEmail,
+            share_phone: sharePhone,
           },
         },
       });
@@ -120,7 +119,6 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
       // Navegar de vuelta al perfil o mostrar mensaje de éxito
       window.location.href = '/profile';
     } catch (error) {
-      setFormError('Error al actualizar el perfil. Por favor, inténtalo de nuevo.');
       console.error('Error updating profile:', error);
     }
   };
@@ -140,102 +138,100 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
         )
       }
     >
-      {error || updateError || formError ? (
-        <Flashbar
-          items={[
-            {
-              type: 'error',
-              content:
-                error?.message ||
-                updateError?.message ||
-                formError ||
-                'Ocurrió un error al cargar los datos del usuario',
-              dismissible: true,
-              onDismiss: () => setFormError(null),
-            },
-          ]}
-        />
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <Form
-            actions={
-              <SpaceBetween direction="horizontal" size="xs">
-                <Button formAction="none" variant="link" onClick={handleCancel}>
-                  Cancelar
-                </Button>
-                <Button variant="primary" loading={updateLoading} disabled={loading}>
-                  Guardar cambios
-                </Button>
-              </SpaceBetween>
-            }
-          >
-            <Container header={<Header variant="h2">Información personal</Header>}>
-              <SpaceBetween direction="vertical" size="l">
-                <FormField label="Nombre completo">
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.detail.value)}
-                    disabled={loading}
-                    placeholder="Ingresa tu nombre completo"
-                  />
-                </FormField>
-                <FormField label="Correo electrónico">
-                  <Input
-                    value={email}
-                    disabled={true}
-                    type="email"
-                    placeholder="Correo electrónico"
-                  />
-                  <Checkbox
-                    checked={shareEmail}
-                    onChange={({ detail }) => setShareEmail(detail.checked)}
-                  >
-                    Compartir mi correo electrónico
-                  </Checkbox>
-                </FormField>
-                <FormField label="Teléfono">
-                  <Input value={cellPhone} disabled={true} placeholder="Número de teléfono" />
-                  <Checkbox
-                    checked={sharePhone}
-                    onChange={({ detail }) => setSharePhone(detail.checked)}
-                  >
-                    Compartir mi número de teléfono
-                  </Checkbox>
-                </FormField>
-                <FormField label="Compañía">
-                  <Input
-                    value={company}
-                    onChange={(e) => setCompany(e.detail.value)}
-                    disabled={loading}
-                    placeholder="Ingresa el nombre de tu empresa"
-                  />
-                </FormField>
-                <FormField label="Puesto o rol">
-                  <Input
-                    value={jobTitle}
-                    onChange={(e) => setJobTitle(e.detail.value)}
-                    disabled={loading}
-                    placeholder="Ingresa tu puesto de trabajo o rol"
-                  />
-                </FormField>
-                <FormField
-                  label="PIN"
-                  description="Ingresa exactamente 4 dígitos numéricos"
-                  errorText={pinError}
-                >
-                  <Input
-                    value={pin}
-                    placeholder="PIN de acceso (4 dígitos)"
-                    onChange={handlePinChange}
-                    type="text"
-                    inputMode="numeric"
-                  />
-                </FormField>
-              </SpaceBetween>
-            </Container>
-          </Form>
-        </form>
+      {(error || updateError || formError) && (
+        <>
+          <Flashbar
+            items={[
+              {
+                type: 'error',
+                content: error?.message || updateError?.message || formError,
+                dismissible: true,
+                onDismiss: () => setFormError(null),
+              },
+            ]}
+          />
+          <br />
+        </>
       )}
+      <form onSubmit={handleSubmit}>
+        <Form
+          actions={
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button formAction="none" variant="link" onClick={handleCancel}>
+                Cancelar
+              </Button>
+              <Button variant="primary" loading={updateLoading} disabled={loading}>
+                Guardar cambios
+              </Button>
+            </SpaceBetween>
+          }
+        >
+          <Container header={<Header variant="h2">Información personal</Header>}>
+            <SpaceBetween direction="vertical" size="l">
+              <FormField label="Nombre completo">
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.detail.value)}
+                  disabled={loading}
+                  placeholder="Ingresa tu nombre completo"
+                />
+              </FormField>
+              <FormField label="Correo electrónico">
+                <Input
+                  value={email}
+                  disabled={true}
+                  type="email"
+                  placeholder="Correo electrónico"
+                />
+                <Checkbox
+                  checked={shareEmail}
+                  onChange={({ detail }) => setShareEmail(detail.checked)}
+                >
+                  Compartir mi correo electrónico
+                </Checkbox>
+              </FormField>
+              <FormField label="Teléfono">
+                <Input value={cellPhone} disabled={true} placeholder="Número de teléfono" />
+                <Checkbox
+                  checked={sharePhone}
+                  onChange={({ detail }) => setSharePhone(detail.checked)}
+                >
+                  Compartir mi número de teléfono
+                </Checkbox>
+              </FormField>
+              <FormField label="Compañía">
+                <Input
+                  value={company}
+                  onChange={(e) => setCompany(e.detail.value)}
+                  disabled={loading}
+                  placeholder="Ingresa el nombre de tu empresa"
+                />
+              </FormField>
+              <FormField label="Puesto o rol">
+                <Input
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.detail.value)}
+                  disabled={loading}
+                  placeholder="Ingresa tu puesto de trabajo o rol"
+                />
+              </FormField>
+              <FormField
+                label="PIN"
+                description="Ingresa exactamente 4 dígitos numéricos"
+                errorText={pinError}
+              >
+                <Input
+                  value={pin}
+                  placeholder="PIN de acceso (4 dígitos)"
+                  onChange={handlePinChange}
+                  type="text"
+                  inputMode="numeric"
+                />
+              </FormField>
+            </SpaceBetween>
+          </Container>
+        </Form>
+      </form>
     </ContentLayout>
   );
 }
