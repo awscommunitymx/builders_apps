@@ -80,6 +80,7 @@ export function MyProfileRoute() {
             error={errorState}
             user={user}
             actionButton={actionButton}
+            isMyProfile={true}
           />
         )
       }

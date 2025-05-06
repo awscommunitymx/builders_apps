@@ -20,6 +20,7 @@ export interface UserProfileProps {
   error?: Error | null;
   user?: User | null;
   actionButton?: React.ReactNode;
+  isMyProfile?: boolean;
 }
 
 export function UserProfile({
@@ -27,6 +28,7 @@ export function UserProfile({
   error = null,
   user = null,
   actionButton = null,
+  isMyProfile = false,
 }: UserProfileProps) {
   return (
     <ContentLayout
@@ -46,6 +48,21 @@ export function UserProfile({
         )
       }
     >
+      {!user?.initialized && !loading && isMyProfile && (
+        <div>
+          <Flashbar
+            items={[
+              {
+                type: 'warning',
+                content:
+                  'Tu perfil no está configurado. Por favor haz clic en el botón "Editar perfil" para configurarlo.',
+                dismissible: false,
+              },
+            ]}
+          />
+          <br />
+        </div>
+      )}
       {error ? (
         <Flashbar
           items={[
