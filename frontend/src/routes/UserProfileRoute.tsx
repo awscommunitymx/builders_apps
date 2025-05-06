@@ -23,6 +23,7 @@ const GET_USER = gql`
       email
       cell_phone
       company
+      user_id
     }
   }
 `;

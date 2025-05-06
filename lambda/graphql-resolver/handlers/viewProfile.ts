@@ -39,10 +39,10 @@ export default async function handleViewProfile(
   // Query user by shortId
   const queryParams = {
     TableName: tableName,
-    KeyConditionExpression: 'PK = :pk AND SK = :sk',
+    IndexName: 'short_id-index',
+    KeyConditionExpression: 'short_id = :short_id',
     ExpressionAttributeValues: {
-      ':pk': `USER#${id}`,
-      ':sk': 'PROFILE',
+      ':short_id': id,
     },
     Limit: 1,
   };
