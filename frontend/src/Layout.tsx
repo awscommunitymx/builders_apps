@@ -3,14 +3,15 @@ import { Outlet } from 'react-router';
 import { generateLoginUrl } from './auth-utils';
 import { useEffect, useState } from 'react';
 import imgUrl from './assets/logo.svg';
+import { getLoggedInUser } from './utils/getAuthenticatedUser';
 
 export function Layout() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     // Check if access_token exists in localStorage
-    const accessToken = localStorage.getItem('access_token');
-    setIsLoggedIn(!!accessToken);
+    const user = getLoggedInUser();
+    setIsLoggedIn(!!user);
   }, []);
 
   const getUtilityItems = () => {
