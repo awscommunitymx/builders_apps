@@ -15,6 +15,7 @@ import {
   DynamoUpdateItem,
   CallAwsService,
   DynamoGetItem,
+  DynamoDeleteItem,
 } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { SecretValue, Duration } from 'aws-cdk-lib';
@@ -690,11 +691,11 @@ export class UserStepFunctionStack extends Construct {
           })
         ).next(
           // Finally, delete the user from DynamoDB
-          new DynamoGetItem(this, 'DeleteUserFromDynamoDB', {
+          new DynamoDeleteItem(this, 'DeleteUserFromDynamoDB', {
             table: props.dynamoTable,
             key: {
               PK: DynamoAttributeValue.fromString(
-                JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
+                JsonPath.format('USER#{}', JsonPath.stringAt('$.existingUser.Item.user_id.S'))
               ),
               SK: DynamoAttributeValue.fromString('PROFILE'),
             },
