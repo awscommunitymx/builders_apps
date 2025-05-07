@@ -12,7 +12,7 @@ const logger = new Logger({ serviceName: SERVICE_NAME });
 const metrics = new Metrics({ namespace: 'Profiles', serviceName: SERVICE_NAME });
 
 interface AlgoliaDeleteEvent {
-  user_id: string;
+  userId: string;
   action: 'delete';
 }
 
@@ -33,9 +33,9 @@ export const handler: Handler<AlgoliaDeleteEvent> = async (event) => {
     logger.info('Processing Algolia delete event', { event });
     metrics.addMetric('AlgoliaDeleteAttempt', MetricUnit.Count, 1);
 
-    const { user_id, action } = event;
+    const { userId, action } = event;
 
-    if (!user_id || action !== 'delete') {
+    if (!userId || action !== 'delete') {
       throw new Error('Invalid event: missing user_id or action is not delete');
     }
 
@@ -54,8 +54,8 @@ export const handler: Handler<AlgoliaDeleteEvent> = async (event) => {
     const client = algoliasearch(appId, apiKey);
     const index = client.initIndex(process.env.ALGOLIA_INDEX_NAME || 'users');
 
-    logger.info('Deleting user from Algolia', { objectID: user_id });
-    const result = await index.deleteObject(user_id);
+    logger.info('Deleting user from Algolia', { objectID: userId });
+    const result = await index.deleteObject(userId);
 
     logger.info('Algolia delete completed successfully', { result });
     metrics.addMetric('AlgoliaDeleteSuccess', MetricUnit.Count, 1);
@@ -64,7 +64,7 @@ export const handler: Handler<AlgoliaDeleteEvent> = async (event) => {
       statusCode: 200,
       body: {
         message: 'User deleted from Algolia successfully',
-        objectID: user_id,
+        objectID: userId,
         taskID: result.taskID,
       },
     };
