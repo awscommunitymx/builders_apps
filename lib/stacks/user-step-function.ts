@@ -14,6 +14,8 @@ import {
   DynamoAttributeValue,
   DynamoUpdateItem,
   CallAwsService,
+  DynamoGetItem,
+  DynamoDeleteItem,
 } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { SecretValue, Duration } from 'aws-cdk-lib';
@@ -130,30 +132,6 @@ export class UserStepFunctionStack extends Construct {
       algoliaUpdateLambda.addToRolePolicy(secretsManagerPolicy);
     }
 
-    // Create the Lambda function for making API calls to Eventbrite
-    const eventbriteApiCallLambda = new NodejsFunction(this, 'EventbriteApiCallFunction', {
-      functionName: `eventbrite-api-call-${props.environmentName}`,
-      runtime: Runtime.NODEJS_22_X,
-      handler: 'handler',
-      entry: path.join(__dirname, '../../lambda/eventbrite-api-call/index.ts'),
-      description: 'Makes API calls to Eventbrite with proper authentication',
-      timeout: Duration.seconds(30),
-      memorySize: 256,
-      environment: {
-        SECRET_NAME: eventbriteApiKey.secretName,
-      },
-    });
-
-    // Grant the Lambda function permission to read the secret
-    eventbriteApiKey.grantRead(eventbriteApiCallLambda);
-
-    // Create separate Lambda task instances for each flow
-    // One for order.placed
-    const callEventbriteApi = new LambdaInvoke(this, 'CallEventbriteApi', {
-      lambdaFunction: eventbriteApiCallLambda,
-      outputPath: '$.Payload',
-    });
-
     // Create task to call Algolia update Lambda
     const updateAlgoliaTask = new LambdaInvoke(this, 'UpdateAlgoliaIndex', {
       lambdaFunction: algoliaUpdateLambda,
@@ -186,6 +164,85 @@ export class UserStepFunctionStack extends Construct {
       }
     );
 
+    // Create the Lambda function for Algolia deletions
+
+    const algoliaDeleteLambda = new NodejsFunction(this, 'AlgoliaDeleteFunction', {
+      functionName: `algolia-delete-${props.environmentName}`,
+      runtime: Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/algolia-delete/index.ts'),
+      description: 'Deletes users from Algolia index',
+      timeout: Duration.seconds(30),
+      memorySize: 256,
+      environment: {
+        ALGOLIA_API_KEY_SECRET: algoliaApiKey?.secretName || 'algolia/api_key',
+        ALGOLIA_APP_ID_SECRET: algoliaAppId?.secretName || 'algolia/app_id',
+        ALGOLIA_INDEX_NAME: `${props.environmentName}_attendees`,
+      },
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          'algoliasearch',
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+        ],
+      },
+    });
+
+    // Grant the Lambda function permission to read Algolia secrets
+    if (algoliaApiKey && algoliaAppId) {
+      algoliaApiKey.grantRead(algoliaDeleteLambda);
+      algoliaAppId.grantRead(algoliaDeleteLambda);
+    } else {
+      // If no ARNs provided, grant permission to read secrets by name
+      const secretsManagerPolicy = new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [
+          `arn:aws:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:algolia/api_key*`,
+          `arn:aws:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:algolia/app_id*`,
+        ],
+      });
+      algoliaDeleteLambda.addToRolePolicy(secretsManagerPolicy);
+    }
+
+    // Task to delete user from Algolia index
+    const deleteFromAlgoliaTask = new LambdaInvoke(this, 'DeleteFromAlgoliaIndex', {
+      lambdaFunction: algoliaDeleteLambda,
+      inputPath: '$',
+      resultPath: '$.algoliaDeleteResult',
+      payloadResponseOnly: true,
+      payload: TaskInput.fromObject({
+        userId: JsonPath.stringAt('$.body.id'),
+        action: 'delete',
+      }),
+    });
+
+    // Create the Lambda function for making API calls to Eventbrite
+    const eventbriteApiCallLambda = new NodejsFunction(this, 'EventbriteApiCallFunction', {
+      functionName: `eventbrite-api-call-${props.environmentName}`,
+      runtime: Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/eventbrite-api-call/index.ts'),
+      description: 'Makes API calls to Eventbrite with proper authentication',
+      timeout: Duration.seconds(30),
+      memorySize: 256,
+      environment: {
+        SECRET_NAME: eventbriteApiKey.secretName,
+      },
+    });
+
+    // Grant the Lambda function permission to read the secret
+    eventbriteApiKey.grantRead(eventbriteApiCallLambda);
+
+    // Create separate Lambda task instances for each flow
+    // One for order.placed
+    const callEventbriteApi = new LambdaInvoke(this, 'CallEventbriteApi', {
+      lambdaFunction: eventbriteApiCallLambda,
+      outputPath: '$.Payload',
+    });
+
     // Define what happens after Algolia update
     const algoliaUpdateSucceeded = new Succeed(this, 'AlgoliaUpdateSucceeded');
 
@@ -193,6 +250,8 @@ export class UserStepFunctionStack extends Construct {
     const apiFailure = new Fail(this, 'ApiFailure');
     const orderPlacedSuccess = new Succeed(this, 'OrderPlacedSuccess');
     const attendeeUpdatedSuccess = new Succeed(this, 'AttendeeUpdatedSuccess');
+    const orderRefundedSuccess = new Succeed(this, 'OrderRefundedSuccess');
+    const userNotFoundSuccess = new Succeed(this, 'UserNotFoundSuccess');
 
     const generateShortIdTask = new LambdaInvoke(this, 'GenerateShortId', {
       lambdaFunction: generateShortIdLambda,
@@ -596,9 +655,62 @@ export class UserStepFunctionStack extends Construct {
       })
     ).next(processAttendeesUpdateChoice);
 
+    const processAttendeesDelete = Chain.start(
+      new DynamoGetItem(this, 'GetUserForRefund', {
+        table: props.dynamoTable,
+        key: {
+          PK: DynamoAttributeValue.fromString(
+            JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
+          ),
+          SK: DynamoAttributeValue.fromString('PROFILE'),
+        },
+        resultPath: '$.existingUser',
+      })
+    ).next(
+      new Choice(this, 'UserExistsForRefund')
+      .when(
+        // Check if the user exists
+        Condition.isPresent('$.existingUser.Item'),
+        Chain.start(
+          // Delete from Algolia first
+          deleteFromAlgoliaTask
+        ).next (
+          // Then delete the user from Cognito
+          new CallAwsService(this, 'DeleteCognitoUser', {
+            service: 'cognitoidentityprovider',
+            action: 'adminDeleteUser',
+            iamAction: 'cognito-idp:AdminDeleteUser',
+            iamResources: [
+              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
+            ],
+            parameters: {
+              UserPoolId: props.userPool.userPoolId,
+              Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
+            },
+            resultPath: JsonPath.DISCARD,
+          })
+        ).next(
+          // Finally, delete the user from DynamoDB
+          new DynamoDeleteItem(this, 'DeleteUserFromDynamoDB', {
+            table: props.dynamoTable,
+            key: {
+              PK: DynamoAttributeValue.fromString(
+                JsonPath.format('USER#{}', JsonPath.stringAt('$.existingUser.Item.user_id.S'))
+              ),
+              SK: DynamoAttributeValue.fromString('PROFILE'),
+            },
+            resultPath: JsonPath.DISCARD,
+          })
+        )
+        .next(orderRefundedSuccess)
+      )
+      .otherwise(userNotFoundSuccess)
+    );
+
     const handlerChoice = new Choice(this, 'HandlerChoice')
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
-      .when(Condition.stringEquals('$.config.action', 'attendee.updated'), processAttendeesUpdate);
+      .when(Condition.stringEquals('$.config.action', 'attendee.updated'), processAttendeesUpdate)
+      .when(Condition.stringEquals('$.config.action', 'order.refunded'), processAttendeesDelete);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
       .when(Condition.numberEquals('$.statusCode', 200), handlerChoice)
