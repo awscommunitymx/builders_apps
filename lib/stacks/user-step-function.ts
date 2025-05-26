@@ -169,7 +169,9 @@ export class UserStepFunctionStack extends Construct {
             user_id: JsonPath.stringAt('$.body.order_id'),
             email: JsonPath.stringAt('$.body.profile.email'),
             name: JsonPath.stringAt('$.body.profile.name'),
-            cell_phone: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
+            cell_phone: JsonPath.stringAt(
+              '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+            ),
           },
           action: JsonPath.stringAt('$.config.action'),
         }),
@@ -433,10 +435,10 @@ export class UserStepFunctionStack extends Construct {
                     Condition.isPresent('$.body.profile.cell_phone'),
                     Chain.start(
                       new LambdaInvoke(this, 'ProcessPhoneNumber', {
-                        lambdaFunction: processPhoneNumberLambda,
+                        lambdaFunction: validatePhoneNumberLambda,
                         inputPath: '$.body.profile.cell_phone',
                         resultSelector: {
-                          'processedPhoneNumber.$': '$.Payload.processedPhoneNumber',
+                          'processedPhoneNumber.$': '$.Payload',
                         },
                         resultPath: '$.processedPhoneNumber',
                       })
@@ -473,7 +475,9 @@ export class UserStepFunctionStack extends Construct {
                           },
                           expressionAttributeValues: {
                             ':cell_phone': DynamoAttributeValue.fromString(
-                              JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
+                              JsonPath.stringAt(
+                                '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+                              )
                             ),
                           },
                           updateExpression: 'SET cell_phone = :cell_phone',
@@ -493,7 +497,9 @@ export class UserStepFunctionStack extends Construct {
                               // Or if the value is different from the processed phone number
                               Condition.not(
                                 Condition.stringEqualsJsonPath(
-                                  JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
+                                  JsonPath.stringAt(
+                                    '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+                                  ),
                                   JsonPath.stringAt('$.existingUserForPhone.Item.cell_phone.S')
                                 )
                               )
@@ -515,7 +521,7 @@ export class UserStepFunctionStack extends Construct {
                                   {
                                     Name: 'phone_number',
                                     Value: JsonPath.stringAt(
-                                      '$.processedPhoneNumber.processedPhoneNumber'
+                                      '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
                                     ),
                                   },
                                   {

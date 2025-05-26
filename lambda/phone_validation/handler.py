@@ -54,6 +54,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # If event is just a string, treat it as the phone number
         if not phone_number and isinstance(event, str):
             phone_number = event
+
+        if not phone_number and isinstance(event, int):
+            phone_number = str(event)
             
         if not phone_number:
             logger.warning("No phone number found in event")
