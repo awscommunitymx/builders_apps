@@ -31,6 +31,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53_targets from 'aws-cdk-lib/aws-route53-targets';
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 
 interface UserStepFunctionStackProps {
   environmentName: string;
@@ -58,6 +59,17 @@ export class UserStepFunctionStack extends Construct {
       handler: 'handler',
       entry: path.join(__dirname, '../../lambda/process-phone-number/index.ts'),
       description: 'Processes phone numbers to ensure correct country code format',
+      timeout: Duration.seconds(10),
+      memorySize: 128,
+    });
+
+    const validatePhoneNumberLambda = new PythonFunction(this, 'ValidatePhoneNumberFunction', {
+      functionName: `validate-phone-number-${props.environmentName}`,
+      entry: path.join(__dirname, '../../lambda/phone_validation'),
+      runtime: Runtime.PYTHON_3_11,
+      handler: 'lambda_handler',
+      index: 'handler.py',
+      description: 'Validates phone numbers to ensure they are in the correct format',
       timeout: Duration.seconds(10),
       memorySize: 128,
     });
