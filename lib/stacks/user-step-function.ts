@@ -259,8 +259,18 @@ export class UserStepFunctionStack extends Construct {
       payloadResponseOnly: true,
     });
 
+    // Create a Pass step to add tempEmail variable
+    const addTempEmailPass = new Pass(this, 'AddTempEmail', {
+      parameters: {
+        'body.$': '$.body',
+        'config.$': '$.config',
+        tempEmail: JsonPath.format('tmp_order+{}@awscommunity.mx', JsonPath.stringAt('$.body.id')),
+      },
+    });
+
     // Add the createCognitoUserTask to the Map state
-    const processAttendees = Chain.start(generateShortIdTask)
+    const processAttendees = Chain.start(addTempEmailPass)
+      .next(generateShortIdTask)
       .next(
         new DynamoPutItem(this, 'CreateUser', {
           table: props.dynamoTable,
@@ -269,7 +279,7 @@ export class UserStepFunctionStack extends Construct {
               JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
             ),
             SK: DynamoAttributeValue.fromString('PROFILE'),
-            email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.email')),
+            email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.tempEmail')),
             name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
             user_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.id')),
             short_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.shortIdResult')),
@@ -290,7 +300,7 @@ export class UserStepFunctionStack extends Construct {
           ],
           service: 'cognitoidentityprovider',
           parameters: {
-            Username: JsonPath.stringAt('$.body.email'),
+            Username: JsonPath.stringAt('$.tempEmail'),
             UserPoolId: props.userPool.userPoolId,
             MessageAction: 'SUPPRESS',
           },
@@ -312,7 +322,7 @@ export class UserStepFunctionStack extends Construct {
           service: 'cognitoidentityprovider',
           parameters: {
             UserPoolId: props.userPool.userPoolId,
-            Username: JsonPath.stringAt('$.body.email'),
+            Username: JsonPath.stringAt('$.tempEmail'),
             GroupName: 'Attendees',
           },
           resultPath: JsonPath.DISCARD,
@@ -668,43 +678,45 @@ export class UserStepFunctionStack extends Construct {
       })
     ).next(
       new Choice(this, 'UserExistsForRefund')
-      .when(
-        // Check if the user exists
-        Condition.isPresent('$.existingUser.Item'),
-        Chain.start(
-          // Delete from Algolia first
-          deleteFromAlgoliaTask
-        ).next (
-          // Then delete the user from Cognito
-          new CallAwsService(this, 'DeleteCognitoUser', {
-            service: 'cognitoidentityprovider',
-            action: 'adminDeleteUser',
-            iamAction: 'cognito-idp:AdminDeleteUser',
-            iamResources: [
-              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
-            ],
-            parameters: {
-              UserPoolId: props.userPool.userPoolId,
-              Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
-            },
-            resultPath: JsonPath.DISCARD,
-          })
-        ).next(
-          // Finally, delete the user from DynamoDB
-          new DynamoDeleteItem(this, 'DeleteUserFromDynamoDB', {
-            table: props.dynamoTable,
-            key: {
-              PK: DynamoAttributeValue.fromString(
-                JsonPath.format('USER#{}', JsonPath.stringAt('$.existingUser.Item.user_id.S'))
-              ),
-              SK: DynamoAttributeValue.fromString('PROFILE'),
-            },
-            resultPath: JsonPath.DISCARD,
-          })
+        .when(
+          // Check if the user exists
+          Condition.isPresent('$.existingUser.Item'),
+          Chain.start(
+            // Delete from Algolia first
+            deleteFromAlgoliaTask
+          )
+            .next(
+              // Then delete the user from Cognito
+              new CallAwsService(this, 'DeleteCognitoUser', {
+                service: 'cognitoidentityprovider',
+                action: 'adminDeleteUser',
+                iamAction: 'cognito-idp:AdminDeleteUser',
+                iamResources: [
+                  `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
+                ],
+                parameters: {
+                  UserPoolId: props.userPool.userPoolId,
+                  Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
+                },
+                resultPath: JsonPath.DISCARD,
+              })
+            )
+            .next(
+              // Finally, delete the user from DynamoDB
+              new DynamoDeleteItem(this, 'DeleteUserFromDynamoDB', {
+                table: props.dynamoTable,
+                key: {
+                  PK: DynamoAttributeValue.fromString(
+                    JsonPath.format('USER#{}', JsonPath.stringAt('$.existingUser.Item.user_id.S'))
+                  ),
+                  SK: DynamoAttributeValue.fromString('PROFILE'),
+                },
+                resultPath: JsonPath.DISCARD,
+              })
+            )
+            .next(orderRefundedSuccess)
         )
-        .next(orderRefundedSuccess)
-      )
-      .otherwise(userNotFoundSuccess)
+        .otherwise(userNotFoundSuccess)
     );
 
     const handlerChoice = new Choice(this, 'HandlerChoice')
