@@ -52,17 +52,6 @@ export class UserStepFunctionStack extends Construct {
   constructor(scope: Construct, id: string, props: UserStepFunctionStackProps) {
     super(scope, id);
 
-    // Create the Lambda function for phone number processing
-    const processPhoneNumberLambda = new NodejsFunction(this, 'ProcessPhoneNumberFunction', {
-      functionName: `process-phone-number-${props.environmentName}`,
-      runtime: Runtime.NODEJS_22_X,
-      handler: 'handler',
-      entry: path.join(__dirname, '../../lambda/process-phone-number/index.ts'),
-      description: 'Processes phone numbers to ensure correct country code format',
-      timeout: Duration.seconds(10),
-      memorySize: 128,
-    });
-
     const validatePhoneNumberLambda = new PythonFunction(this, 'ValidatePhoneNumberFunction', {
       functionName: `validate-phone-number-${props.environmentName}`,
       entry: path.join(__dirname, '../../lambda/phone_validation'),
