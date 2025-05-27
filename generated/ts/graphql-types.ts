@@ -124,6 +124,7 @@ export type SponsorUser = {
   company?: Maybe<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
+  last_visit?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   short_id?: Maybe<Scalars['String']['output']>;
@@ -338,6 +339,7 @@ export type SponsorUserResolvers<ContextType = any, ParentType extends Resolvers
   company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   job_title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  last_visit?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   short_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

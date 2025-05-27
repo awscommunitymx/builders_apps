@@ -123,6 +123,7 @@ export type SponsorUser = {
   company?: Maybe<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
+  last_visit?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   short_id?: Maybe<Scalars['String']['output']>;

@@ -107,14 +107,10 @@ export default async function handleViewSponsorVisit(
     },
   };
   const messageQueryResult = await docClient.send(new QueryCommand(messageQueryParams));
-  if (!messageQueryResult.Items || messageQueryResult.Items.length === 0) {
-    logger.info('No se encontraron visitas de patrocinadores para el usuario', {
-      userId: updated.user_id,
-    });
-    throw new Error('No se encontraron visitas de patrocinadores para el usuario');
+  if (messageQueryResult.Items && messageQueryResult.Items.length > 0) {
+    updated.message = messageQueryResult.Items[0].message;
+    updated.last_visit = messageQueryResult.Items[0].last_visit;
   }
-
-  updated.message = messageQueryResult.Items[0].message;
 
   return updated;
 }

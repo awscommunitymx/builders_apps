@@ -1,6 +1,7 @@
 import { useParams } from 'react-router';
 import { PublicUserProfile } from '../components/PublicUserProfile';
 import { getLoggedInUser } from '../utils/getAuthenticatedUser';
+import { SponsorUserProfile } from '../components/SponsorUserProfile';
 
 export function UserProfileRoute() {
   const { id } = useParams<{ id: string }>() as { id: string };
@@ -9,13 +10,11 @@ export function UserProfileRoute() {
 
   return (
     <>
-      {loggedInUser?.groups.includes('Sponsor') && (
-        <div style={{ marginBottom: '20px' }}>
-          <h2>Admin View</h2>
-          <p>Admin users can view and manage all profiles.</p>
-        </div>
+      {loggedInUser?.groups.includes('Sponsors') ? (
+        <SponsorUserProfile id={id} />
+      ) : (
+        <PublicUserProfile id={id} />
       )}
-      <PublicUserProfile id={id} />;
     </>
   );
 }
