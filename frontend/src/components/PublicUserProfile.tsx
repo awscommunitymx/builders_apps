@@ -54,7 +54,6 @@ export function PublicUserProfile({ id }: PublicUserProfileProps) {
     </Button>
   );
 
-  // return <UserProfile initialId={id} loading={loading} error={error} user={data?.viewProfile} />;
   return (
     <>
       {showPinPrompt ? (
