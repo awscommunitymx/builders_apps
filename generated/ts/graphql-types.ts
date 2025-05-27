@@ -68,6 +68,12 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
+  getSponsorVisit?: Maybe<SponsorUser>;
+};
+
+
+export type QueryGetSponsorVisitArgs = {
+  short_id: Scalars['ID']['input'];
 };
 
 export type RegisterSponsorVisitInput = {
@@ -293,6 +299,7 @@ export type ProfileAccessResolvers<ContextType = any, ParentType extends Resolve
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  getSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<QueryGetSponsorVisitArgs, 'short_id'>>;
 };
 
 export type RoomResolvers<ContextType = any, ParentType extends ResolversParentTypes['Room'] = ResolversParentTypes['Room']> = {

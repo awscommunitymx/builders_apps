@@ -8,7 +8,7 @@ import {
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics } from '@aws-lambda-powertools/metrics';
-import { RegisterSponsorVisitInput, SponsorUser } from '@awscommunity/generated-ts';
+import { SponsorUser } from '@awscommunity/generated-ts';
 import { getAuthenticatedUser } from '../utils/getAuthenticatedUser';
 import { AppSyncIdentityCognito } from 'aws-lambda';
 
@@ -22,9 +22,9 @@ const client = tracer.captureAWSv3Client(new DynamoDBClient({}));
 const docClient = DynamoDBDocumentClient.from(client);
 const tableName = process.env.TABLE_NAME!;
 
-export default async function handleRegisterSponsorVisit(
+export default async function handleViewSponsorVisit(
   authenticatedUser: AppSyncIdentityCognito,
-  updates: RegisterSponsorVisitInput
+  shortId: string
 ): Promise<SponsorUser> {
   const authenticatedUserSub = authenticatedUser.sub;
 
@@ -39,7 +39,7 @@ export default async function handleRegisterSponsorVisit(
 
   const groups = authenticatedUser.groups || [];
   if (!groups.includes('Sponsors')) {
-    throw new Error('No tienes permisos para registrar visitas de patrocinadores');
+    throw new Error('No tienes permisos para ver visitas de patrocinadores');
   }
 
   const queryUserParams = {
@@ -47,7 +47,7 @@ export default async function handleRegisterSponsorVisit(
     IndexName: 'short_id-index',
     KeyConditionExpression: 'short_id = :short_id',
     ExpressionAttributeValues: {
-      ':short_id': updates.short_id,
+      ':short_id': shortId,
     },
     Limit: 1,
   };
@@ -73,7 +73,7 @@ export default async function handleRegisterSponsorVisit(
 
   const queryResult = await docClient.send(new QueryCommand(queryParams));
   if (!queryResult.Items || queryResult.Items.length === 0) {
-    logger.info('No estas asociado a ningun patrocinador', {
+    logger.info('No se encontraron visitas de patrocinadores para el usuario', {
       userId: authenticatedUserProfile.user_id,
     });
     throw new Error('Tu usuario no está asociado a ningún patrocinador');
@@ -86,35 +86,35 @@ export default async function handleRegisterSponsorVisit(
     IndexName: 'short_id-index',
     KeyConditionExpression: 'short_id = :short_id',
     ExpressionAttributeValues: {
-      ':short_id': updates.short_id,
+      ':short_id': shortId,
     },
     Limit: 1,
   };
   const userQueryResult = await docClient.send(new QueryCommand(userQueryParams));
   if (!userQueryResult.Items || userQueryResult.Items.length === 0) {
-    logger.info('User not found by short_id', { short_id: updates.short_id });
+    logger.info('User not found by short_id', { short_id: shortId });
     metrics.addMetric('UserNotFoundByShortId', 'Count', 1);
     throw new Error('Usuario no encontrado por short_id');
   }
   let updated = userQueryResult.Items[0] as SponsorUser;
 
-  const updateParams: UpdateCommandInput = {
+  const messageQueryParams = {
     TableName: tableName,
-    Key: { PK: `SPONSOR#${sponsorId}`, SK: `USER#${updated.user_id}` },
-    UpdateExpression: 'SET #lastVisit = :lastVisit, #message = :message',
-    ExpressionAttributeNames: {
-      '#lastVisit': 'lastVisit',
-      '#message': 'message',
-    },
+    KeyConditionExpression: 'PK = :pk AND SK = :sk',
     ExpressionAttributeValues: {
-      ':lastVisit': new Date().toISOString(),
-      ':message': updates.message || '',
+      ':pk': `SPONSOR#${sponsorId}`,
+      ':sk': `USER#${updated.user_id}`,
     },
   };
+  const messageQueryResult = await docClient.send(new QueryCommand(messageQueryParams));
+  if (!messageQueryResult.Items || messageQueryResult.Items.length === 0) {
+    logger.info('No se encontraron visitas de patrocinadores para el usuario', {
+      userId: updated.user_id,
+    });
+    throw new Error('No se encontraron visitas de patrocinadores para el usuario');
+  }
 
-  await docClient.send(new UpdateCommand(updateParams));
-
-  updated.message = updates.message || '';
+  updated.message = messageQueryResult.Items[0].message;
 
   return updated;
 }

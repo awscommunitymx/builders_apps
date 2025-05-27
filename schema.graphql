@@ -31,6 +31,7 @@ type ProfileAccess {
 
 type Query {
   getMyProfile: User
+  getSponsorVisit(short_id: ID!): SponsorUser
 }
 
 input UpdateUserInput {

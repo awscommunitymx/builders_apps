@@ -98,6 +98,11 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'registerSponsorVisit',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSponsorVisit', {
+      typeName: 'Query',
+      fieldName: 'getSponsorVisit',
+    });
   }
 
   private createOutputs(environmentName: string): void {

@@ -67,6 +67,12 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
+  getSponsorVisit?: Maybe<SponsorUser>;
+};
+
+
+export type QueryGetSponsorVisitArgs = {
+  short_id: Scalars['ID']['input'];
 };
 
 export type RegisterSponsorVisitInput = {
