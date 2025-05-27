@@ -1,4 +1,4 @@
-interface LoggedInUser {
+export interface LoggedInUser {
   username: string;
   groups: string[];
   sub: string;
