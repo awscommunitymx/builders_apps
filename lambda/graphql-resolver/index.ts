@@ -9,9 +9,11 @@ import {
   MutationUpdateUserArgs,
   User,
   UpdateUserInput,
+  MutationRegisterSponsorVisitArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
+import handleRegisterSponsorVisit from './handlers/registerSponsorVisit';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -39,6 +41,11 @@ export const handler = middy((async (event) => {
       const updates: Partial<Omit<User, 'user_id' | 'short_id'>> = {};
       const { input } = event.arguments as MutationUpdateUserArgs;
       return handleUpdateUser(identity.sub, input);
+    }
+
+    if (event.info.fieldName === 'registerSponsorVisit') {
+      const { input } = event.arguments as MutationRegisterSponsorVisitArgs;
+      return handleRegisterSponsorVisit(identity, input);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);
