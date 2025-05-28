@@ -109,7 +109,7 @@ export default async function handleViewSponsorVisit(
   const messageQueryResult = await docClient.send(new QueryCommand(messageQueryParams));
   if (messageQueryResult.Items && messageQueryResult.Items.length > 0) {
     updated.message = messageQueryResult.Items[0].message;
-    updated.last_visit = messageQueryResult.Items[0].last_visit;
+    updated.last_visit = messageQueryResult.Items[0].lastVisit;
   }
 
   return updated;

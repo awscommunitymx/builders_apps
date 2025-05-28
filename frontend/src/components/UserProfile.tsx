@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { User } from '@awscommunity/generated-react/hooks';
 import '@cloudscape-design/global-styles/index.css';
 import {
@@ -8,11 +7,11 @@ import {
   Container,
   KeyValuePairs,
   CopyToClipboard,
-  Button,
   Spinner,
   Flashbar,
   StatusIndicator,
 } from '@cloudscape-design/components';
+import { PropsWithChildren } from 'react';
 
 export interface UserProfileProps {
   initialId?: string;
@@ -29,7 +28,8 @@ export function UserProfile({
   user = null,
   actionButton = null,
   isMyProfile = false,
-}: UserProfileProps) {
+  children = null,
+}: PropsWithChildren<UserProfileProps>) {
   return (
     <ContentLayout
       header={
@@ -74,100 +74,103 @@ export function UserProfile({
           ]}
         />
       ) : (
-        <Container header={<Header variant="h2">Resumen</Header>}>
-          <KeyValuePairs
-            columns={1}
-            items={[
-              ...[
-                {
-                  label: 'ARN',
-                  value: loading ? (
-                    <Spinner />
-                  ) : (
-                    <CopyToClipboard
-                      copyButtonAriaLabel="Copy ARN"
-                      copyErrorText="ARN failed to copy"
-                      copySuccessText="ARN copied"
-                      textToCopy={`arn:aws:iam::${user?.user_id}:builder/${user?.name.toLowerCase().replace(/\s/g, '')}`}
-                      variant="inline"
-                    />
-                  ),
-                },
-                {
-                  label: 'Nombre',
-                  value: loading ? <Spinner /> : user?.name,
-                },
-                {
-                  label: 'Compañía',
-                  value: loading ? <Spinner /> : user?.company,
-                },
-              ],
-              ...(user?.job_title
-                ? [
-                    {
-                      label: 'Puesto',
-                      value: loading ? <Spinner /> : user?.job_title,
-                    },
-                  ]
-                : []),
-              ...(user?.email
-                ? [
-                    {
-                      label: 'Email',
-                      value: loading ? (
-                        <Spinner />
-                      ) : (
-                        <SpaceBetween direction="vertical" size="xs">
-                          {user?.email}
-                          {isMyProfile && (
-                            <StatusIndicator type={user?.share_email ? 'success' : 'error'}>
-                              {user?.share_email ? 'Compartiendo' : 'No se comparte'}
+        <SpaceBetween size="l">
+          <Container header={<Header variant="h2">Resumen</Header>}>
+            <KeyValuePairs
+              columns={1}
+              items={[
+                ...[
+                  {
+                    label: 'ARN',
+                    value: loading ? (
+                      <Spinner />
+                    ) : (
+                      <CopyToClipboard
+                        copyButtonAriaLabel="Copy ARN"
+                        copyErrorText="ARN failed to copy"
+                        copySuccessText="ARN copied"
+                        textToCopy={`arn:aws:iam::${user?.user_id}:builder/${user?.name.toLowerCase().replace(/\s/g, '')}`}
+                        variant="inline"
+                      />
+                    ),
+                  },
+                  {
+                    label: 'Nombre',
+                    value: loading ? <Spinner /> : user?.name,
+                  },
+                  {
+                    label: 'Compañía',
+                    value: loading ? <Spinner /> : user?.company,
+                  },
+                ],
+                ...(user?.job_title
+                  ? [
+                      {
+                        label: 'Puesto',
+                        value: loading ? <Spinner /> : user?.job_title,
+                      },
+                    ]
+                  : []),
+                ...(user?.email
+                  ? [
+                      {
+                        label: 'Email',
+                        value: loading ? (
+                          <Spinner />
+                        ) : (
+                          <SpaceBetween direction="vertical" size="xs">
+                            {user?.email}
+                            {isMyProfile && (
+                              <StatusIndicator type={user?.share_email ? 'success' : 'error'}>
+                                {user?.share_email ? 'Compartiendo' : 'No se comparte'}
+                              </StatusIndicator>
+                            )}
+                          </SpaceBetween>
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(user?.cell_phone
+                  ? [
+                      {
+                        label: 'Teléfono',
+                        value: loading ? (
+                          <Spinner />
+                        ) : (
+                          <SpaceBetween direction="vertical" size="xs">
+                            {user?.cell_phone}
+                            {isMyProfile && (
+                              <StatusIndicator type={user?.share_phone ? 'success' : 'error'}>
+                                {user?.share_phone ? 'Compartiendo' : 'No se comparte'}
+                              </StatusIndicator>
+                            )}
+                          </SpaceBetween>
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(user?.pin
+                  ? [
+                      {
+                        label: 'PIN',
+                        value: loading ? (
+                          <Spinner />
+                        ) : (
+                          <SpaceBetween direction="vertical" size="xs">
+                            {user?.pin}
+                            <StatusIndicator type={user?.pin ? 'success' : 'error'}>
+                              {user?.pin ? 'Configurado' : 'No configurado'}
                             </StatusIndicator>
-                          )}
-                        </SpaceBetween>
-                      ),
-                    },
-                  ]
-                : []),
-              ...(user?.cell_phone
-                ? [
-                    {
-                      label: 'Teléfono',
-                      value: loading ? (
-                        <Spinner />
-                      ) : (
-                        <SpaceBetween direction="vertical" size="xs">
-                          {user?.cell_phone}
-                          {isMyProfile && (
-                            <StatusIndicator type={user?.share_phone ? 'success' : 'error'}>
-                              {user?.share_phone ? 'Compartiendo' : 'No se comparte'}
-                            </StatusIndicator>
-                          )}
-                        </SpaceBetween>
-                      ),
-                    },
-                  ]
-                : []),
-              ...(user?.pin
-                ? [
-                    {
-                      label: 'PIN',
-                      value: loading ? (
-                        <Spinner />
-                      ) : (
-                        <SpaceBetween direction="vertical" size="xs">
-                          {user?.pin}
-                          <StatusIndicator type={user?.pin ? 'success' : 'error'}>
-                            {user?.pin ? 'Configurado' : 'No configurado'}
-                          </StatusIndicator>
-                        </SpaceBetween>
-                      ),
-                    },
-                  ]
-                : []),
-            ]}
-          />
-        </Container>
+                          </SpaceBetween>
+                        ),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </Container>
+          {children}
+        </SpaceBetween>
       )}
     </ContentLayout>
   );
