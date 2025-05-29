@@ -67,7 +67,7 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
-  getSponsorDashboard: Array<SponsorUser>;
+  getSponsorDashboard: SponsorDashboard;
   getSponsorVisit?: Maybe<SponsorUser>;
 };
 
@@ -116,6 +116,13 @@ export type Speaker = {
   __typename?: 'Speaker';
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+};
+
+export type SponsorDashboard = {
+  __typename?: 'SponsorDashboard';
+  sponsor_name: Scalars['String']['output'];
+  total_visits: Scalars['Int']['output'];
+  visits: Array<SponsorUser>;
 };
 
 export type SponsorUser = {

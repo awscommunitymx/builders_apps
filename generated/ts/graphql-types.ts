@@ -68,7 +68,7 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
-  getSponsorDashboard: Array<SponsorUser>;
+  getSponsorDashboard: SponsorDashboard;
   getSponsorVisit?: Maybe<SponsorUser>;
 };
 
@@ -117,6 +117,13 @@ export type Speaker = {
   __typename?: 'Speaker';
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+};
+
+export type SponsorDashboard = {
+  __typename?: 'SponsorDashboard';
+  sponsor_name: Scalars['String']['output'];
+  total_visits: Scalars['Int']['output'];
+  visits: Array<SponsorUser>;
 };
 
 export type SponsorUser = {
@@ -240,6 +247,7 @@ export type ResolversTypes = {
   Session: ResolverTypeWrapper<Session>;
   SessionStatus: SessionStatus;
   Speaker: ResolverTypeWrapper<Speaker>;
+  SponsorDashboard: ResolverTypeWrapper<SponsorDashboard>;
   SponsorUser: ResolverTypeWrapper<SponsorUser>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   UpdateUserInput: UpdateUserInput;
@@ -261,6 +269,7 @@ export type ResolversParentTypes = {
   Room: Room;
   Session: Session;
   Speaker: Speaker;
+  SponsorDashboard: SponsorDashboard;
   SponsorUser: SponsorUser;
   String: Scalars['String']['output'];
   UpdateUserInput: UpdateUserInput;
@@ -301,7 +310,7 @@ export type ProfileAccessResolvers<ContextType = any, ParentType extends Resolve
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  getSponsorDashboard?: Resolver<Array<ResolversTypes['SponsorUser']>, ParentType, ContextType>;
+  getSponsorDashboard?: Resolver<ResolversTypes['SponsorDashboard'], ParentType, ContextType>;
   getSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<QueryGetSponsorVisitArgs, 'short_id'>>;
 };
 
@@ -333,6 +342,13 @@ export type SessionResolvers<ContextType = any, ParentType extends ResolversPare
 export type SpeakerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Speaker'] = ResolversParentTypes['Speaker']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SponsorDashboardResolvers<ContextType = any, ParentType extends ResolversParentTypes['SponsorDashboard'] = ResolversParentTypes['SponsorDashboard']> = {
+  sponsor_name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  total_visits?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  visits?: Resolver<Array<ResolversTypes['SponsorUser']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -374,6 +390,7 @@ export type Resolvers<ContextType = any> = {
   Room?: RoomResolvers<ContextType>;
   Session?: SessionResolvers<ContextType>;
   Speaker?: SpeakerResolvers<ContextType>;
+  SponsorDashboard?: SponsorDashboardResolvers<ContextType>;
   SponsorUser?: SponsorUserResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };

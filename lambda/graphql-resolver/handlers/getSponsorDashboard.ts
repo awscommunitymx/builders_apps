@@ -9,7 +9,7 @@ import {
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics } from '@aws-lambda-powertools/metrics';
-import { SponsorUser } from '@awscommunity/generated-ts';
+import { SponsorDashboard, SponsorUser } from '@awscommunity/generated-ts';
 import { getAuthenticatedUser } from '../utils/getAuthenticatedUser';
 import { AppSyncIdentityCognito } from 'aws-lambda';
 
@@ -25,7 +25,7 @@ const tableName = process.env.TABLE_NAME!;
 
 export default async function getSponsorDashboard(
   authenticatedUser: AppSyncIdentityCognito
-): Promise<Array<SponsorUser>> {
+): Promise<SponsorDashboard> {
   const authenticatedUserSub = authenticatedUser.sub;
   const segment = tracer.getSegment();
 
@@ -65,6 +65,24 @@ export default async function getSponsorDashboard(
 
   const sponsorId = queryResult.Items[0].SK.split('#')[1];
 
+  const getSponsorMetadataParams = {
+    TableName: tableName,
+    Key: {
+      PK: `SPONSOR#${sponsorId}`,
+      SK: 'METADATA',
+    },
+  };
+
+  const sponsorMetadataSegment = segment?.addNewSubsegment('GetSponsorMetadata');
+  sponsorMetadataSegment?.addAnnotation('sponsorId', sponsorId);
+  const sponsorMetadataResult = await docClient.send(new GetCommand(getSponsorMetadataParams));
+  sponsorMetadataSegment?.close();
+  if (!sponsorMetadataResult.Item) {
+    logger.info('No se encontró metadata del patrocinador', { sponsorId });
+    throw new Error('No se encontró metadata del patrocinador');
+  }
+  const sponsorMetadata = sponsorMetadataResult.Item;
+
   const sponsorScanQueryParams = {
     TableName: tableName,
     KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
@@ -82,7 +100,11 @@ export default async function getSponsorDashboard(
     logger.info('No se encontraron usuarios asociados al patrocinador', {
       sponsorId,
     });
-    return [];
+    return {
+      sponsor_name: sponsorMetadata.name,
+      visits: [],
+      total_visits: 0,
+    };
   }
   sponsorScanSegment?.close();
 
@@ -118,5 +140,9 @@ export default async function getSponsorDashboard(
   logger.info('Sponsor dashboard retrieved successfully', {
     sponsorUsersCount: sponsorUsers.length,
   });
-  return sponsorUsers;
+  return {
+    sponsor_name: sponsorMetadata.name,
+    visits: sponsorUsers,
+    total_visits: sponsorUsers.length,
+  };
 }

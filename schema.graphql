@@ -30,10 +30,16 @@ type ProfileAccess {
   timestamp: String!
 }
 
+type SponsorDashboard {
+  sponsor_name: String!
+  visits: [SponsorUser!]!
+  total_visits: Int!
+}
+
 type Query {
   getMyProfile: User
   getSponsorVisit(short_id: ID!): SponsorUser
-  getSponsorDashboard: [SponsorUser!]!
+  getSponsorDashboard: SponsorDashboard!
 }
 
 input UpdateUserInput {
