@@ -19,6 +19,8 @@ import {
   StatusIndicator,
   Box,
   ColumnLayout,
+  BarChart,
+  PieChart,
 } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router';
 
@@ -153,6 +155,78 @@ export function SponsorDashboardRoute() {
     if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
     return `Hace ${Math.floor(diffDays / 30)} meses`;
   };
+
+  // Process chart data
+  const chartData = useMemo(() => {
+    if (!data?.getSponsorDashboard?.visits) return [];
+
+    // Group visits by date
+    const visitsByDate: { [key: string]: number } = {};
+
+    data.getSponsorDashboard.visits.forEach((visit: SponsorUser) => {
+      if (visit.last_visit) {
+        const date = new Date(visit.last_visit);
+        const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+        visitsByDate[dateKey] = (visitsByDate[dateKey] || 0) + 1;
+      }
+    });
+
+    // Convert to chart format and sort by date
+    const chartSeries = Object.entries(visitsByDate)
+      .map(([date, count]) => ({
+        x: new Date(date),
+        y: count,
+      }))
+      .sort((a, b) => a.x.getTime() - b.x.getTime());
+
+    return chartSeries;
+  }, [data]);
+
+  // Process hourly distribution data for bar chart
+  const hourlyData = useMemo(() => {
+    if (!data?.getSponsorDashboard?.visits) return [];
+
+    const visitsByHour: { [key: number]: number } = {};
+
+    // Initialize all hours
+    for (let i = 0; i < 24; i++) {
+      visitsByHour[i] = 0;
+    }
+
+    data.getSponsorDashboard.visits.forEach((visit: SponsorUser) => {
+      if (visit.last_visit) {
+        const date = new Date(visit.last_visit);
+        const hour = date.getHours();
+        visitsByHour[hour]++;
+      }
+    });
+
+    return Object.entries(visitsByHour).map(([hour, count]) => ({
+      x: `${hour}:00`,
+      y: count,
+    }));
+  }, [data]);
+
+  // Process company distribution data for pie chart
+  const companyData = useMemo(() => {
+    if (!data?.getSponsorDashboard?.visits) return [];
+
+    const visitsByCompany: { [key: string]: number } = {};
+
+    data.getSponsorDashboard.visits.forEach((visit: SponsorUser) => {
+      const company = visit.company || 'Sin especificar';
+      visitsByCompany[company] = (visitsByCompany[company] || 0) + 1;
+    });
+
+    // Convert to pie chart format and get top 10 companies
+    return Object.entries(visitsByCompany)
+      .map(([company, count]) => ({
+        title: company,
+        value: count,
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10); // Show only top 10 companies
+  }, [data]);
 
   // Table columns definition
   const columnDefinitions = [
@@ -312,6 +386,105 @@ export function SponsorDashboardRoute() {
                   </Container>
                 </ColumnLayout>
               )}
+
+              {/* Visits Analytics Charts */}
+              {dashboardData &&
+                (chartData.length > 0 || hourlyData.length > 0 || companyData.length > 0) && (
+                  <SpaceBetween size="l">
+                    {/* Hourly and Company Distribution - Side by Side */}
+                    <ColumnLayout columns={2} borders="horizontal">
+                      {/* Hourly Distribution */}
+                      <Container
+                        header={
+                          <Header
+                            variant="h3"
+                            description="Distribución de visitas por hora del día"
+                          >
+                            Horarios de Visitas
+                          </Header>
+                        }
+                      >
+                        <BarChart
+                          series={[
+                            {
+                              title: 'Visitas por hora',
+                              type: 'bar',
+                              data: hourlyData,
+                              color: '#037f0c',
+                            },
+                          ]}
+                          xDomain={hourlyData.map((d) => d.x)}
+                          yDomain={[0, Math.max(...hourlyData.map((d) => d.y), 1)]}
+                          i18nStrings={{
+                            filterLabel: 'Filtrar series',
+                            filterPlaceholder: 'Filtrar series',
+                            filterSelectedAriaLabel: 'Serie seleccionada',
+                            detailPopoverDismissAriaLabel: 'Cerrar popover',
+                            legendAriaLabel: 'Leyenda',
+                            chartAriaRoleDescription: 'Gráfico de barras',
+                            xTickFormatter: (value) => value.toString(),
+                            yTickFormatter: (value) => value.toString(),
+                          }}
+                          ariaLabel="Gráfico de distribución horaria de visitas"
+                          height={300}
+                          hideLegend
+                          empty={
+                            <Box textAlign="center" color="inherit">
+                              <b>No hay datos disponibles</b>
+                              <Box padding={{ bottom: 's' }} variant="p" color="inherit">
+                                No hay suficientes datos para mostrar la distribución horaria.
+                              </Box>
+                            </Box>
+                          }
+                        />
+                      </Container>
+
+                      {/* Company Distribution */}
+                      {companyData.length > 0 && (
+                        <Container
+                          header={
+                            <Header
+                              variant="h3"
+                              description="Top 10 empresas por número de visitas"
+                            >
+                              Empresas Visitantes
+                            </Header>
+                          }
+                        >
+                          <PieChart
+                            data={companyData}
+                            detailPopoverContent={(datum) => [
+                              { key: 'Empresa', value: datum.title },
+                              { key: 'Visitas', value: datum.value.toString() },
+                              {
+                                key: 'Porcentaje',
+                                value: `${((datum.value / data?.getSponsorDashboard?.visits?.length || 1) * 100).toFixed(1)}%`,
+                              },
+                            ]}
+                            i18nStrings={{
+                              detailsValue: 'Valor',
+                              detailsPercentage: 'Porcentaje',
+                              filterLabel: 'Filtrar',
+                              filterPlaceholder: 'Filtrar datos',
+                              filterSelectedAriaLabel: 'seleccionado',
+                              detailPopoverDismissAriaLabel: 'Cerrar popover',
+                              legendAriaLabel: 'Leyenda',
+                              chartAriaRoleDescription: 'Gráfico circular',
+                              segmentAriaRoleDescription: 'Segmento',
+                            }}
+                            ariaLabel="Distribución de visitas por empresa"
+                            errorText="Error al cargar el gráfico"
+                            loadingText="Cargando gráfico..."
+                            recoveryText="Reintentar"
+                            innerMetricDescription="empresas"
+                            innerMetricValue={companyData.length.toString()}
+                            variant="donut"
+                          />
+                        </Container>
+                      )}
+                    </ColumnLayout>
+                  </SpaceBetween>
+                )}
 
               {/* Visitors Table */}
               <Container
