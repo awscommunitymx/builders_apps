@@ -15,6 +15,7 @@ import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
 import handleRegisterSponsorVisit from './handlers/registerSponsorVisit';
 import handleViewSponsorVisit from './handlers/viewSponsorVisit';
+import getSponsorDashboard from './handlers/getSponsorDashboard';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -56,6 +57,10 @@ export const handler = middy((async (event) => {
     if (event.info.fieldName === 'getSponsorVisit') {
       const { short_id } = event.arguments as QueryGetSponsorVisitArgs;
       return handleViewSponsorVisit(identity, short_id);
+    }
+
+    if (event.info.fieldName === 'getSponsorDashboard') {
+      return getSponsorDashboard(identity);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

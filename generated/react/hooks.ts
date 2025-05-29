@@ -67,6 +67,7 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
+  getSponsorDashboard: Array<SponsorUser>;
   getSponsorVisit?: Maybe<SponsorUser>;
 };
 

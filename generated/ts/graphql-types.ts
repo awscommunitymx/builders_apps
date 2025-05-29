@@ -68,6 +68,7 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
+  getSponsorDashboard: Array<SponsorUser>;
   getSponsorVisit?: Maybe<SponsorUser>;
 };
 
@@ -300,6 +301,7 @@ export type ProfileAccessResolvers<ContextType = any, ParentType extends Resolve
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  getSponsorDashboard?: Resolver<Array<ResolversTypes['SponsorUser']>, ParentType, ContextType>;
   getSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<QueryGetSponsorVisitArgs, 'short_id'>>;
 };
 

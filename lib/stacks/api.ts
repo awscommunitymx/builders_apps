@@ -103,6 +103,11 @@ export class ApiStack extends Construct {
       typeName: 'Query',
       fieldName: 'getSponsorVisit',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSponsorDashboard', {
+      typeName: 'Query',
+      fieldName: 'getSponsorDashboard',
+    });
   }
 
   private createOutputs(environmentName: string): void {
