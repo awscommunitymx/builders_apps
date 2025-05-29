@@ -25,8 +25,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<App />} />
                 <Route path="/profile/:id" element={<UserProfileRoute />} />
                 <Route path="/profile" element={<MyProfileRoute />} />
+                <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
               </Route>
-              <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
             </Routes>
           </BrowserRouter>
         </ApolloProvider>
