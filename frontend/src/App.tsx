@@ -13,6 +13,7 @@ import {
 
 import iamUrl from './assets/iam.svg';
 import eventbridgeUrl from './assets/EventBridge.svg';
+import { getLoggedInUser } from './utils/getAuthenticatedUser';
 
 // Interface for the data property in board items
 interface BoardItemData {
@@ -45,6 +46,8 @@ function boardItem(text: string, imgUrl: string, url: string) {
 }
 
 function App() {
+  const loggedInUser = getLoggedInUser();
+
   const services = [
     {
       title: 'Perfil',
@@ -56,6 +59,15 @@ function App() {
       imgUrl: eventbridgeUrl,
       url: '/agenda',
     },
+    ...(loggedInUser?.groups.includes('Sponsors')
+      ? [
+          {
+            title: 'Panel de Patrocinadores',
+            imgUrl: iamUrl, // Using IAM icon for now, can be changed later
+            url: '/sponsor-dashboard',
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -69,8 +81,17 @@ function App() {
               text: 'Builders App',
             }}
             items={[
-              { type: 'link', text: `Mi perfil`, href: `/profile` },
-              { type: 'link', text: `Agenda`, href: `/agenda` },
+              { type: 'link' as const, text: `Mi perfil`, href: `/profile` },
+              { type: 'link' as const, text: `Agenda`, href: `/agenda` },
+              ...(loggedInUser?.groups.includes('Sponsors')
+                ? [
+                    {
+                      type: 'link' as const,
+                      text: `Panel de Patrocinadores`,
+                      href: `/sponsor-dashboard`,
+                    },
+                  ]
+                : []),
             ]}
           />
         }
