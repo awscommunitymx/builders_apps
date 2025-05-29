@@ -9,9 +9,11 @@ import {
   MutationUpdateUserArgs,
   User,
   UpdateUserInput,
+  Session
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
+import { simulateAgendaUpdate, simulateRoomAgendaUpdate } from './handlers/simulateAgendaUpdate';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -19,7 +21,11 @@ const tracer = new Tracer({ serviceName: SERVICE_NAME });
 const logger = new Logger({ serviceName: SERVICE_NAME });
 const metrics = new Metrics({ namespace: 'Profiles', serviceName: SERVICE_NAME });
 
-type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs;
+type HandlerArgs =
+  | MutationViewProfileArgs
+  | MutationUpdateUserArgs
+  | { session: Session }
+  | { roomId: string; session: Session };;
 
 export const handler = middy((async (event) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -39,6 +45,14 @@ export const handler = middy((async (event) => {
       const updates: Partial<Omit<User, 'user_id' | 'short_id'>> = {};
       const { input } = event.arguments as MutationUpdateUserArgs;
       return handleUpdateUser(identity.sub, input);
+    }
+
+    if (event.info.fieldName === 'simulateAgendaUpdate') {
+      return simulateAgendaUpdate(event.arguments.session);
+    }
+
+    if (event.info.fieldName === 'simulateRoomAgendaUpdate') {
+      return simulateRoomAgendaUpdate(event.arguments.roomId, event.arguments.session);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

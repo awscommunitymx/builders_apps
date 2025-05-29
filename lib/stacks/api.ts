@@ -93,6 +93,34 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'updateUser',
     });
+
+    // Simulate agenda mutation (general)
+    lambdaDataSource.createResolver('GraphQLResolverSimulateAgendaUpdate', {
+      typeName: 'Mutation',
+      fieldName: 'simulateAgendaUpdate',
+    });
+
+    // Simulate agenda mutation (room-specific)
+    lambdaDataSource.createResolver('GraphQLResolverSimulateRoomAgendaUpdate', {
+      typeName: 'Mutation',
+      fieldName: 'simulateRoomAgendaUpdate',
+    });
+
+    // Subscription: general agenda updates
+    lambdaDataSource.createResolver('GraphQLResolverOnAgendaUpdate', {
+      typeName: 'Subscription',
+      fieldName: 'onAgendaUpdate',
+      requestMappingTemplate: appsync.MappingTemplate.fromString('{}'),
+      responseMappingTemplate: appsync.MappingTemplate.fromString('$util.toJson($ctx.result)'),
+    });
+
+    // Subscription: room-specific agenda updates
+    lambdaDataSource.createResolver('GraphQLResolverOnRoomAgendaUpdate', {
+      typeName: 'Subscription',
+      fieldName: 'onRoomAgendaUpdate',
+      requestMappingTemplate: appsync.MappingTemplate.fromString('{}'),
+      responseMappingTemplate: appsync.MappingTemplate.fromString('$util.toJson($ctx.result)'),
+    });
   }
 
   private createOutputs(environmentName: string): void {
