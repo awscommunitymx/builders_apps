@@ -10,7 +10,7 @@ import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { truncateLambdaName } from '../../utils/lambda';
 
 const TWILIO_MESSAGING_SERVICE_SID = 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90';
-const TWILIO_CONTENT_SID = 'HX83af14ebee4976b69d1f45d0c90cfcf3';
+const TWILIO_CONTENT_SID = 'HX95f1413fb86f339d0cf3199e8e69e04e';
 
 interface LambdaStackProps {
   environmentName: string;

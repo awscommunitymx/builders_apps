@@ -311,10 +311,11 @@ def lambda_handler(event, context):
         content_variables = {
             "1": nombre_usuario,
             "2": "AWS Community Day México 2025", 
-            "3": "14 de junio",
-            "4": "Expo Reforma, Ciudad de México",
-            "5": "day.awscommunity.mx",
-            "6": qr_code_url.replace("https://qrcodes-cdmx25-us-east-1.s3.amazonaws.com/", "")
+            "3": texto_qr,
+            "4": "14 de junio de 2025",
+            "5": "Expo Reforma, Ciudad de México",
+            "6": "day.awscommunity.mx",
+            "7": qr_code_url.replace("https://qrcodes-cdmx25-us-east-1.s3.amazonaws.com/", "")
         }
         
         # Send the message
