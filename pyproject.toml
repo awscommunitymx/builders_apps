@@ -1,0 +1,18 @@
+[project]
+name = "builders-apps"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.38.26",
+    "phonenumbers>=9.0.6",
+    "pillow>=11.2.1",
+    "qrcode>=8.2",
+    "twilio>=9.6.2",
+]
+
+[dependency-groups]
+dev = [
+    "ipython>=9.2.0",
+]
