@@ -8,10 +8,14 @@ import {
   MutationViewProfileArgs,
   MutationUpdateUserArgs,
   User,
-  UpdateUserInput,
+  MutationRegisterSponsorVisitArgs,
+  QueryGetSponsorVisitArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
+import handleRegisterSponsorVisit from './handlers/registerSponsorVisit';
+import handleViewSponsorVisit from './handlers/viewSponsorVisit';
+import getSponsorDashboard from './handlers/getSponsorDashboard';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -19,7 +23,11 @@ const tracer = new Tracer({ serviceName: SERVICE_NAME });
 const logger = new Logger({ serviceName: SERVICE_NAME });
 const metrics = new Metrics({ namespace: 'Profiles', serviceName: SERVICE_NAME });
 
-type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs;
+type HandlerArgs =
+  | MutationViewProfileArgs
+  | MutationUpdateUserArgs
+  | MutationRegisterSponsorVisitArgs
+  | QueryGetSponsorVisitArgs;
 
 export const handler = middy((async (event) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -39,6 +47,20 @@ export const handler = middy((async (event) => {
       const updates: Partial<Omit<User, 'user_id' | 'short_id'>> = {};
       const { input } = event.arguments as MutationUpdateUserArgs;
       return handleUpdateUser(identity.sub, input);
+    }
+
+    if (event.info.fieldName === 'registerSponsorVisit') {
+      const { input } = event.arguments as MutationRegisterSponsorVisitArgs;
+      return handleRegisterSponsorVisit(identity, input);
+    }
+
+    if (event.info.fieldName === 'getSponsorVisit') {
+      const { short_id } = event.arguments as QueryGetSponsorVisitArgs;
+      return handleViewSponsorVisit(identity, short_id);
+    }
+
+    if (event.info.fieldName === 'getSponsorDashboard') {
+      return getSponsorDashboard(identity);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

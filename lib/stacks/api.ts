@@ -93,6 +93,21 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'updateUser',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverRegisterSponsorVisit', {
+      typeName: 'Mutation',
+      fieldName: 'registerSponsorVisit',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSponsorVisit', {
+      typeName: 'Query',
+      fieldName: 'getSponsorVisit',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSponsorDashboard', {
+      typeName: 'Query',
+      fieldName: 'getSponsorDashboard',
+    });
   }
 
   private createOutputs(environmentName: string): void {

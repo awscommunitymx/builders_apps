@@ -9,6 +9,19 @@ type User {
   share_email: Boolean
   pin: Int
   initialized: Boolean
+  short_id: String
+}
+
+type SponsorUser {
+  user_id: ID!
+  name: String!
+  company: String
+  job_title: String
+  cell_phone: String
+  email: String
+  short_id: String
+  message: String
+  last_visit: String
 }
 
 type ProfileAccess {
@@ -17,8 +30,16 @@ type ProfileAccess {
   timestamp: String!
 }
 
+type SponsorDashboard {
+  sponsor_name: String!
+  visits: [SponsorUser!]!
+  total_visits: Int!
+}
+
 type Query {
   getMyProfile: User
+  getSponsorVisit(short_id: ID!): SponsorUser
+  getSponsorDashboard: SponsorDashboard!
 }
 
 input UpdateUserInput {
@@ -27,6 +48,11 @@ input UpdateUserInput {
   pin: Int
   share_email: Boolean
   share_phone: Boolean
+}
+
+input RegisterSponsorVisitInput {
+  short_id: ID!
+  message: String
 }
 
 mutation UpdateUser($input: UpdateUserInput!) {
@@ -44,6 +70,7 @@ mutation UpdateUser($input: UpdateUserInput!) {
 type Mutation {
   viewProfile(id: String!, pin: String!): User
   updateUser(input: UpdateUserInput!): User
+  registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
 }
 
 schema {

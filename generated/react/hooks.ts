@@ -36,8 +36,14 @@ export type CategoryItem = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  registerSponsorVisit?: Maybe<SponsorUser>;
   updateUser?: Maybe<User>;
   viewProfile?: Maybe<User>;
+};
+
+
+export type MutationRegisterSponsorVisitArgs = {
+  input: RegisterSponsorVisitInput;
 };
 
 
@@ -61,6 +67,18 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getMyProfile?: Maybe<User>;
+  getSponsorDashboard: SponsorDashboard;
+  getSponsorVisit?: Maybe<SponsorUser>;
+};
+
+
+export type QueryGetSponsorVisitArgs = {
+  short_id: Scalars['ID']['input'];
+};
+
+export type RegisterSponsorVisitInput = {
+  message?: InputMaybe<Scalars['String']['input']>;
+  short_id: Scalars['ID']['input'];
 };
 
 export type Room = {
@@ -100,6 +118,26 @@ export type Speaker = {
   name: Scalars['String']['output'];
 };
 
+export type SponsorDashboard = {
+  __typename?: 'SponsorDashboard';
+  sponsor_name: Scalars['String']['output'];
+  total_visits: Scalars['Int']['output'];
+  visits: Array<SponsorUser>;
+};
+
+export type SponsorUser = {
+  __typename?: 'SponsorUser';
+  cell_phone?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  job_title?: Maybe<Scalars['String']['output']>;
+  last_visit?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  short_id?: Maybe<Scalars['String']['output']>;
+  user_id: Scalars['ID']['output'];
+};
+
 export type UpdateUserInput = {
   company?: InputMaybe<Scalars['String']['input']>;
   pin?: InputMaybe<Scalars['Int']['input']>;
@@ -119,5 +157,6 @@ export type User = {
   pin?: Maybe<Scalars['Int']['output']>;
   share_email?: Maybe<Scalars['Boolean']['output']>;
   share_phone?: Maybe<Scalars['Boolean']['output']>;
+  short_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };

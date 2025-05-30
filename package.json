@@ -23,6 +23,7 @@
     "storybook": "npm run storybook --workspace=frontend"
   },
   "devDependencies": {
+    "@aws-cdk/aws-lambda-python-alpha": "^2.198.0-alpha.0",
     "@faker-js/faker": "^9.7.0",
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/typescript": "^4.1.5",

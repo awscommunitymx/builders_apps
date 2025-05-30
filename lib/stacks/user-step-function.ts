@@ -31,6 +31,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53_targets from 'aws-cdk-lib/aws-route53-targets';
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 
 interface UserStepFunctionStackProps {
   environmentName: string;
@@ -42,6 +43,7 @@ interface UserStepFunctionStackProps {
   eventbriteApiKeySecretArn: string;
   algoliaApiKeySecretArn: string;
   algoliaAppIdSecretArn: string;
+  twilioMessageSender: PythonFunction;
 }
 
 export class UserStepFunctionStack extends Construct {
@@ -51,13 +53,13 @@ export class UserStepFunctionStack extends Construct {
   constructor(scope: Construct, id: string, props: UserStepFunctionStackProps) {
     super(scope, id);
 
-    // Create the Lambda function for phone number processing
-    const processPhoneNumberLambda = new NodejsFunction(this, 'ProcessPhoneNumberFunction', {
-      functionName: `process-phone-number-${props.environmentName}`,
-      runtime: Runtime.NODEJS_22_X,
-      handler: 'handler',
-      entry: path.join(__dirname, '../../lambda/process-phone-number/index.ts'),
-      description: 'Processes phone numbers to ensure correct country code format',
+    const validatePhoneNumberLambda = new PythonFunction(this, 'ValidatePhoneNumberFunction', {
+      functionName: `validate-phone-number-${props.environmentName}`,
+      entry: path.join(__dirname, '../../lambda/phone_validation'),
+      runtime: Runtime.PYTHON_3_11,
+      handler: 'lambda_handler',
+      index: 'handler.py',
+      description: 'Validates phone numbers to ensure they are in the correct format',
       timeout: Duration.seconds(10),
       memorySize: 128,
     });
@@ -157,12 +159,29 @@ export class UserStepFunctionStack extends Construct {
             user_id: JsonPath.stringAt('$.body.order_id'),
             email: JsonPath.stringAt('$.body.profile.email'),
             name: JsonPath.stringAt('$.body.profile.name'),
-            cell_phone: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
+            cell_phone: JsonPath.stringAt(
+              '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+            ),
           },
           action: JsonPath.stringAt('$.config.action'),
         }),
       }
     );
+
+    // Create Twilio WhatsApp message sender task
+    const sendWhatsAppMessage = new LambdaInvoke(this, 'SendWhatsAppMessage', {
+      lambdaFunction: props.twilioMessageSender,
+      inputPath: '$',
+      resultPath: '$.whatsappResult',
+      payloadResponseOnly: true,
+      payload: TaskInput.fromObject({
+        nombre_usuario: JsonPath.stringAt('$.body.profile.first_name'),
+        email_usuario: JsonPath.stringAt('$.body.profile.email'),
+        telefono: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber.clean_phone'),
+        texto_qr: JsonPath.stringAt('$.body.order_id'),
+        nombre_completo: JsonPath.stringAt('$.body.profile.name'),
+      }),
+    });
 
     // Create the Lambda function for Algolia deletions
 
@@ -259,8 +278,18 @@ export class UserStepFunctionStack extends Construct {
       payloadResponseOnly: true,
     });
 
+    // Create a Pass step to add tempEmail variable
+    const addTempEmailPass = new Pass(this, 'AddTempEmail', {
+      parameters: {
+        'body.$': '$.body',
+        'config.$': '$.config',
+        tempEmail: JsonPath.format('tmp_order+{}@awscommunity.mx', JsonPath.stringAt('$.body.id')),
+      },
+    });
+
     // Add the createCognitoUserTask to the Map state
-    const processAttendees = Chain.start(generateShortIdTask)
+    const processAttendees = Chain.start(addTempEmailPass)
+      .next(generateShortIdTask)
       .next(
         new DynamoPutItem(this, 'CreateUser', {
           table: props.dynamoTable,
@@ -269,7 +298,7 @@ export class UserStepFunctionStack extends Construct {
               JsonPath.format('USER#{}', JsonPath.stringAt('$.body.id'))
             ),
             SK: DynamoAttributeValue.fromString('PROFILE'),
-            email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.email')),
+            email: DynamoAttributeValue.fromString(JsonPath.stringAt('$.tempEmail')),
             name: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.name')),
             user_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.body.id')),
             short_id: DynamoAttributeValue.fromString(JsonPath.stringAt('$.shortIdResult')),
@@ -290,7 +319,7 @@ export class UserStepFunctionStack extends Construct {
           ],
           service: 'cognitoidentityprovider',
           parameters: {
-            Username: JsonPath.stringAt('$.body.email'),
+            Username: JsonPath.stringAt('$.tempEmail'),
             UserPoolId: props.userPool.userPoolId,
             MessageAction: 'SUPPRESS',
           },
@@ -312,7 +341,7 @@ export class UserStepFunctionStack extends Construct {
           service: 'cognitoidentityprovider',
           parameters: {
             UserPoolId: props.userPool.userPoolId,
-            Username: JsonPath.stringAt('$.body.email'),
+            Username: JsonPath.stringAt('$.tempEmail'),
             GroupName: 'Attendees',
           },
           resultPath: JsonPath.DISCARD,
@@ -411,102 +440,124 @@ export class UserStepFunctionStack extends Construct {
                     Condition.isPresent('$.body.profile.cell_phone'),
                     Chain.start(
                       new LambdaInvoke(this, 'ProcessPhoneNumber', {
-                        lambdaFunction: processPhoneNumberLambda,
+                        lambdaFunction: validatePhoneNumberLambda,
                         inputPath: '$.body.profile.cell_phone',
                         resultSelector: {
-                          'processedPhoneNumber.$': '$.Payload.processedPhoneNumber',
+                          'processedPhoneNumber.$': '$.Payload',
                         },
                         resultPath: '$.processedPhoneNumber',
                       })
-                    )
-                      .next(
-                        // First, get the existing item to check the current phone number
-                        new CallAwsService(this, 'GetExistingUserForPhone', {
-                          service: 'dynamodb',
-                          action: 'getItem',
-                          iamResources: [props.dynamoTable.tableArn],
-                          iamAction: 'dynamodb:GetItem',
-                          parameters: {
-                            TableName: props.dynamoTable.tableName,
-                            Key: {
-                              PK: {
-                                S: JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id')),
-                              },
-                              SK: {
-                                S: 'PROFILE',
-                              },
-                            },
-                          },
-                          resultPath: '$.existingUserForPhone',
-                        })
-                      )
-                      .next(
-                        new DynamoUpdateItem(this, 'SetCellPhone', {
-                          table: props.dynamoTable,
-                          key: {
-                            PK: DynamoAttributeValue.fromString(
-                              JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                    ).next(
+                      new Choice(this, 'ProcessedPhoneNumberPresent')
+                        .when(
+                          Condition.booleanEquals(
+                            JsonPath.stringAt(
+                              '$.processedPhoneNumber.processedPhoneNumber.validation_result.is_valid'
                             ),
-                            SK: DynamoAttributeValue.fromString('PROFILE'),
-                          },
-                          expressionAttributeValues: {
-                            ':cell_phone': DynamoAttributeValue.fromString(
-                              JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber')
-                            ),
-                          },
-                          updateExpression: 'SET cell_phone = :cell_phone',
-                          conditionExpression: 'attribute_exists(PK)',
-                          resultPath: JsonPath.DISCARD,
-                        })
-                      )
-                      .next(
-                        new Choice(this, 'PhoneNumberChanged')
-                          .when(
-                            // Check if the phone number has changed
-                            Condition.or(
-                              // If the cell_phone attribute doesn't exist yet
-                              Condition.not(
-                                Condition.isPresent('$.existingUserForPhone.Item.cell_phone')
-                              ),
-                              // Or if the value is different from the processed phone number
-                              Condition.not(
-                                Condition.stringEqualsJsonPath(
-                                  JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber'),
-                                  JsonPath.stringAt('$.existingUserForPhone.Item.cell_phone.S')
-                                )
-                              )
-                            ),
-                            // Update the user's phone number in Cognito
-                            new CallAwsService(this, 'UpdateCognitoUserPhone', {
-                              service: 'cognitoidentityprovider',
-                              action: 'adminUpdateUserAttributes',
-                              iamAction: 'cognito-idp:AdminUpdateUserAttributes',
-                              iamResources: [
-                                `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
-                                  cdk.Stack.of(this).account
-                                }:userpool/${props.userPool.userPoolId}`,
-                              ],
+                            true
+                          ),
+                          Chain.start(
+                            new CallAwsService(this, 'GetExistingUserForPhone', {
+                              service: 'dynamodb',
+                              action: 'getItem',
+                              iamResources: [props.dynamoTable.tableArn],
+                              iamAction: 'dynamodb:GetItem',
                               parameters: {
-                                UserPoolId: props.userPool.userPoolId,
-                                Username: JsonPath.stringAt('$.existingUserForPhone.Item.email.S'),
-                                UserAttributes: [
-                                  {
-                                    Name: 'phone_number',
-                                    Value: JsonPath.stringAt(
-                                      '$.processedPhoneNumber.processedPhoneNumber'
+                                TableName: props.dynamoTable.tableName,
+                                Key: {
+                                  PK: {
+                                    S: JsonPath.format(
+                                      'USER#{}',
+                                      JsonPath.stringAt('$.body.order_id')
                                     ),
                                   },
-                                  {
-                                    Name: 'phone_number_verified',
-                                    Value: 'true',
+                                  SK: {
+                                    S: 'PROFILE',
                                   },
-                                ],
+                                },
                               },
-                              resultPath: JsonPath.DISCARD,
+                              resultPath: '$.existingUserForPhone',
                             })
                           )
-                          .otherwise(new Succeed(this, 'PhoneNumberNotChanged'))
-                      )
+                            .next(
+                              new DynamoUpdateItem(this, 'SetCellPhone', {
+                                table: props.dynamoTable,
+                                key: {
+                                  PK: DynamoAttributeValue.fromString(
+                                    JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                                  ),
+                                  SK: DynamoAttributeValue.fromString('PROFILE'),
+                                },
+                                expressionAttributeValues: {
+                                  ':cell_phone': DynamoAttributeValue.fromString(
+                                    JsonPath.stringAt(
+                                      '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+                                    )
+                                  ),
+                                },
+                                updateExpression: 'SET cell_phone = :cell_phone',
+                                conditionExpression: 'attribute_exists(PK)',
+                                resultPath: JsonPath.DISCARD,
+                              })
+                            )
+                            .next(sendWhatsAppMessage)
+                            .next(
+                              new Choice(this, 'PhoneNumberChanged')
+                                .when(
+                                  // Check if the phone number has changed
+                                  Condition.or(
+                                    // If the cell_phone attribute doesn't exist yet
+                                    Condition.not(
+                                      Condition.isPresent('$.existingUserForPhone.Item.cell_phone')
+                                    ),
+                                    // Or if the value is different from the processed phone number
+                                    Condition.not(
+                                      Condition.stringEqualsJsonPath(
+                                        JsonPath.stringAt(
+                                          '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+                                        ),
+                                        JsonPath.stringAt(
+                                          '$.existingUserForPhone.Item.cell_phone.S'
+                                        )
+                                      )
+                                    )
+                                  ),
+                                  // Update the user's phone number in Cognito
+                                  new CallAwsService(this, 'UpdateCognitoUserPhone', {
+                                    service: 'cognitoidentityprovider',
+                                    action: 'adminUpdateUserAttributes',
+                                    iamAction: 'cognito-idp:AdminUpdateUserAttributes',
+                                    iamResources: [
+                                      `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${
+                                        cdk.Stack.of(this).account
+                                      }:userpool/${props.userPool.userPoolId}`,
+                                    ],
+                                    parameters: {
+                                      UserPoolId: props.userPool.userPoolId,
+                                      Username: JsonPath.stringAt(
+                                        '$.existingUserForPhone.Item.email.S'
+                                      ),
+                                      UserAttributes: [
+                                        {
+                                          Name: 'phone_number',
+                                          Value: JsonPath.stringAt(
+                                            '$.processedPhoneNumber.processedPhoneNumber.clean_phone'
+                                          ),
+                                        },
+                                        {
+                                          Name: 'phone_number_verified',
+                                          Value: 'true',
+                                        },
+                                      ],
+                                    },
+                                    resultPath: JsonPath.DISCARD,
+                                  })
+                                )
+                                .otherwise(new Succeed(this, 'PhoneNumberNotChanged'))
+                            )
+                        )
+                        .otherwise(new Fail(this, 'InvalidPhoneNumberFormatFail'))
+                    )
                   )
                   .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
               )
@@ -668,43 +719,45 @@ export class UserStepFunctionStack extends Construct {
       })
     ).next(
       new Choice(this, 'UserExistsForRefund')
-      .when(
-        // Check if the user exists
-        Condition.isPresent('$.existingUser.Item'),
-        Chain.start(
-          // Delete from Algolia first
-          deleteFromAlgoliaTask
-        ).next (
-          // Then delete the user from Cognito
-          new CallAwsService(this, 'DeleteCognitoUser', {
-            service: 'cognitoidentityprovider',
-            action: 'adminDeleteUser',
-            iamAction: 'cognito-idp:AdminDeleteUser',
-            iamResources: [
-              `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
-            ],
-            parameters: {
-              UserPoolId: props.userPool.userPoolId,
-              Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
-            },
-            resultPath: JsonPath.DISCARD,
-          })
-        ).next(
-          // Finally, delete the user from DynamoDB
-          new DynamoDeleteItem(this, 'DeleteUserFromDynamoDB', {
-            table: props.dynamoTable,
-            key: {
-              PK: DynamoAttributeValue.fromString(
-                JsonPath.format('USER#{}', JsonPath.stringAt('$.existingUser.Item.user_id.S'))
-              ),
-              SK: DynamoAttributeValue.fromString('PROFILE'),
-            },
-            resultPath: JsonPath.DISCARD,
-          })
+        .when(
+          // Check if the user exists
+          Condition.isPresent('$.existingUser.Item'),
+          Chain.start(
+            // Delete from Algolia first
+            deleteFromAlgoliaTask
+          )
+            .next(
+              // Then delete the user from Cognito
+              new CallAwsService(this, 'DeleteCognitoUser', {
+                service: 'cognitoidentityprovider',
+                action: 'adminDeleteUser',
+                iamAction: 'cognito-idp:AdminDeleteUser',
+                iamResources: [
+                  `arn:aws:cognito-idp:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:userpool/${props.userPool.userPoolId}`,
+                ],
+                parameters: {
+                  UserPoolId: props.userPool.userPoolId,
+                  Username: JsonPath.stringAt('$.existingUser.Item.email.S'),
+                },
+                resultPath: JsonPath.DISCARD,
+              })
+            )
+            .next(
+              // Finally, delete the user from DynamoDB
+              new DynamoDeleteItem(this, 'DeleteUserFromDynamoDB', {
+                table: props.dynamoTable,
+                key: {
+                  PK: DynamoAttributeValue.fromString(
+                    JsonPath.format('USER#{}', JsonPath.stringAt('$.existingUser.Item.user_id.S'))
+                  ),
+                  SK: DynamoAttributeValue.fromString('PROFILE'),
+                },
+                resultPath: JsonPath.DISCARD,
+              })
+            )
+            .next(orderRefundedSuccess)
         )
-        .next(orderRefundedSuccess)
-      )
-      .otherwise(userNotFoundSuccess)
+        .otherwise(userNotFoundSuccess)
     );
 
     const handlerChoice = new Choice(this, 'HandlerChoice')

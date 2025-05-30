@@ -139,6 +139,7 @@ export class BackendStack extends cdk.Stack {
       eventbriteApiKeySecretArn: props.eventbriteApiKeySecretArn,
       algoliaApiKeySecretArn: props.algoliaApiKeySecretArn,
       algoliaAppIdSecretArn: props.algoliaAppIdSecretArn,
+      twilioMessageSender: lambdaStack.twilioMessageSender,
     });
 
     // Expose API URL and Key

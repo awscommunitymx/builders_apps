@@ -11,6 +11,7 @@ import { AuthProvider } from './AuthContext.tsx';
 import { AwsRumProvider } from './AwsRumProvider.tsx';
 import ErrorBoundary from './ErrorBoundary.tsx';
 import { MyProfileRoute } from './routes/MyProfileRoute.tsx';
+import { SponsorDashboardRoute } from './routes/SponsorDashboardRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<App />} />
                 <Route path="/profile/:id" element={<UserProfileRoute />} />
                 <Route path="/profile" element={<MyProfileRoute />} />
+                <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
               </Route>
             </Routes>
           </BrowserRouter>
