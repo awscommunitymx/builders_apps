@@ -236,6 +236,7 @@ def lambda_handler(event, context):
         email_usuario = event.get('email_usuario')
         telefono = event.get('telefono')
         texto_qr = event.get('texto_qr')
+        nombre_completo = event.get('nombre_completo')
 
         # Validate required parameters
         if not nombre_usuario:
@@ -284,10 +285,10 @@ def lambda_handler(event, context):
             telefono = 'whatsapp:' + telefono.lstrip('whatsapp:')
         
         # Step 2: Generate QR code image and upload to S3
-        print(f"Generating QR code for {nombre_usuario}")
+        print(f"Generating QR code for {nombre_completo}")
         nombre_archivo, qr_code_url = generar_qr_y_subir_s3(
             texto_qr, 
-            nombre_usuario, 
+            nombre_completo, 
             email_usuario, 
             texto_qr
         )
