@@ -67,7 +67,7 @@ def generar_qr_y_subir_s3(texto_qr, nombre_usuario, email_usuario, texto):
             version=1,  # Version 1 (21x21 modules)
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
-            border=4,
+            border=1,
         )
         
         # Add data - Version 1 can hold up to 25 alphanumeric characters
@@ -94,15 +94,15 @@ def generar_qr_y_subir_s3(texto_qr, nombre_usuario, email_usuario, texto):
             background = Image.new('RGBA', (background_width, background_height), (0, 32, 64, 255))  # Color azul oscuro
             print("Using programmatic background as fallback")
         
-        # Calcular el tamaño del QR (aproximadamente 1/3 del ancho de la imagen de fondo)
-        qr_size = background.width // 3
+        # Calcular el tamaño del QR (aproximadamente 30% del ancho de la imagen de fondo)
+        qr_size = int(background.width * 0.3)
         qr_image = qr_image.resize((qr_size, qr_size))  # type: ignore
         
         # Crear un fondo negro del mismo tamaño que el QR
         black_background = Image.new('RGBA', (qr_size, qr_size), (0, 0, 0, 255))
         
         # Calcular la posición para centrar el QR en la parte derecha
-        x_position = background.width - qr_size - (background.width // 8)  # 1/8 del ancho desde el borde derecho
+        x_position = background.width - qr_size - (background.width // 16)  # 1/16 del ancho desde el borde derecho
         y_position = (background.height - qr_size) // 2  # Centrado verticalmente
         
         # Crear una nueva imagen con fondo transparente
