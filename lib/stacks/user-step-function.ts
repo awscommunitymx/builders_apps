@@ -178,7 +178,7 @@ export class UserStepFunctionStack extends Construct {
         nombre_usuario: JsonPath.stringAt('$.body.profile.first_name'),
         email_usuario: JsonPath.stringAt('$.body.profile.email'),
         telefono: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber.clean_phone'),
-        texto_qr: JsonPath.stringAt('$.body.order_id'),
+        texto_qr: JsonPath.stringAt('$.body.barcodes[0].barcode'),
         nombre_completo: JsonPath.stringAt('$.body.profile.name'),
       }),
     });
