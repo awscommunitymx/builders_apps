@@ -786,20 +786,34 @@ export class UserStepFunctionStack extends Construct {
         .otherwise(userNotFoundSuccess)
     );
 
+    // Pass state to inject order_id into body.id for cancelled/refunded orders
+    const injectOrderIdIntoBodyId = new Pass(this, 'InjectOrderIdIntoBodyId', {
+      parameters: {
+        body: {
+          'id.$': '$.body.order_id',
+          'order_id.$': '$.body.order_id',
+          'cancelled.$': '$.body.cancelled',
+          'refunded.$': '$.body.refunded',
+        },
+        'config.$': '$.config',
+        'statusCode.$': '$.statusCode',
+      },
+    }).next(processAttendeesDelete);
+
     const handlerChoice = new Choice(this, 'HandlerChoice')
       .when(
         Condition.and(
           Condition.isPresent('$.body.cancelled'),
           Condition.booleanEquals('$.body.cancelled', true)
         ),
-        processAttendeesDelete
+        injectOrderIdIntoBodyId
       )
       .when(
         Condition.and(
           Condition.isPresent('$.body.refunded'),
           Condition.booleanEquals('$.body.refunded', true)
         ),
-        processAttendeesDelete
+        injectOrderIdIntoBodyId
       )
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
       .when(Condition.stringEquals('$.config.action', 'attendee.updated'), processAttendeesUpdate)
