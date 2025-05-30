@@ -63,7 +63,7 @@ export class BackendStack extends cdk.Stack {
       authDomain: props.authDomain,
       certificate: domainCert,
       hostedZone: hostedZone,
-      groups: ['Attendees', 'Sponsors'],
+      groups: ['Attendees', 'Sponsors', 'CheckInVolunteers'],
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {

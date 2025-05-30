@@ -178,7 +178,7 @@ export class UserStepFunctionStack extends Construct {
         nombre_usuario: JsonPath.stringAt('$.body.profile.first_name'),
         email_usuario: JsonPath.stringAt('$.body.profile.email'),
         telefono: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber.clean_phone'),
-        texto_qr: JsonPath.stringAt('$.body.order_id'),
+        texto_qr: JsonPath.stringAt('$.body.barcodes[0].barcode'),
         nombre_completo: JsonPath.stringAt('$.body.profile.name'),
       }),
     });
@@ -671,6 +671,30 @@ export class UserStepFunctionStack extends Construct {
                     )
                   )
                   .otherwise(new Succeed(this, 'EmailNotPresent'))
+              )
+              .branch(
+                new Choice(this, 'BarcodePresent')
+                  .when(
+                    Condition.isPresent('$.body.barcodes[0].barcode'),
+                    new DynamoUpdateItem(this, 'SetBarcode', {
+                      table: props.dynamoTable,
+                      key: {
+                        PK: DynamoAttributeValue.fromString(
+                          JsonPath.format('USER#{}', JsonPath.stringAt('$.body.order_id'))
+                        ),
+                        SK: DynamoAttributeValue.fromString('PROFILE'),
+                      },
+                      expressionAttributeValues: {
+                        ':barcode': DynamoAttributeValue.fromString(
+                          JsonPath.stringAt('$.body.barcodes[0].barcode')
+                        ),
+                      },
+                      updateExpression: 'SET barcode = :barcode',
+                      conditionExpression: 'attribute_exists(PK)',
+                      resultPath: JsonPath.DISCARD,
+                    })
+                  )
+                  .otherwise(new Succeed(this, 'BarcodeNotPresent'))
               )
           )
           .next(
