@@ -499,6 +499,7 @@ export class UserStepFunctionStack extends Construct {
                                 resultPath: JsonPath.DISCARD,
                               })
                             )
+                            .next(sendWhatsAppMessage)
                             .next(
                               new Choice(this, 'PhoneNumberChanged')
                                 .when(
@@ -681,7 +682,6 @@ export class UserStepFunctionStack extends Construct {
             })
           )
           .next(updateAlgoliaAfterProfileUpdate)
-          .next(sendWhatsAppMessage)
           .next(attendeeUpdatedSuccess)
       );
 
