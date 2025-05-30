@@ -43,6 +43,7 @@ interface UserStepFunctionStackProps {
   eventbriteApiKeySecretArn: string;
   algoliaApiKeySecretArn: string;
   algoliaAppIdSecretArn: string;
+  twilioMessageSender: PythonFunction;
 }
 
 export class UserStepFunctionStack extends Construct {
@@ -166,6 +167,20 @@ export class UserStepFunctionStack extends Construct {
         }),
       }
     );
+
+    // Create Twilio WhatsApp message sender task
+    const sendWhatsAppMessage = new LambdaInvoke(this, 'SendWhatsAppMessage', {
+      lambdaFunction: props.twilioMessageSender,
+      inputPath: '$',
+      resultPath: '$.whatsappResult',
+      payloadResponseOnly: true,
+      payload: TaskInput.fromObject({
+        nombre_usuario: JsonPath.stringAt('$.body.profile.name'),
+        email_usuario: JsonPath.stringAt('$.body.profile.email'),
+        telefono: JsonPath.stringAt('$.processedPhoneNumber.processedPhoneNumber.clean_phone'),
+        texto_qr: JsonPath.stringAt('$.body.order_id'),
+      }),
+    });
 
     // Create the Lambda function for Algolia deletions
 
@@ -666,6 +681,7 @@ export class UserStepFunctionStack extends Construct {
             })
           )
           .next(updateAlgoliaAfterProfileUpdate)
+          .next(sendWhatsAppMessage)
           .next(attendeeUpdatedSuccess)
       );
 

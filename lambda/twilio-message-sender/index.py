@@ -83,11 +83,11 @@ def generar_qr_y_subir_s3(texto_qr, nombre_usuario, email_usuario, texto):
         # Load the background image
         try:
             # Try to load back.png from the same directory as the Lambda function
-            background_path = os.path.join(os.path.dirname(__file__), 'back.png')
+            background_path = os.path.join(os.path.dirname(__file__), 'back.jpg')
             background = Image.open(background_path)
             print(f"Background image loaded from: {background_path}")
         except Exception as e:
-            print(f"Could not load back.png: {str(e)}")
+            print(f"Could not load back.jpg: {str(e)}")
             # Fallback to programmatic background if back.png is not found
             background_width = 800
             background_height = 600
