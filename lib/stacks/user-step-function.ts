@@ -558,7 +558,7 @@ export class UserStepFunctionStack extends Construct {
                                 .otherwise(new Succeed(this, 'PhoneNumberNotChanged'))
                             )
                         )
-                        .otherwise(new Fail(this, 'InvalidPhoneNumberFormatFail'))
+                        .otherwise(new Succeed(this, 'InvalidPhoneNumberFormatFail'))
                     )
                   )
                   .otherwise(new Succeed(this, 'CellPhoneNotPresent'))
