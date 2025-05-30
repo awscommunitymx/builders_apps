@@ -441,7 +441,9 @@ export class UserStepFunctionStack extends Construct {
                     Chain.start(
                       new LambdaInvoke(this, 'ProcessPhoneNumber', {
                         lambdaFunction: validatePhoneNumberLambda,
-                        inputPath: '$.body.profile.cell_phone',
+                        payload: TaskInput.fromObject({
+                          phoneNumber: JsonPath.stringAt('$.body.profile.cell_phone'),
+                        }),
                         resultSelector: {
                           'processedPhoneNumber.$': '$.Payload',
                         },
@@ -785,11 +787,23 @@ export class UserStepFunctionStack extends Construct {
     );
 
     const handlerChoice = new Choice(this, 'HandlerChoice')
+      .when(
+        Condition.and(
+          Condition.isPresent('$.body.cancelled'),
+          Condition.booleanEquals('$.body.cancelled', true)
+        ),
+        processAttendeesDelete
+      )
+      .when(
+        Condition.and(
+          Condition.isPresent('$.body.refunded'),
+          Condition.booleanEquals('$.body.refunded', true)
+        ),
+        processAttendeesDelete
+      )
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
       .when(Condition.stringEquals('$.config.action', 'attendee.updated'), processAttendeesUpdate)
-      .when(Condition.stringEquals('$.config.action', 'order.refunded'), processAttendeesDelete)
-      .when(Condition.booleanEquals('$.body.cancelled', true), processAttendeesDelete)
-      .when(Condition.booleanEquals('$.body.refunded', true), processAttendeesDelete);
+      .when(Condition.stringEquals('$.config.action', 'order.refunded'), processAttendeesDelete);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
       .when(Condition.numberEquals('$.statusCode', 200), handlerChoice)
