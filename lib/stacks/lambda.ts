@@ -134,6 +134,7 @@ export class LambdaStack extends Construct {
         TWILIO_MESSAGING_SERVICE_SID: TWILIO_MESSAGING_SERVICE_SID,
         TWILIO_CONTENT_SID: TWILIO_CONTENT_SID,
         ENVIRONMENT: props.environmentName,
+        WELCOME_MESSAGE_TABLE_NAME: 'welcome_message',
       },
       timeout: cdk.Duration.minutes(5),
       memorySize: 512,
@@ -158,6 +159,24 @@ export class LambdaStack extends Construct {
         actions: ['secretsmanager:GetSecretValue'],
         resources: [
           `arn:aws:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:twilio-credentials*`,
+        ],
+      })
+    );
+
+    // Grant DynamoDB permissions for the welcome_message table (managed outside CDK)
+    this.twilioMessageSender.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'dynamodb:PutItem',
+          'dynamodb:UpdateItem',
+          'dynamodb:GetItem',
+          'dynamodb:Query',
+          'dynamodb:Scan',
+        ],
+        resources: [
+          `arn:aws:dynamodb:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:table/welcome_message`,
+          `arn:aws:dynamodb:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:table/welcome_message/*`,
         ],
       })
     );

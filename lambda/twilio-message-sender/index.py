@@ -4,6 +4,7 @@ import io
 import random
 import string
 import requests
+from datetime import datetime
 from twilio.rest import Client
 import boto3
 from botocore.exceptions import ClientError
@@ -17,6 +18,8 @@ region_name = os.environ.get('AWS_REGION', 'us-east-1')
 # Retrieve secrets from AWS Secrets Manager
 secrets_client = boto3.client('secretsmanager', region_name=region_name)
 s3_client = boto3.client('s3', region_name='us-east-1')  # type: ignore
+dynamodb = boto3.resource('dynamodb', region_name=region_name)
+welcome_message_table = dynamodb.Table(os.environ.get('WELCOME_MESSAGE_TABLE_NAME', 'welcome_message'))
 try:
     get_secret_value_response = secrets_client.get_secret_value(SecretId=secret_name)
     if 'SecretString' in get_secret_value_response:
@@ -208,9 +211,11 @@ def generar_qr_y_subir_s3(texto_qr, nombre_usuario, email_usuario, texto):
 def lambda_handler(event, context):
     """
     Lambda function to:
-    1. Generate QR code image locally with user info
-    2. Upload to S3
-    3. Send WhatsApp message via Twilio with the QR code
+    1. Write to DynamoDB welcome_message table
+    2. Generate QR code image locally with user info
+    3. Upload to S3
+    4. Send WhatsApp message via Twilio with the QR code
+    5. Clean up DynamoDB record if any step fails
     
     Expected event structure:
     {
@@ -221,6 +226,10 @@ def lambda_handler(event, context):
     }
     """
     
+    # Track if we've written to DynamoDB for cleanup purposes
+    dynamo_written = False
+    telefono_clean = None
+    
     try:
         # Extract parameters from event
         nombre_usuario = event.get('nombre_usuario')
@@ -230,41 +239,51 @@ def lambda_handler(event, context):
 
         # Validate required parameters
         if not nombre_usuario:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({
-                    'error': 'nombre_usuario is required'
-                })
-            }
+            raise ValueError('nombre_usuario is required')
         
         if not email_usuario:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({
-                    'error': 'email_usuario is required'
-                })
-            }
+            raise ValueError('email_usuario is required')
         
         if not telefono:
+            raise ValueError('telefono is required')
+        
+        if not texto_qr:
+            raise ValueError('texto_qr is required')
+        
+        # Clean phone number for DynamoDB storage (remove whatsapp: prefix if present)
+        telefono_clean = telefono.lstrip('whatsapp:')
+        
+        # Step 1: Atomically write to DynamoDB to prevent duplicates (conditional put)
+        try:
+            welcome_message_table.put_item(
+                Item={
+                    'phone_number': telefono_clean,
+                    'created_at': datetime.utcnow().isoformat()
+                },
+                ConditionExpression='attribute_not_exists(phone_number)'
+            )
+            dynamo_written = True
+            print(f"Successfully wrote phone number to DynamoDB: {telefono_clean}")
+        except welcome_message_table.meta.client.exceptions.ConditionalCheckFailedException:
+            # Phone number already exists - skip processing and return success
+            print(f"Phone number already processed, skipping: {telefono_clean}")
             return {
-                'statusCode': 400,
+                'statusCode': 200,
                 'body': json.dumps({
-                    'error': 'telefono is required'
+                    'message': 'Phone number already processed, skipped',
+                    'phone_number': telefono_clean,
+                    'skipped': True
                 })
             }
+        except Exception as e:
+            print(f"Error writing to DynamoDB: {str(e)}")
+            raise RuntimeError(f'Failed to write to database: {str(e)}')
         
+        # Format phone number for WhatsApp
         if not telefono.startswith('whatsapp:'):
             telefono = 'whatsapp:' + telefono.lstrip('whatsapp:')
         
-        if not texto_qr:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({
-                    'error': 'texto_qr is required'
-                })
-            }
-        
-        # Step 1: Generate QR code image and upload to S3
+        # Step 2: Generate QR code image and upload to S3
         print(f"Generating QR code for {nombre_usuario}")
         nombre_archivo, qr_code_url = generar_qr_y_subir_s3(
             texto_qr, 
@@ -274,12 +293,15 @@ def lambda_handler(event, context):
         )
         
         if not qr_code_url:
-            return {
-                'statusCode': 500,
-                'body': json.dumps({
-                    'error': 'Failed to generate or upload QR code'
-                })
-            }
+            # Cleanup DynamoDB record before failing
+            if dynamo_written and telefono_clean:
+                try:
+                    welcome_message_table.delete_item(Key={'phone_number': telefono_clean})
+                    print(f"Cleaned up DynamoDB record for phone: {telefono_clean}")
+                except Exception as cleanup_error:
+                    print(f"Error cleaning up DynamoDB record: {str(cleanup_error)}")
+            
+            raise RuntimeError('Failed to generate or upload QR code')
         
         
         # Step 3: Initialize Twilio client and send message
@@ -303,7 +325,6 @@ def lambda_handler(event, context):
             to=telefono
         )
         
-        
         print(f"Message sent successfully. SID: {message.sid}")
         
         # Return success response
@@ -321,13 +342,17 @@ def lambda_handler(event, context):
         
     except Exception as e:
         print(f"Error in lambda execution: {str(e)}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({
-                'error': 'Failed to process request',
-                'details': str(e)
-            })
-        }
+        
+        # Cleanup DynamoDB record if we wrote to it
+        if dynamo_written and telefono_clean:
+            try:
+                welcome_message_table.delete_item(Key={'phone_number': telefono_clean})
+                print(f"Cleaned up DynamoDB record for phone: {telefono_clean}")
+            except Exception as cleanup_error:
+                print(f"Error cleaning up DynamoDB record: {str(cleanup_error)}")
+        
+        # Re-raise the exception to let Lambda runtime handle it
+        raise
 
 
 def send_event_notification_with_qr(nombre_usuario, email_usuario, telefono, texto_qr):
