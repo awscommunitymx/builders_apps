@@ -11,31 +11,29 @@ from PIL import Image, ImageDraw, ImageFont
 import qrcode
 import qrcode.constants
 
+secret_name = os.environ['TWILIO_SECRET_NAME']
+
+region_name = os.environ.get('AWS_REGION', 'us-east-1')
+# Retrieve secrets from AWS Secrets Manager
+secrets_client = boto3.client('secretsmanager', region_name=region_name)
+s3_client = boto3.client('s3', region_name='us-east-1')  # type: ignore
+try:
+    get_secret_value_response = secrets_client.get_secret_value(SecretId=secret_name)
+    if 'SecretString' in get_secret_value_response:
+        secrets = json.loads(get_secret_value_response['SecretString'])
+    else:
+        raise ValueError("SecretString not found in the response")
+except ClientError as e:
+    print(f"Error retrieving secret {secret_name}: {str(e)}")
+    raise e
+
+account_sid = secrets['account_sid']
+auth_token = secrets['auth_token']
+
 
 def generar_numero_aleatorio(longitud=10):
     """Genera un número aleatorio de la longitud especificada."""
     return ''.join(random.choices(string.digits, k=longitud))
-
-
-def get_secret(secret_name, region_name="us-east-1"):
-    """
-    Retrieve secrets from AWS Secrets Manager
-    """
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        raise e
-
-    secret = get_secret_value_response['SecretString']
-    return json.loads(secret)
 
 
 def generar_qr_y_subir_s3(texto_qr, nombre_usuario, email_usuario, texto):
@@ -166,7 +164,6 @@ def generar_qr_y_subir_s3(texto_qr, nombre_usuario, email_usuario, texto):
     # Configurar cliente S3
     try:
         # Usar las credenciales de IAM del Lambda
-        s3_client = boto3.client('s3', region_name='us-east-1')  # type: ignore
         
         # Guardar la imagen en un buffer de bytes
         img_byte_array = io.BytesIO()
@@ -219,17 +216,45 @@ def lambda_handler(event, context):
     {
         "nombre_usuario": "Sebastián Marines",
         "email_usuario": "sebastian0marines@gmail.com",
-        "telefono": "whatsapp:+529992683078",
+        "telefono": "+529992683078",
         "texto_qr": "1236232744320242871263001"
     }
     """
     
     try:
         # Extract parameters from event
-        nombre_usuario = event.get('nombre_usuario', 'Usuario')
-        email_usuario = event.get('email_usuario', 'usuario@email.com')
-        telefono = event.get('telefono', 'whatsapp:+529992683078')
-        texto_qr = event.get('texto_qr', '')
+        nombre_usuario = event.get('nombre_usuario')
+        email_usuario = event.get('email_usuario')
+        telefono = event.get('telefono')
+        texto_qr = event.get('texto_qr')
+
+        # Validate required parameters
+        if not nombre_usuario:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({
+                    'error': 'nombre_usuario is required'
+                })
+            }
+        
+        if not email_usuario:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({
+                    'error': 'email_usuario is required'
+                })
+            }
+        
+        if not telefono:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({
+                    'error': 'telefono is required'
+                })
+            }
+        
+        if not telefono.startswith('whatsapp:'):
+            telefono = 'whatsapp:' + telefono.lstrip('whatsapp:')
         
         if not texto_qr:
             return {
@@ -256,17 +281,6 @@ def lambda_handler(event, context):
                 })
             }
         
-        # Step 2: Get Twilio credentials
-        if 'TWILIO_SECRET_NAME' in os.environ:
-            # Get credentials from Secrets Manager
-            secret_name = os.environ['TWILIO_SECRET_NAME']
-            secrets = get_secret(secret_name)
-            account_sid = secrets['account_sid']
-            auth_token = secrets['auth_token']
-        else:
-            # Fallback to environment variables
-            account_sid = os.environ.get('TWILIO_ACCOUNT_SID', 'AC865224bbdcfbf2e81f9fe68bba01d143')
-            auth_token = os.environ.get('TWILIO_AUTH_TOKEN', '21dfd0e42342faf76a86c030c0dba75e')
         
         # Step 3: Initialize Twilio client and send message
         client = Client(account_sid, auth_token)
@@ -283,8 +297,8 @@ def lambda_handler(event, context):
         
         # Send the message
         message = client.messages.create(
-            from_=os.environ.get('TWILIO_MESSAGING_SERVICE_SID', 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90'),
-            content_sid=os.environ.get('TWILIO_CONTENT_SID', 'HX83af14ebee4976b69d1f45d0c90cfcf3'),
+            from_=os.environ.get('TWILIO_MESSAGING_SERVICE_SID'),
+            content_sid=os.environ.get('TWILIO_CONTENT_SID'),
             content_variables=json.dumps(content_variables),
             to=telefono
         )

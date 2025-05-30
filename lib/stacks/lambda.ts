@@ -6,7 +6,11 @@ import * as path from 'path';
 import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { truncateLambdaName } from '../../utils/lambda';
+
+const TWILIO_MESSAGING_SERVICE_SID = 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90';
+const TWILIO_CONTENT_SID = 'HX83af14ebee4976b69d1f45d0c90cfcf3';
 
 interface LambdaStackProps {
   environmentName: string;
@@ -16,6 +20,7 @@ interface LambdaStackProps {
 export class LambdaStack extends Construct {
   public readonly graphQLResolver: NodejsFunction;
   public readonly eventbriteWebhookHandler: NodejsFunction;
+  public readonly twilioMessageSender: PythonFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
@@ -114,6 +119,51 @@ export class LambdaStack extends Construct {
     // Add Function URL
 
     this.eventbriteWebhookHandler.addFunctionUrl({
+      authType: lambdaUrl.FunctionUrlAuthType.NONE,
+    });
+
+    // Create the Python Lambda function for Twilio message sender
+    this.twilioMessageSender = new PythonFunction(this, 'TwilioMessageSender', {
+      functionName: truncateLambdaName('TwilioMessageSender', props.environmentName),
+      runtime: lambda.Runtime.PYTHON_3_11,
+      handler: 'lambda_handler',
+      entry: path.join(__dirname, '../../lambda/twilio-message-sender'),
+      environment: {
+        S3_BUCKET_NAME: 'qrcodes-cdmx25-us-east-1',
+        TWILIO_SECRET_NAME: `twilio-credentials`,
+        TWILIO_MESSAGING_SERVICE_SID: TWILIO_MESSAGING_SERVICE_SID,
+        TWILIO_CONTENT_SID: TWILIO_CONTENT_SID,
+        ENVIRONMENT: props.environmentName,
+      },
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 512,
+      bundling: {
+        assetExcludes: ['.git', '.gitignore', '__pycache__', '*.pyc'],
+      },
+    });
+
+    // Grant S3 permissions to Twilio Lambda for the existing bucket
+    this.twilioMessageSender.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+        resources: ['arn:aws:s3:::qrcodes-cdmx25-us-east-1/*'],
+      })
+    );
+
+    // Grant Secrets Manager permissions
+    this.twilioMessageSender.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [
+          `arn:aws:secretsmanager:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:secret:twilio-credentials*`,
+        ],
+      })
+    );
+
+    // Add Function URL for Twilio Lambda
+    this.twilioMessageSender.addFunctionUrl({
       authType: lambdaUrl.FunctionUrlAuthType.NONE,
     });
   }
