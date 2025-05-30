@@ -45,6 +45,15 @@ export class DatabaseStack extends Construct {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    this.table.addGlobalSecondaryIndex({
+      indexName: 'barcode-index',
+      partitionKey: {
+        name: 'barcode',
+        type: dynamodb.AttributeType.STRING,
+      },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // Export the table name
     new cdk.CfnOutput(this, 'TableName', {
       value: this.table.tableName,
