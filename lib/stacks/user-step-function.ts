@@ -787,7 +787,9 @@ export class UserStepFunctionStack extends Construct {
     const handlerChoice = new Choice(this, 'HandlerChoice')
       .when(Condition.stringEquals('$.config.action', 'order.placed'), processAttendees)
       .when(Condition.stringEquals('$.config.action', 'attendee.updated'), processAttendeesUpdate)
-      .when(Condition.stringEquals('$.config.action', 'order.refunded'), processAttendeesDelete);
+      .when(Condition.stringEquals('$.config.action', 'order.refunded'), processAttendeesDelete)
+      .when(Condition.booleanEquals('$.body.cancelled', true), processAttendeesDelete)
+      .when(Condition.booleanEquals('$.body.refunded', true), processAttendeesDelete);
 
     const apiChoice = new Choice(this, 'ApiResponseChoice')
       .when(Condition.numberEquals('$.statusCode', 200), handlerChoice)
