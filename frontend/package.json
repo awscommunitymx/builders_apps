@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "@cloudscape-design/board-components": "^3.0.101",
+    "@cloudscape-design/chat-components": "^1.0.45",
     "@cloudscape-design/components": "^3.0.923",
+    "@cloudscape-design/design-tokens": "^3.0.57",
     "@cloudscape-design/global-styles": "^1.0.38",
     "aws-rum-web": "^1.22.1",
     "react": "^18.3.1",

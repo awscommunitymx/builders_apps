@@ -9,27 +9,86 @@ import {
   Button,
   Grid,
   ColumnLayout,
+  Icon,
 } from '@cloudscape-design/components';
+import Avatar from '@cloudscape-design/chat-components/avatar';
 
 // Sample images - replace with actual images for each session
-const sessionImages = {
+const sessionImages: { [key: string]: string } = {
   '1': 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format',
   '2': 'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?w=800&auto=format',
   '3': 'https://images.unsplash.com/photo-1573164574511-73c773193279?w=800&auto=format',
 };
 
+// Define the Speaker interface
+interface SpeakerType {
+  name: string;
+  bio: string;
+  avatarUrl: string;
+  company?: string;
+  socialMedia?: {
+    linkedin?: string;
+    github?: string;
+    twitter?: string;
+    facebook?: string;
+    instagram?: string;
+    blog?: string;
+    company?: string;
+  };
+}
+
+interface SessionType {
+  id: string;
+  name: string;
+  description: string;
+  extendedDescription: string;
+  speakers: SpeakerType[];
+  time: string;
+  location: string;
+  capacity: number;
+  tags: string[];
+}
+
 // Extended session data with more details for the detail view
-const sessionData = {
+const sessionData: { [key: string]: SessionType } = {
   '1': {
     id: '1',
     name: 'Innovación en Inteligencia Artificial',
     description: 'Explorando las últimas tendencias en IA y sus aplicaciones prácticas',
     extendedDescription: `Esta charla profundiza en cómo la inteligencia artificial está transformando industrias enteras. 
     Analizaremos los avances más recientes en machine learning y deep learning, así como casos de uso prácticos 
-    que están generando valor en diversos sectores. La Dra. Rodríguez compartirá su experiencia en proyectos de IA aplicada
-    y ofrecerá una visión práctica de cómo implementar estas tecnologías en entornos reales.`,
-    speaker: 'Dra. María Rodríguez',
-    speakerBio: 'Investigadora principal en el Instituto de Tecnología Avanzada y ex-directora de AI Research en Tech Innovations Inc. Cuenta con más de 15 años de experiencia en el campo de la IA y numerosas publicaciones académicas.',
+    que están generando valor en diversos sectores. Los presentadores compartirán su experiencia en proyectos de IA aplicada
+    y ofrecerán una visión práctica de cómo implementar estas tecnologías en entornos reales.`,
+    speakers: [
+      {
+        name: 'Dra. María Rodríguez',
+        bio: 'Investigadora principal en el Instituto de Tecnología Avanzada y ex-directora de AI Research en Tech Innovations Inc. Cuenta con más de 15 años de experiencia en el campo de la IA y numerosas publicaciones académicas.',
+        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format',
+        company: 'Instituto de Tecnología Avanzada',
+        socialMedia: {
+          linkedin: 'https://linkedin.com/in/maria-rodriguez',
+          github: 'https://github.com/maria-rodriguez',
+          twitter: 'https://twitter.com/mariarod_ai',
+          facebook: 'https://facebook.com/mariarod.ai',
+          instagram: 'https://instagram.com/mariarod_ai',
+          blog: 'https://mariarodriguezai.com/blog',
+          company: 'https://institutodetecnologiaavanzada.edu',
+        },
+      },
+      {
+        name: 'Dr. Juan Pérez',
+        bio: 'Director del Laboratorio de Inteligencia Artificial Aplicada y profesor investigador con especialidad en algoritmos de aprendizaje profundo. Pionero en la integración de IA en sistemas de manufactura inteligente.',
+        avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=150&auto=format',
+        socialMedia: {
+          linkedin: 'https://linkedin.com/in/juan-perez-ai',
+          github: 'https://github.com/jperez-ai',
+          twitter: 'https://twitter.com/jperez_deeplearn',
+          instagram: 'https://instagram.com/dr.juanperez',
+          blog: 'https://deeplearninglab.tech/blog',
+          company: 'https://iaalab.org',
+        },
+      },
+    ],
     time: '09:00 - 10:30',
     location: 'Sala Principal',
     capacity: 200,
@@ -42,9 +101,37 @@ const sessionData = {
     extendedDescription: `En esta presentación, exploraremos la intersección entre la tecnología moderna y la sostenibilidad ambiental.
     Veremos ejemplos concretos de cómo las empresas están utilizando soluciones tecnológicas para reducir su huella de carbono,
     optimizar el uso de recursos y contribuir a los Objetivos de Desarrollo Sostenible de la ONU.
-    El Ing. Mendoza presentará casos de éxito y lecciones aprendidas de proyectos reales.`,
-    speaker: 'Ing. Carlos Mendoza',
-    speakerBio: 'Ingeniero ambiental y consultor en tecnologías sostenibles con experiencia en más de 50 proyectos internacionales. Fundador de GreenTech Solutions y asesor para varias organizaciones comprometidas con la agenda medioambiental.',
+    Los presentadores compartirán casos de éxito y lecciones aprendidas de proyectos reales.`,
+    speakers: [
+      {
+        name: 'Ing. Carlos Mendoza',
+        bio: 'Ingeniero ambiental y consultor en tecnologías sostenibles con experiencia en más de 50 proyectos internacionales. Fundador de GreenTech Solutions y asesor para varias organizaciones comprometidas con la agenda medioambiental.',
+        avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format',
+        socialMedia: {
+          linkedin: 'https://linkedin.com/in/carlos-mendoza-env',
+          github: 'https://github.com/cmendoza-greentech',
+          twitter: 'https://twitter.com/cmendoza_eco',
+          facebook: 'https://facebook.com/carlosmendozasostenible',
+          instagram: 'https://instagram.com/carlosmendoza_eco',
+          blog: 'https://sostenibilidadtecnologica.com',
+          company: 'https://greentech-solutions.com',
+        },
+      },
+      {
+        name: 'Ing. Laura Vázquez',
+        bio: 'Especialista en energías renovables y directora del programa de Ciudades Sustentables. Su trabajo se ha centrado en la implementación de soluciones tecnológicas para el desarrollo urbano sostenible.',
+        avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format',
+        socialMedia: {
+          linkedin: 'https://linkedin.com/in/laura-vazquez-sustain',
+          github: 'https://github.com/lvazquez-sustain',
+          twitter: 'https://twitter.com/laura_vsustain',
+          facebook: 'https://facebook.com/lauravsustentable',
+          instagram: 'https://instagram.com/laurav_sustentable',
+          blog: 'https://ciudadessustentables.org/blog',
+          company: 'https://ciudadessustentables.org',
+        },
+      },
+    ],
     time: '11:00 - 12:30',
     location: 'Auditorio B',
     capacity: 150,
@@ -55,11 +142,39 @@ const sessionData = {
     name: 'Seguridad en la Nube: Desafíos Actuales',
     description: 'Estrategias para proteger datos e infraestructura en entornos cloud',
     extendedDescription: `La adopción masiva de servicios en la nube ha creado nuevos desafíos de seguridad que requieren 
-    enfoques innovadores. En esta charla, la Lic. Gómez abordará las amenazas más comunes en entornos cloud, 
+    enfoques innovadores. En esta charla, se abordarán las amenazas más comunes en entornos cloud, 
     estrategias efectivas de mitigación y buenas prácticas para proteger datos sensibles y garantizar la continuidad del negocio.
     Se presentarán estudios de caso y recomendaciones prácticas basadas en estándares internacionales.`,
-    speaker: 'Lic. Ana Gómez',
-    speakerBio: 'Especialista en ciberseguridad con certificación CISSP y AWS Security Specialist. Ha liderado equipos de seguridad en importantes empresas del sector financiero y actualmente es consultora independiente en seguridad cloud.',
+    speakers: [
+      {
+        name: 'Lic. Ana Gómez',
+        bio: 'Especialista en ciberseguridad con certificación CISSP y AWS Security Specialist. Ha liderado equipos de seguridad en importantes empresas del sector financiero y actualmente es consultora independiente en seguridad cloud.',
+        avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=150&auto=format',
+        socialMedia: {
+          linkedin: 'https://linkedin.com/in/ana-gomez-security',
+          github: 'https://github.com/anagomez-security',
+          twitter: 'https://twitter.com/anagomez_sec',
+          facebook: 'https://facebook.com/anagomez.security',
+          instagram: 'https://instagram.com/anagomez_security',
+          blog: 'https://cloudsecurityblog.com',
+          company: 'https://securecloudconsulting.com',
+        },
+      },
+      {
+        name: 'Dr. Roberto Sánchez',
+        bio: 'Director de Seguridad de la Información en TechDefense Inc. Doctor en Informática con especialidad en modelos de seguridad para infraestructuras críticas y entornos distribuidos.',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format',
+        socialMedia: {
+          linkedin: 'https://linkedin.com/in/roberto-sanchez-security',
+          github: 'https://github.com/rsanchez-techdefense',
+          twitter: 'https://twitter.com/rsanchez_infosec',
+          facebook: 'https://facebook.com/robertosanchez.security',
+          instagram: 'https://instagram.com/robertosanchez_security',
+          blog: 'https://criticalinfrastructuresecurity.net',
+          company: 'https://techdefense.com',
+        },
+      },
+    ],
     time: '14:00 - 15:30',
     location: 'Sala de Conferencias C',
     capacity: 120,
@@ -67,14 +182,13 @@ const sessionData = {
   },
 };
 
-
 export interface SessionDetailProps {
   sessionId: string;
 }
 
-export default function SessionDetail({sessionId}: SessionDetailProps) {
+export default function SessionDetail({ sessionId }: SessionDetailProps) {
   const navigate = useNavigate();
-  
+
   // Verificar si el ID de sesión es válido
   if (!sessionId || !sessionData[sessionId]) {
     return (
@@ -88,9 +202,9 @@ export default function SessionDetail({sessionId}: SessionDetailProps) {
       </Container>
     );
   }
-  
+
   const session = sessionData[sessionId];
-  
+
   return (
     <ContentLayout
       header={
@@ -100,73 +214,257 @@ export default function SessionDetail({sessionId}: SessionDetailProps) {
             <Button variant="primary" onClick={() => navigate('/')}>
               Volver a la agenda
             </Button>
-            
           }
         >
           {session.name}
         </Header>
       }
+      maxContentWidth={1200}
     >
       <SpaceBetween size="l">
         <Container>
-                <SpaceBetween size="l">
-                    <Box variant="awsui-key-label"></Box>
-                    <ColumnLayout columns={1}>
-                  <Box variant="awsui-key-label">Horario</Box>
-                  <div>{session.time}</div>
-                  
-                  <Box variant="awsui-key-label">Ubicación</Box>
-                  <div>{session.location}</div>
-                  
-                  <Box variant="awsui-key-label">Capacidad</Box>
-                  <div>{session.capacity} asistentes</div>
-                </ColumnLayout>
-              </SpaceBetween>
+          <SpaceBetween size="l">
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'nowrap',
+                justifyContent: 'space-between',
+                width: '100%',
+                overflowX: 'auto', // Permite desplazamiento horizontal en pantallas muy pequeñas
+              }}
+            >
+              <div style={{ flex: '1', minWidth: '100px', paddingRight: '10px' }}>
+                <Box variant="awsui-key-label">Horario</Box>
+                <div>{session.time}</div>
+              </div>
+
+              <div style={{ flex: '1', minWidth: '100px', padding: '0 10px' }}>
+                <Box variant="awsui-key-label">Ubicación</Box>
+                <div>{session.location}</div>
+              </div>
+
+              <div style={{ flex: '1', minWidth: '100px', paddingLeft: '10px' }}>
+                <Box variant="awsui-key-label">Capacidad</Box>
+                <div>{session.capacity} asistentes</div>
+              </div>
+            </div>
+          </SpaceBetween>
         </Container>
         <Container>
-          <Grid gridDefinition={[{ colspan: 8 }, { colspan: 4 }]}>
+          <Grid gridDefinition={[{ colspan: 12 }]}>
             <div>
               <SpaceBetween size="l">
                 <Box>
                   <h3>Descripción</h3>
                   <p>{session.extendedDescription}</p>
                 </Box>
-                
+
                 <Box>
-                  <h3>Presentador</h3>
-                  <div>{session.speaker}</div>
-                  <p>{session.speakerBio}</p>
+                  <h3>Presentadores</h3>
+
+                  <SpaceBetween size="s">
+                    {session.speakers.map((speaker, index) => (
+                      <div key={index} style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                          <Avatar ariaLabel="" imgUrl={speaker.avatarUrl} width={40} />
+                          <div style={{ marginLeft: '15px', flex: 1 }}>
+                            <div style={{ fontWeight: 'bold' }}>{speaker.name}</div>
+                            {speaker.company && (
+                              <div style={{ fontSize: '14px', color: '#222' }}>
+                                {speaker.company}
+                              </div>
+                            )}
+                            <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                              {speaker.bio}
+                            </div>
+
+                            {/* Social Media Icons */}
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                              {speaker.socialMedia?.linkedin && (
+                                <a
+                                  href={speaker.socialMedia.linkedin}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="LinkedIn"
+                                  title="LinkedIn"
+                                  style={{ color: '#0077b5', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                              {speaker.socialMedia?.github && (
+                                <a
+                                  href={speaker.socialMedia.github}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="GitHub"
+                                  title="GitHub"
+                                  style={{ color: '#333', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                              {speaker.socialMedia?.twitter && (
+                                <a
+                                  href={speaker.socialMedia.twitter}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="X (Twitter)"
+                                  title="X (Twitter)"
+                                  style={{ color: '#1DA1F2', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                              {speaker.socialMedia?.facebook && (
+                                <a
+                                  href={speaker.socialMedia.facebook}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="Facebook"
+                                  title="Facebook"
+                                  style={{ color: '#1877F2', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                              {speaker.socialMedia?.instagram && (
+                                <a
+                                  href={speaker.socialMedia.instagram}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="Instagram"
+                                  title="Instagram"
+                                  style={{ color: '#E4405F', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                              {speaker.socialMedia?.blog && (
+                                <a
+                                  href={speaker.socialMedia.blog}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="Blog Personal"
+                                  title="Blog Personal"
+                                  style={{ color: '#FF5722', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M12,2C9.24,2,7,4.24,7,7v2h10V7C17,4.24,14.76,2,12,2z M12,6c-0.55,0-1-0.45-1-1s0.45-1,1-1s1,0.45,1,1S12.55,6,12,6z" />
+                                      <path d="M12,11c-4.42,0-8,1.79-8,4v5c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-5C20,12.79,16.42,11,12,11z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                              {speaker.socialMedia?.company && (
+                                <a
+                                  href={speaker.socialMedia.company}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label="Sitio web de la compañía"
+                                  title="Sitio web de la compañía"
+                                  style={{ color: '#6c757d', textDecoration: 'none' }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1 16.057v-3.057h2.994c-.059 1.143-.212 2.24-.456 3.279-.823-.12-1.674-.188-2.538-.222zm1.957 2.162c-.499 1.33-1.159 2.497-1.957 3.456v-3.62c.666.028 1.319.081 1.957.164zm-1.957-7.219v-3.015c.868-.034 1.721-.103 2.548-.224.238 1.027.389 2.111.446 3.239h-2.994zm0-5.014v-3.661c.806.969 1.471 2.15 1.971 3.496-.642.084-1.3.137-1.971.165zm2.703-3.267c1.237.496 2.354 1.228 3.29 2.146-.642.234-1.311.442-2.019.607-.344-.992-.775-1.91-1.271-2.753zm-7.241 13.56c-.244-1.039-.398-2.136-.456-3.279h2.994v3.057c-.865.034-1.714.102-2.538.222zm2.538 1.776v3.62c-.798-.959-1.458-2.126-1.957-3.456.638-.083 1.291-.136 1.957-.164zm-2.994-7.055c.057-1.128.207-2.212.446-3.239.827.121 1.68.19 2.548.224v3.015h-2.994zm1.024-5.179c.5-1.346 1.165-2.527 1.97-3.496v3.661c-.671-.028-1.329-.081-1.97-.165zm-2.005-.35c-.708-.165-1.377-.373-2.018-.607.937-.918 2.053-1.65 3.29-2.146-.496.844-.927 1.762-1.272 2.753zm-.549 1.918c-.264 1.151-.434 2.36-.492 3.611h-3.933c.165-1.658.739-3.197 1.617-4.518.88.361 1.816.67 2.808.907zm.009 9.262c-.988.236-1.92.542-2.797.9-.89-1.328-1.471-2.879-1.637-4.551h3.934c.058 1.265.231 2.488.5 3.651zm.553 1.917c.342.976.768 1.881 1.257 2.712-1.223-.49-2.326-1.211-3.256-2.115.636-.229 1.299-.435 1.999-.597zm9.924 0c.7.163 1.362.367 1.999.597-.931.903-2.034 1.625-3.257 2.116.489-.832.915-1.737 1.258-2.713zm.553-1.917c.27-1.163.442-2.386.501-3.651h3.934c-.167 1.672-.748 3.223-1.638 4.551-.877-.358-1.81-.664-2.797-.9zm.501-5.651c-.058-1.251-.229-2.46-.492-3.611.992-.237 1.929-.546 2.809-.907.877 1.321 1.451 2.86 1.616 4.518h-3.933z" />
+                                    </svg>
+                                  </div>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </SpaceBetween>
                 </Box>
-                
+
                 <Box>
                   <h3>Etiquetas</h3>
                   <div>
-                    {session.tags.map(tag => (
-                      <span key={tag} style={{
-                        display: 'inline-block',
-                        margin: '0 8px 8px 0',
-                        padding: '4px 8px',
-                        backgroundColor: '#f0f0f0',
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                      }}>
+                    {session.tags.map((tag: string) => (
+                      <span
+                        key={tag}
+                        style={{
+                          display: 'inline-block',
+                          margin: '0 8px 8px 0',
+                          padding: '4px 8px',
+                          backgroundColor: '#e0e0e3',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      >
                         {tag}
                       </span>
                     ))}
                   </div>
                 </Box>
-                <Box>
-                  <img
-                    src={sessionImages[sessionId]}
-                    alt={session.name}
-                    style={{ width: '30', borderRadius: '8px', objectFit: 'cover' }}
-                  />
-                </Box>
               </SpaceBetween>
-            </div>
-            
-            <div>
-
             </div>
           </Grid>
         </Container>
