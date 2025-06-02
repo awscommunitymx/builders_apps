@@ -19,6 +19,7 @@ type ProfileAccess {
 
 type Query {
   getMyProfile: User
+  getAgenda: AgendaData
 }
 
 input UpdateUserInput {
@@ -41,14 +42,8 @@ mutation UpdateUser($input: UpdateUserInput!) {
   }
 }
 
-type Mutation {
-  viewProfile(id: String!, pin: String!): User
-  updateUser(input: UpdateUserInput!): User
-}
-
-schema {
-  query: Query
-  mutation: Mutation
+input AgendaDataInput {
+  sessions: [SessionInput!]!
 }
 
 type AgendaData {
@@ -99,4 +94,63 @@ enum SessionStatus {
   DRAFT
   PUBLISHED
   CANCELLED
+  ACCEPTED
+}
+
+input SessionInput {
+  id: ID!
+  title: String!
+  description: String!
+  startsAt: String!
+  endsAt: String!
+  isServiceSession: Boolean!
+  isPlenumSession: Boolean!
+  liveUrl: String
+  recordingUrl: String
+  status: SessionStatus!
+  isInformed: Boolean!
+  isConfirmed: Boolean!
+  room: RoomInput!
+  speakers: [SpeakerInput!]!
+  categories: [CategoryInput!]!
+}
+
+input RoomInput {
+  id: ID!
+  name: String!
+}
+
+input SpeakerInput {
+  id: ID!
+  name: String!
+}
+
+input CategoryInput {
+  id: ID!
+  name: String!
+  categoryItems: [CategoryItemInput!]!
+  sort: Int!
+}
+
+input CategoryItemInput {
+  id: ID!
+  name: String!
+}
+
+type Subscription {
+  onAgendaUpdate: AgendaData @aws_subscribe(mutations: ["updateAgenda"])
+  onRoomAgendaUpdate(roomId: ID!): Session @aws_subscribe(mutations: ["updateRoomAgenda"])
+}
+
+type Mutation {
+  viewProfile(id: String!, pin: String!): User
+  updateUser(input: UpdateUserInput!): User
+  updateAgenda(data: AgendaDataInput!): AgendaData
+  updateRoomAgenda(roomId: ID!, session: SessionInput!): Session
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
 }
