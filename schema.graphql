@@ -54,7 +54,7 @@ type Session {
   id: ID!
   roomId: ID!
   title: String!
-  description: String!
+  description: String
   startsAt: String!
   endsAt: String!
   isServiceSession: Boolean!
@@ -64,7 +64,7 @@ type Session {
   room: Room!
   liveUrl: String
   recordingUrl: String
-  status: SessionStatus!
+  status: SessionStatus
   isInformed: Boolean!
   isConfirmed: Boolean!
 }
@@ -98,14 +98,14 @@ enum SessionStatus {
 input SessionInput {
   id: ID!
   title: String!
-  description: String!
+  description: String
   startsAt: String!
   endsAt: String!
   isServiceSession: Boolean!
   isPlenumSession: Boolean!
   liveUrl: String
   recordingUrl: String
-  status: SessionStatus!
+  status: SessionStatus
   isInformed: Boolean!
   isConfirmed: Boolean!
   room: RoomInput!

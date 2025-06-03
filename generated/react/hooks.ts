@@ -107,7 +107,7 @@ export type RoomInput = {
 export type Session = {
   __typename?: 'Session';
   categories: Array<Category>;
-  description: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
   endsAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   isConfirmed: Scalars['Boolean']['output'];
@@ -120,13 +120,13 @@ export type Session = {
   roomId: Scalars['ID']['output'];
   speakers: Array<Speaker>;
   startsAt: Scalars['String']['output'];
-  status: SessionStatus;
+  status?: Maybe<SessionStatus>;
   title: Scalars['String']['output'];
 };
 
 export type SessionInput = {
   categories: Array<CategoryInput>;
-  description: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
   endsAt: Scalars['String']['input'];
   id: Scalars['ID']['input'];
   isConfirmed: Scalars['Boolean']['input'];
@@ -138,7 +138,7 @@ export type SessionInput = {
   room: RoomInput;
   speakers: Array<SpeakerInput>;
   startsAt: Scalars['String']['input'];
-  status: SessionStatus;
+  status?: InputMaybe<SessionStatus>;
   title: Scalars['String']['input'];
 };
 

@@ -108,7 +108,7 @@ export type RoomInput = {
 export type Session = {
   __typename?: 'Session';
   categories: Array<Category>;
-  description: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
   endsAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   isConfirmed: Scalars['Boolean']['output'];
@@ -121,13 +121,13 @@ export type Session = {
   roomId: Scalars['ID']['output'];
   speakers: Array<Speaker>;
   startsAt: Scalars['String']['output'];
-  status: SessionStatus;
+  status?: Maybe<SessionStatus>;
   title: Scalars['String']['output'];
 };
 
 export type SessionInput = {
   categories: Array<CategoryInput>;
-  description: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
   endsAt: Scalars['String']['input'];
   id: Scalars['ID']['input'];
   isConfirmed: Scalars['Boolean']['input'];
@@ -139,7 +139,7 @@ export type SessionInput = {
   room: RoomInput;
   speakers: Array<SpeakerInput>;
   startsAt: Scalars['String']['input'];
-  status: SessionStatus;
+  status?: InputMaybe<SessionStatus>;
   title: Scalars['String']['input'];
 };
 
@@ -359,7 +359,7 @@ export type RoomResolvers<ContextType = any, ParentType extends ResolversParentT
 
 export type SessionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Session'] = ResolversParentTypes['Session']> = {
   categories?: Resolver<Array<ResolversTypes['Category']>, ParentType, ContextType>;
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   endsAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -372,7 +372,7 @@ export type SessionResolvers<ContextType = any, ParentType extends ResolversPare
   roomId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   speakers?: Resolver<Array<ResolversTypes['Speaker']>, ParentType, ContextType>;
   startsAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['SessionStatus'], ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['SessionStatus']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
