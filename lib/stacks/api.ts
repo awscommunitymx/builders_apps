@@ -93,6 +93,16 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'updateUser',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverUpdateAgenda', {
+      typeName: 'Mutation',
+      fieldName: 'updateAgenda',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverUpdateRoomAgenda', {
+      typeName: 'Mutation',
+      fieldName: 'updateRoomAgenda',
+    });
   }
 
   private createOutputs(environmentName: string): void {

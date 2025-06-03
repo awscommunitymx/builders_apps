@@ -81,7 +81,7 @@ export class BackendStack extends cdk.Stack {
       new cdk.aws_iam.PolicyStatement({
         effect: cdk.aws_iam.Effect.ALLOW,
         actions: ['appsync:GraphQL'],
-        resources: [`${apiStack.api.arn}/types/Query/*`, `${apiStack.api.arn}/types/Mutation/*`],
+        resources: [`${apiStack.api.arn}/types/Query/*`, `${apiStack.api.arn}/types/Mutation/*`, `${apiStack.api.arn}/types/Subscription/*`],
       })
     );
 
