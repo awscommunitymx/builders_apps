@@ -92,10 +92,7 @@ type Room {
 }
 
 enum SessionStatus {
-  DRAFT
-  PUBLISHED
-  CANCELLED
-  ACCEPTED
+  Accepted
 }
 
 input SessionInput {

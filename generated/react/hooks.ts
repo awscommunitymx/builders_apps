@@ -143,10 +143,7 @@ export type SessionInput = {
 };
 
 export enum SessionStatus {
-  Accepted = 'ACCEPTED',
-  Cancelled = 'CANCELLED',
-  Draft = 'DRAFT',
-  Published = 'PUBLISHED'
+  Accepted = 'Accepted'
 }
 
 export type Speaker = {
