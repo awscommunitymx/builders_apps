@@ -52,6 +52,7 @@ type AgendaData {
 
 type Session {
   id: ID!
+  roomId: ID!
   title: String!
   description: String!
   startsAt: String!
