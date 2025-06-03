@@ -118,6 +118,7 @@ export type Session = {
   liveUrl?: Maybe<Scalars['String']['output']>;
   recordingUrl?: Maybe<Scalars['String']['output']>;
   room: Room;
+  roomId: Scalars['ID']['output'];
   speakers: Array<Speaker>;
   startsAt: Scalars['String']['output'];
   status: SessionStatus;
@@ -371,6 +372,7 @@ export type SessionResolvers<ContextType = any, ParentType extends ResolversPare
   liveUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   recordingUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   room?: Resolver<ResolversTypes['Room'], ParentType, ContextType>;
+  roomId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   speakers?: Resolver<Array<ResolversTypes['Speaker']>, ParentType, ContextType>;
   startsAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['SessionStatus'], ParentType, ContextType>;

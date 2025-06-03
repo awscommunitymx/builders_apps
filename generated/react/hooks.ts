@@ -117,6 +117,7 @@ export type Session = {
   liveUrl?: Maybe<Scalars['String']['output']>;
   recordingUrl?: Maybe<Scalars['String']['output']>;
   room: Room;
+  roomId: Scalars['ID']['output'];
   speakers: Array<Speaker>;
   startsAt: Scalars['String']['output'];
   status: SessionStatus;
