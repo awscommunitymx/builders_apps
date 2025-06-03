@@ -13,7 +13,6 @@ import {
   AgendaData,
   MutationUpdateAgendaArgs,
   MutationUpdateRoomAgendaArgs,
-  SubscriptionOnRoomAgendaUpdateArgs,
   SessionInput,
   CategoryItemInput,
   SpeakerInput,
@@ -28,7 +27,7 @@ const tracer = new Tracer({ serviceName: SERVICE_NAME });
 const logger = new Logger({ serviceName: SERVICE_NAME });
 const metrics = new Metrics({ namespace: 'Profiles', serviceName: SERVICE_NAME });
 
-type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs | MutationUpdateAgendaArgs | MutationUpdateRoomAgendaArgs | SubscriptionOnRoomAgendaUpdateArgs;
+type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs | MutationUpdateAgendaArgs | MutationUpdateRoomAgendaArgs;
 
 export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -61,6 +60,7 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
       const agendaData: AgendaData = {
         sessions: data.sessions.map((sess: SessionInput) => ({
           id: sess.id,
+          roomId: sess.room.id,
           title: sess.title,
           description: sess.description,
           startsAt: sess.startsAt,
@@ -86,13 +86,14 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
       return agendaData;
     }
 
-    // === 4) Mutation: updateRoomAgenda (room-specific feed) ===
+    // === 2) Mutation: updateRoomAgenda (room-specific feed) ===
     if (event.info.fieldName === 'updateRoomAgenda') {
-      const { roomId, session } = event.arguments as MutationUpdateRoomAgendaArgs;
+      const { session } = event.arguments as MutationUpdateRoomAgendaArgs;
 
       // Build Session payload exactly matching the Subscription’s return type
       const resultSession: Session = {
         id: session.id,
+        roomId: session.room.id,
         title: session.title,
         description: session.description,
         startsAt: session.startsAt,
