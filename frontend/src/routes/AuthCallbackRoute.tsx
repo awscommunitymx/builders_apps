@@ -85,9 +85,18 @@ const AuthCallbackRoute: React.FC = () => {
             success: true,
           });
 
+          const userSession = challengeResult.signInUserSession;
+          const id_token = userSession.id_token?.jwtToken || '';
+          const refresh_token = userSession.refreshToken?.token || '';
+          const access_token = userSession.accessToken?.jwtToken || '';
+
+          localStorage.setItem('access_token', access_token);
+          localStorage.setItem('id_token', id_token);
+          localStorage.setItem('refresh_token', refresh_token);
+
           // Redirect to dashboard or home page after successful auth
           setTimeout(() => {
-            navigate('/dashboard'); // Adjust the route as needed
+            navigate('/'); // Adjust the route as needed
           }, 1500);
         } else {
           throw new Error('Authentication challenge failed');
