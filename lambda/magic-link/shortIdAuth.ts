@@ -2,13 +2,22 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { QueryCommand, PutCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics } from '@aws-lambda-powertools/metrics';
 import { encrypt } from '../../utils/encryption';
 import { TIMEOUT_MINS } from '../../utils/constants';
+import Twilio from 'twilio';
 
-const { SES_FROM_ADDRESS, USER_POOL_ID, BASE_URL, TABLE_NAME } = process.env;
+const {
+  SES_FROM_ADDRESS,
+  USER_POOL_ID,
+  BASE_URL,
+  TABLE_NAME,
+  TWILIO_SECRET_NAME,
+  TWILIO_MESSAGING_SERVICE_SID,
+} = process.env;
 const ONE_MIN = 60 * 1000;
 
 // Initialize AWS Powertools
@@ -20,6 +29,10 @@ const metrics = new Metrics({ namespace: 'Authentication', serviceName: 'short-i
 const dynamoDBClient = tracer.captureAWSv3Client(new DynamoDBClient({}));
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 const sesClient = tracer.captureAWSv3Client(new SESv2Client({}));
+const secretsClient = tracer.captureAWSv3Client(new SecretsManagerClient({}));
+
+// Twilio credentials cache
+let twilioCredentials: { account_sid: string; auth_token: string } | null = null;
 
 interface AuthRequest {
   short_id: string;
@@ -35,6 +48,75 @@ interface UserProfile {
   cell_phone?: string;
   [key: string]: any;
 }
+
+const getTwilioCredentials = async (): Promise<{ account_sid: string; auth_token: string }> => {
+  if (twilioCredentials) {
+    return twilioCredentials;
+  }
+
+  if (!TWILIO_SECRET_NAME) {
+    throw new Error('TWILIO_SECRET_NAME environment variable is not set');
+  }
+
+  try {
+    const command = new GetSecretValueCommand({ SecretId: TWILIO_SECRET_NAME });
+    const response = await secretsClient.send(command);
+
+    if (!response.SecretString) {
+      throw new Error('No secret string found in Twilio credentials');
+    }
+
+    twilioCredentials = JSON.parse(response.SecretString);
+
+    if (!twilioCredentials?.account_sid || !twilioCredentials?.auth_token) {
+      throw new Error('Invalid Twilio credentials structure');
+    }
+
+    return twilioCredentials;
+  } catch (error) {
+    logger.error('Failed to retrieve Twilio credentials', { error });
+    throw error;
+  }
+};
+
+const sendWhatsAppMessage = async (
+  phoneNumber: string,
+  name: string,
+  magicLink: string
+): Promise<void> => {
+  try {
+    const credentials = await getTwilioCredentials();
+
+    // Initialize Twilio client
+    const client = Twilio(credentials.account_sid, credentials.auth_token);
+
+    // Format phone number for WhatsApp
+    const formattedPhone = phoneNumber.startsWith('whatsapp:')
+      ? phoneNumber
+      : `whatsapp:${phoneNumber.replace(/^\+/, '')}`;
+
+    // Send the message using Twilio Content API
+    const message = await client.messages.create({
+      from: TWILIO_MESSAGING_SERVICE_SID!,
+      to: formattedPhone,
+      contentSid: 'HX8b1f55e6942288e05b18603c923f82c9',
+      contentVariables: JSON.stringify({
+        '1': name,
+        '2': magicLink,
+      }),
+      shortenUrls: true,
+    });
+
+    logger.info('WhatsApp message sent successfully', {
+      messageSid: message.sid,
+      phone: formattedPhone,
+      status: message.status,
+    });
+  } catch (error) {
+    logger.error('Failed to send WhatsApp message', { error, phoneNumber });
+    throw error;
+  }
+};
 
 const sendEmail = async (email: string, name: string, magicLink: string): Promise<void> => {
   const emailParams = {
@@ -190,9 +272,28 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     // Send magic link email
     await sendEmail(userProfile.email, userProfile.name || 'Builder', magicLink);
 
+    // Send WhatsApp message if user has a cell phone
+    if (userProfile.cell_phone) {
+      try {
+        await sendWhatsAppMessage(userProfile.cell_phone, userProfile.name || 'Builder', magicLink);
+        logger.info('WhatsApp message sent successfully', {
+          email: userProfile.email,
+          phone: userProfile.cell_phone,
+        });
+      } catch (whatsappError) {
+        // Log the error but don't fail the entire request since email was sent
+        logger.error('Failed to send WhatsApp message, but email was sent successfully', {
+          error: whatsappError,
+          email: userProfile.email,
+          phone: userProfile.cell_phone,
+        });
+      }
+    }
+
     logger.info('Magic link sent successfully', {
       email: userProfile.email,
       short_id: userProfile.short_id,
+      whatsapp_sent: !!userProfile.cell_phone,
     });
 
     metrics.addMetadata('short_id', short_id);

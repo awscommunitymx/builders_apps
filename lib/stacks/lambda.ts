@@ -203,6 +203,8 @@ export class LambdaStack extends Construct {
         USER_POOL_ID: props.userPool?.userPoolId || '',
         BASE_URL: props.baseUrl || '',
         SES_FROM_ADDRESS: props.sesFromAddress || '',
+        TWILIO_SECRET_NAME: 'twilio-credentials',
+        TWILIO_MESSAGING_SERVICE_SID: TWILIO_MESSAGING_SERVICE_SID,
         ENVIRONMENT: props.environmentName,
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         POWERTOOLS_SERVICE_NAME: 'short-id-auth',
@@ -220,6 +222,7 @@ export class LambdaStack extends Construct {
           '@aws-lambda-powertools/tracer',
           '@aws-lambda-powertools/logger',
           '@aws-lambda-powertools/metrics',
+          'twilio',
         ],
       },
     });
@@ -254,6 +257,15 @@ export class LambdaStack extends Construct {
         effect: iam.Effect.ALLOW,
         actions: ['ses:SendEmail', 'ses:SendRawEmail', 'sesv2:SendEmail'],
         resources: ['*'],
+      })
+    );
+
+    // Grant Secrets Manager permissions for Twilio credentials
+    this.shortIdAuthFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [`arn:aws:secretsmanager:*:*:secret:twilio-credentials*`],
       })
     );
   }
