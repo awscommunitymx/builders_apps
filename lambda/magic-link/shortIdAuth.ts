@@ -99,7 +99,7 @@ const sendWhatsAppMessage = async (
     const message = await client.messages.create({
       from: TWILIO_MESSAGING_SERVICE_SID!,
       to: formattedPhone,
-      contentSid: 'HX8b1f55e6942288e05b18603c923f82c9',
+      contentSid: 'HXe24d649d90df163293740f3ad83021e0',
       contentVariables: JSON.stringify({
         '1': name,
         '2': magicLink,
@@ -157,6 +157,11 @@ const sendEmail = async (email: string, name: string, magicLink: string): Promis
   };
 
   await sesClient.send(new SendEmailCommand(emailParams));
+};
+
+const getFirstName = (fullName: string | undefined): string => {
+  if (!fullName) return 'Builder';
+  return fullName.split(' ')[0] || 'Builder';
 };
 
 const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -271,7 +276,8 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     // Send magic link email
-    await sendEmail(userProfile.email, userProfile.name || 'Builder', magicLink);
+    const firstName = getFirstName(userProfile.name);
+    await sendEmail(userProfile.email, firstName, magicLink);
 
     // Track WhatsApp delivery success
     let whatsappSent = false;
@@ -279,7 +285,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     // Send WhatsApp message if user has a cell phone
     if (userProfile.cell_phone) {
       try {
-        await sendWhatsAppMessage(userProfile.cell_phone, userProfile.name || 'Builder', magicLink);
+        await sendWhatsAppMessage(userProfile.cell_phone, firstName, magicLink);
         whatsappSent = true;
         logger.info('WhatsApp message sent successfully', {
           email: userProfile.email,
