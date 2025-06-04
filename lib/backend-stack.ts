@@ -68,7 +68,7 @@ export class BackendStack extends cdk.Stack {
       table: databaseStack.table,
       userPool: cognitoStack.userPool,
       baseUrl: props.appDomain,
-      sesFromAddress: `no-reply@${props.hostedZoneName}`,
+      sesFromAddress: 'noreply@awscommunity.mx',
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {

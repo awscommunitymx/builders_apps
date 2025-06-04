@@ -235,6 +235,7 @@ export class LambdaStack extends Construct {
 
     // Grant the Lambda function access to DynamoDB
     props.table.grantReadData(this.shortIdAuthFunction);
+    props.table.grantWriteData(this.shortIdAuthFunction);
 
     // Grant Cognito permissions for updating user attributes
     if (props.userPool) {

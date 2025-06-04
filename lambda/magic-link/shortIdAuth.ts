@@ -1,10 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { QueryCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import {
-  CognitoIdentityProviderClient,
-  AdminUpdateUserAttributesCommand,
-} from '@aws-sdk/client-cognito-identity-provider';
+import { QueryCommand, PutCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
@@ -23,7 +19,6 @@ const metrics = new Metrics({ namespace: 'Authentication', serviceName: 'short-i
 // Initialize AWS clients
 const dynamoDBClient = tracer.captureAWSv3Client(new DynamoDBClient({}));
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
-const cognitoClient = tracer.captureAWSv3Client(new CognitoIdentityProviderClient({}));
 const sesClient = tracer.captureAWSv3Client(new SESv2Client({}));
 
 interface AuthRequest {
@@ -162,31 +157,32 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     const token = encodeURIComponent(tokenB64);
     const magicLink = `https://${BASE_URL}/magic-link?email=${userProfile.email}&token=${token}`;
 
-    // Update Cognito user with auth challenge token
+    // Store auth challenge token in DynamoDB
     try {
-      await cognitoClient.send(
-        new AdminUpdateUserAttributesCommand({
-          UserPoolId: USER_POOL_ID,
-          Username: userProfile.email,
-          UserAttributes: [
-            {
-              Name: 'custom:authChallenge',
-              Value: tokenB64,
-            },
-          ],
+      await docClient.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: {
+            PK: `AUTH#${userProfile.email}`,
+            SK: 'AUTH_CHALLENGE',
+            token: tokenB64,
+            expiration: expiration.toJSON(),
+            created_at: now.toJSON(),
+            ttl: Math.floor(expiration.getTime() / 1000), // TTL for automatic cleanup
+          },
         })
       );
 
-      logger.info('Updated Cognito user attributes', { email: userProfile.email });
-    } catch (cognitoError) {
-      logger.error('Failed to update Cognito user attributes', {
-        error: cognitoError,
+      logger.info('Stored auth challenge token in DynamoDB', { email: userProfile.email });
+    } catch (dynamoError) {
+      logger.error('Failed to store auth challenge token in DynamoDB', {
+        error: dynamoError,
         email: userProfile.email,
       });
       return {
-        statusCode: 404,
+        statusCode: 500,
         body: JSON.stringify({
-          message: 'User not found in authentication system.',
+          message: 'Failed to generate authentication token.',
         }),
       };
     }
