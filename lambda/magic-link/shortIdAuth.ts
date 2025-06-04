@@ -127,7 +127,7 @@ const sendEmail = async (email: string, name: string, magicLink: string): Promis
     Content: {
       Simple: {
         Subject: {
-          Data: 'Your Magic Link - AWS Community Builders',
+          Data: 'Tu Enlace de Acceso - Builders App',
           Charset: 'UTF-8',
         },
         Body: {
@@ -135,20 +135,20 @@ const sendEmail = async (email: string, name: string, magicLink: string): Promis
             Data: `
               <html>
                 <body>
-                  <h2>Hello ${name || 'Builder'}!</h2>
-                  <p>Click the link below to sign in to your account:</p>
+                  <h2>¡Hola ${name || 'Builder'}!</h2>
+                  <p>Haz clic en el enlace de abajo para iniciar sesión en tu cuenta:</p>
                   <a href="${magicLink}" style="background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">
-                    Sign In
+                    Iniciar Sesión
                   </a>
-                  <p>This link will expire in ${TIMEOUT_MINS} minutes.</p>
-                  <p>If you didn't request this link, please ignore this email.</p>
+                  <p>Este enlace expirará en ${TIMEOUT_MINS} minutos.</p>
+                  <p>Si no solicitaste este enlace, por favor ignora este correo electrónico.</p>
                 </body>
               </html>
             `,
             Charset: 'UTF-8',
           },
           Text: {
-            Data: `Hello ${name || 'Builder'}!\n\nClick the link below to sign in: ${magicLink}\n\nThis link will expire in ${TIMEOUT_MINS} minutes.\n\nIf you didn't request this link, please ignore this email.`,
+            Data: `¡Hola ${name || 'Builder'}!\n\nHaz clic en el enlace de abajo para iniciar sesión: ${magicLink}\n\nEste enlace expirará en ${TIMEOUT_MINS} minutos.\n\nSi no solicitaste este enlace, por favor ignora este correo electrónico.`,
             Charset: 'UTF-8',
           },
         },
@@ -298,9 +298,9 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     // Create appropriate message based on delivery methods
     let deliveryMessage: string;
     if (whatsappSent) {
-      deliveryMessage = 'Enlace mágico enviado exitosamente a tu WhatsApp y correo electrónico.';
+      deliveryMessage = 'Enlace de acceso enviado exitosamente a tu WhatsApp y correo electrónico.';
     } else {
-      deliveryMessage = 'Enlace mágico enviado exitosamente a tu correo electrónico.';
+      deliveryMessage = 'Enlace de acceso enviado exitosamente a tu correo electrónico.';
     }
 
     logger.info('Magic link sent successfully', {
