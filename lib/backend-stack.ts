@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { DatabaseStack } from './stacks/database';
 import { ApiStack } from './stacks/api';
 import { LambdaStack } from './stacks/lambda';
+import { AuthApiStack } from './stacks/auth-api';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
@@ -27,6 +28,7 @@ export interface AppStackProps extends cdk.StackProps {
 export class BackendStack extends cdk.Stack {
   public readonly apiUrl: string;
   public readonly apiKey: string;
+  public readonly authApiUrl: string;
   public readonly userPoolId: string;
   public readonly userPoolClientId: string;
   public readonly userPoolDomain: string;
@@ -51,12 +53,7 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
     });
 
-    const lambdaStack = new LambdaStack(this, 'LambdaStack', {
-      environmentName: props.environmentName,
-      table: databaseStack.table,
-    });
-
-    // Create Cognito Stack for authentication
+    // Create Cognito Stack for authentication first
     const cognitoStack = new CognitoStack(this, 'CognitoStack', {
       environmentName: props.environmentName,
       appDomain: props.appDomain,
@@ -64,6 +61,14 @@ export class BackendStack extends cdk.Stack {
       certificate: domainCert,
       hostedZone: hostedZone,
       groups: ['Attendees', 'Sponsors', 'CheckInVolunteers'],
+    });
+
+    const lambdaStack = new LambdaStack(this, 'LambdaStack', {
+      environmentName: props.environmentName,
+      table: databaseStack.table,
+      userPool: cognitoStack.userPool,
+      baseUrl: props.appDomain,
+      sesFromAddress: `no-reply@${props.hostedZoneName}`,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -75,6 +80,13 @@ export class BackendStack extends cdk.Stack {
       domainName: props.domainName,
       userPool: cognitoStack.userPool,
     });
+
+    // // Create Authentication API Stack
+    // const authApiStack = new AuthApiStack(this, 'AuthApiStack', {
+    //   shortIdAuthFunction: lambdaStack.shortIdAuthFunction,
+    //   userTable: databaseStack.table,
+    //   userPool: cognitoStack.userPool,
+    // });
 
     // Add permissions for authenticated users to access API operations
     cognitoStack.authenticatedRole.addToPolicy(
@@ -145,6 +157,7 @@ export class BackendStack extends cdk.Stack {
     // Expose API URL and Key
     this.apiUrl = apiStack.api.graphqlUrl;
     this.apiKey = apiStack.api.apiKey || '';
+    // this.authApiUrl = authApiStack.api.url;
 
     // Expose Cognito information
     this.userPoolId = cognitoStack.userPool.userPoolId;
@@ -157,6 +170,11 @@ export class BackendStack extends cdk.Stack {
       value: this.apiUrl,
       description: 'GraphQL API URL',
     });
+
+    // new cdk.CfnOutput(this, 'AuthApiUrl', {
+    //   value: this.authApiUrl,
+    //   description: 'Authentication REST API URL',
+    // });
 
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: this.userPoolId,

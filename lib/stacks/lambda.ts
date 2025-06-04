@@ -4,6 +4,8 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as ses from 'aws-cdk-lib/aws-ses';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
@@ -15,12 +17,16 @@ const TWILIO_CONTENT_SID = 'HX04e190778b8ae34d3bfea52d2aea1d0a';
 interface LambdaStackProps {
   environmentName: string;
   table: dynamodb.Table;
+  userPool?: cognito.UserPool;
+  baseUrl?: string;
+  sesFromAddress?: string;
 }
 
 export class LambdaStack extends Construct {
   public readonly graphQLResolver: NodejsFunction;
   public readonly eventbriteWebhookHandler: NodejsFunction;
   public readonly twilioMessageSender: PythonFunction;
+  public readonly shortIdAuthFunction: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
@@ -185,6 +191,70 @@ export class LambdaStack extends Construct {
     this.twilioMessageSender.addFunctionUrl({
       authType: lambdaUrl.FunctionUrlAuthType.NONE,
     });
+
+    // Create the Lambda function for short_id authentication
+    this.shortIdAuthFunction = new NodejsFunction(this, 'ShortIdAuthFunction', {
+      functionName: truncateLambdaName('ShortIdAuth', props.environmentName),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/magic-link/shortIdAuth.ts'),
+      environment: {
+        TABLE_NAME: props.table.tableName,
+        USER_POOL_ID: props.userPool?.userPoolId || '',
+        BASE_URL: props.baseUrl || '',
+        SES_FROM_ADDRESS: props.sesFromAddress || '',
+        ENVIRONMENT: props.environmentName,
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        POWERTOOLS_SERVICE_NAME: 'short-id-auth',
+        POWERTOOLS_METRICS_NAMESPACE: 'Authentication',
+        LOG_LEVEL: this.getLogLevel(props.environmentName),
+        POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
+        POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+      },
+      timeout: cdk.Duration.seconds(30),
+      tracing: lambda.Tracing.ACTIVE,
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+        ],
+      },
+    });
+
+    // Grant additional permissions for CloudWatch Metrics
+    this.shortIdAuthFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['cloudwatch:PutMetricData'],
+        resources: ['*'],
+      })
+    );
+
+    // Grant the Lambda function access to DynamoDB
+    props.table.grantReadData(this.shortIdAuthFunction);
+
+    // Grant Cognito permissions for updating user attributes
+    if (props.userPool) {
+      this.shortIdAuthFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ['cognito-idp:AdminUpdateUserAttributes', 'cognito-idp:AdminGetUser'],
+          resources: [props.userPool.userPoolArn],
+        })
+      );
+    }
+
+    // Grant SES permissions for sending emails
+    this.shortIdAuthFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['ses:SendEmail', 'ses:SendRawEmail', 'sesv2:SendEmail'],
+        resources: ['*'],
+      })
+    );
   }
 
   private getLogLevel(environmentName: string): string {
