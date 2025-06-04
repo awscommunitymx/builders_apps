@@ -198,6 +198,8 @@ else
   RUM_APP_REGION=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='RumAppRegion'].OutputValue" --output text)
   IDENTITY_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='IdentityPoolId'].OutputValue" --output text)
   GUEST_ROLE_ARN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='GuestRoleArn'].OutputValue" --output text)
+  USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
+  USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
   
   # Create .env file in the frontend directory
   cat > frontend/.env << EOL
@@ -208,6 +210,8 @@ VITE_RUM_APP_MONITOR_ID=${RUM_MONITOR_ID}
 VITE_RUM_APP_REGION=${RUM_APP_REGION}
 VITE_IDENTITY_POOL_ID=${IDENTITY_POOL_ID}
 VITE_GUEST_ROLE_ARN=${GUEST_ROLE_ARN}
+VITE_USER_POOL_CLIENT_ID=${USER_POOL_CLIENT_ID}
+VITE_USER_POOL_ID=${USER_POOL_ID}
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"
