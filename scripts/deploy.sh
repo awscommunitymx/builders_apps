@@ -200,6 +200,7 @@ else
   GUEST_ROLE_ARN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='GuestRoleArn'].OutputValue" --output text)
   USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
   USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
+  AUTH_API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='AuthApiUrl'].OutputValue" --output text)
   
   # Create .env file in the frontend directory
   cat > frontend/.env << EOL
@@ -212,6 +213,7 @@ VITE_IDENTITY_POOL_ID=${IDENTITY_POOL_ID}
 VITE_GUEST_ROLE_ARN=${GUEST_ROLE_ARN}
 VITE_USER_POOL_CLIENT_ID=${USER_POOL_CLIENT_ID}
 VITE_USER_POOL_ID=${USER_POOL_ID}
+VITE_AUTH_API_URL=${AUTH_API_URL}
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"

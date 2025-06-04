@@ -13,6 +13,7 @@ import ErrorBoundary from './ErrorBoundary.tsx';
 import { MyProfileRoute } from './routes/MyProfileRoute.tsx';
 import { SponsorDashboardRoute } from './routes/SponsorDashboardRoute.tsx';
 import AuthCallbackRoute from './routes/AuthCallbackRoute.tsx';
+import LoginRoute from './routes/Login.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/magic-link" element={<AuthCallbackRoute />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={<Layout />}>
+                <Route path="/login" element={<LoginRoute />} />
                 <Route index element={<App />} />
                 <Route path="/profile/:id" element={<UserProfileRoute />} />
                 <Route path="/profile" element={<MyProfileRoute />} />

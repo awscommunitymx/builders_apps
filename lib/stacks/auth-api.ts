@@ -4,6 +4,7 @@ import { RestApi, LambdaIntegration, Cors, MethodLoggingLevel } from 'aws-cdk-li
 import { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import * as cdk from 'aws-cdk-lib';
 
 interface AuthApiStackProps extends StackProps {
   shortIdAuthFunction: LambdaFunction;
@@ -51,6 +52,12 @@ export class AuthApiStack extends Construct {
 
     shortIdResource.addMethod('POST', shortIdAuthIntegration, {
       operationName: 'AuthenticateWithShortId',
+    });
+
+    new cdk.CfnOutput(this, 'AuthApiUrl', {
+      value: this.api.url,
+      description: 'The URL of the Auth API',
+      exportName: `${cdk.Stack.of(this).stackName}-AuthApiUrl`,
     });
   }
 }
