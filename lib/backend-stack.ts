@@ -54,6 +54,12 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
     });
 
+    // Create KMS key for encryption
+    const encryptionKey = new kms.Key(this, 'EncryptionKey', {
+      description: `Encryption key for magic link tokens - ${props.environmentName}`,
+      enableKeyRotation: true,
+    });
+
     // Create Cognito Stack for authentication first
     const cognitoStack = new CognitoStack(this, 'CognitoStack', {
       environmentName: props.environmentName,
@@ -62,12 +68,8 @@ export class BackendStack extends cdk.Stack {
       certificate: domainCert,
       hostedZone: hostedZone,
       groups: ['Attendees', 'Sponsors', 'CheckInVolunteers'],
-    });
-
-    // Create KMS key for encryption
-    const encryptionKey = new kms.Key(this, 'EncryptionKey', {
-      description: `Encryption key for magic link tokens - ${props.environmentName}`,
-      enableKeyRotation: true,
+      table: databaseStack.table,
+      kmsKey: encryptionKey,
     });
 
     const lambdaStack = new LambdaStack(this, 'LambdaStack', {

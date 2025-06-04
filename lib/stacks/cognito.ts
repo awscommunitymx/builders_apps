@@ -6,6 +6,9 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import { getAuthUrls, sanitizeDomainPrefix } from '../../utils/cognito';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { truncateLambdaName } from '../../utils/lambda';
+import * as path from 'path';
 
 export interface CognitoStackProps {
   environmentName: string;
@@ -17,6 +20,8 @@ export interface CognitoStackProps {
   defineAuthChallengeFunction?: lambda.IFunction;
   createAuthChallengeFunction?: lambda.IFunction;
   verifyAuthChallengeFunction?: lambda.IFunction;
+  table: cdk.aws_dynamodb.ITable;
+  kmsKey?: cdk.aws_kms.IKey; // Optional KMS key for encryption
 }
 
 export class CognitoStack extends Construct {
@@ -27,8 +32,118 @@ export class CognitoStack extends Construct {
   public readonly authenticatedRole: iam.Role;
   public readonly unauthenticatedRole: iam.Role;
 
+  public readonly defineAuthChallengeFunction: NodejsFunction;
+  public readonly createAuthChallengeFunction: NodejsFunction;
+  public readonly verifyAuthChallengeFunction: NodejsFunction;
+
   constructor(scope: Construct, id: string, props: CognitoStackProps) {
     super(scope, id);
+
+    // Create Cognito custom auth challenge Lambda functions
+    this.defineAuthChallengeFunction = new NodejsFunction(this, 'DefineAuthChallengeFunction', {
+      functionName: truncateLambdaName('DefineAuthChallenge', props.environmentName),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/auth-challenge/defineAuthChallenge.ts'),
+      environment: {
+        ENVIRONMENT: props.environmentName,
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        POWERTOOLS_SERVICE_NAME: 'define-auth-challenge',
+        POWERTOOLS_METRICS_NAMESPACE: 'Authentication',
+        LOG_LEVEL: this.getLogLevel(props.environmentName),
+        POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
+        POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+      },
+      timeout: cdk.Duration.seconds(10),
+      tracing: lambda.Tracing.ACTIVE,
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+        ],
+      },
+    });
+
+    this.createAuthChallengeFunction = new NodejsFunction(this, 'CreateAuthChallengeFunction', {
+      functionName: truncateLambdaName('CreateAuthChallenge', props.environmentName),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/auth-challenge/createAuthChallenge.ts'),
+      environment: {
+        TABLE_NAME: props.table.tableName,
+        ENVIRONMENT: props.environmentName,
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        POWERTOOLS_SERVICE_NAME: 'create-auth-challenge',
+        POWERTOOLS_METRICS_NAMESPACE: 'Authentication',
+        LOG_LEVEL: this.getLogLevel(props.environmentName),
+        POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
+        POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+      },
+      timeout: cdk.Duration.seconds(10),
+      tracing: lambda.Tracing.ACTIVE,
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+        ],
+      },
+    });
+
+    this.verifyAuthChallengeFunction = new NodejsFunction(this, 'VerifyAuthChallengeFunction', {
+      functionName: truncateLambdaName('VerifyAuthChallenge', props.environmentName),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/auth-challenge/verifyAuthChallenge.ts'),
+      environment: {
+        KMS_KEY_ID: props.kmsKey?.keyId || '',
+        ENVIRONMENT: props.environmentName,
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        POWERTOOLS_SERVICE_NAME: 'verify-auth-challenge',
+        POWERTOOLS_METRICS_NAMESPACE: 'Authentication',
+        LOG_LEVEL: this.getLogLevel(props.environmentName),
+        POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
+        POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+      },
+      timeout: cdk.Duration.seconds(10),
+      tracing: lambda.Tracing.ACTIVE,
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+        ],
+      },
+    });
+
+    // Grant permissions for the Cognito auth challenge functions
+    props.table.grantReadData(this.createAuthChallengeFunction);
+
+    if (props.kmsKey) {
+      props.kmsKey.grantDecrypt(this.verifyAuthChallengeFunction);
+    }
+
+    // Grant CloudWatch permissions for all auth challenge functions
+    [
+      this.defineAuthChallengeFunction,
+      this.createAuthChallengeFunction,
+      this.verifyAuthChallengeFunction,
+    ].forEach((func) => {
+      func.addToRolePolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ['cloudwatch:PutMetricData'],
+          resources: ['*'],
+        })
+      );
+    });
 
     // Create the Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'UserPool', {
@@ -87,9 +202,9 @@ export class CognitoStack extends Construct {
       removalPolicy: this.getRemovalPolicy(props.environmentName),
       // Configure Lambda triggers for custom auth challenge
       lambdaTriggers: {
-        defineAuthChallenge: props.defineAuthChallengeFunction,
-        createAuthChallenge: props.createAuthChallengeFunction,
-        verifyAuthChallengeResponse: props.verifyAuthChallengeFunction,
+        defineAuthChallenge: this.defineAuthChallengeFunction,
+        createAuthChallenge: this.createAuthChallengeFunction,
+        verifyAuthChallengeResponse: this.verifyAuthChallengeFunction,
       },
     });
 
@@ -248,5 +363,12 @@ export class CognitoStack extends Construct {
     return environmentName === 'production' || environmentName === 'staging'
       ? cdk.RemovalPolicy.RETAIN
       : cdk.RemovalPolicy.DESTROY;
+  }
+
+  private getLogLevel(environmentName: string): string {
+    // Different log levels based on environment
+    if (environmentName === 'production') return 'WARN';
+    if (environmentName === 'staging') return 'INFO';
+    return 'DEBUG'; // Development/PR environments
   }
 }
