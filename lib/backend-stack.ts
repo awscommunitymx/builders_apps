@@ -9,6 +9,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
 import * as rum from 'aws-cdk-lib/aws-rum';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as kms from 'aws-cdk-lib/aws-kms';
 import { UserStepFunctionStack } from './stacks/user-step-function';
 
 export interface AppStackProps extends cdk.StackProps {
@@ -63,12 +64,19 @@ export class BackendStack extends cdk.Stack {
       groups: ['Attendees', 'Sponsors', 'CheckInVolunteers'],
     });
 
+    // Create KMS key for encryption
+    const encryptionKey = new kms.Key(this, 'EncryptionKey', {
+      description: `Encryption key for magic link tokens - ${props.environmentName}`,
+      enableKeyRotation: true,
+    });
+
     const lambdaStack = new LambdaStack(this, 'LambdaStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
       userPool: cognitoStack.userPool,
       baseUrl: props.appDomain,
       sesFromAddress: 'noreply@awscommunity.mx',
+      kmsKey: encryptionKey,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {

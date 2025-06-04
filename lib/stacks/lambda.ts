@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as kms from 'aws-cdk-lib/aws-kms';
 import * as path from 'path';
 import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
@@ -20,6 +21,7 @@ interface LambdaStackProps {
   userPool?: cognito.UserPool;
   baseUrl?: string;
   sesFromAddress?: string;
+  kmsKey?: kms.Key;
 }
 
 export class LambdaStack extends Construct {
@@ -205,6 +207,7 @@ export class LambdaStack extends Construct {
         SES_FROM_ADDRESS: props.sesFromAddress || '',
         TWILIO_SECRET_NAME: 'twilio-credentials',
         TWILIO_MESSAGING_SERVICE_SID: TWILIO_MESSAGING_SERVICE_SID,
+        KMS_KEY_ID: props.kmsKey?.keyId || '',
         ENVIRONMENT: props.environmentName,
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         POWERTOOLS_SERVICE_NAME: 'short-id-auth',
@@ -268,6 +271,11 @@ export class LambdaStack extends Construct {
         resources: [`arn:aws:secretsmanager:*:*:secret:twilio-credentials*`],
       })
     );
+
+    // Grant KMS permissions for encryption/decryption
+    if (props.kmsKey) {
+      props.kmsKey.grantEncryptDecrypt(this.shortIdAuthFunction);
+    }
   }
 
   private getLogLevel(environmentName: string): string {
