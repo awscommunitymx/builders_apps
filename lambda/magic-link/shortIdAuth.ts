@@ -169,7 +169,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     return {
       statusCode: 400,
       body: JSON.stringify({
-        message: 'Invalid JSON in request body.',
+        message: 'JSON inválido en el cuerpo de la solicitud.',
       }),
     };
   }
@@ -181,7 +181,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     return {
       statusCode: 400,
       body: JSON.stringify({
-        message: 'You must provide a valid short_id.',
+        message: 'Debes proporcionar un short_id válido.',
       }),
     };
   }
@@ -208,7 +208,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       return {
         statusCode: 404,
         body: JSON.stringify({
-          message: 'User not found with the provided short_id.',
+          message: 'Usuario no encontrado.',
         }),
       };
     }
@@ -220,7 +220,8 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       return {
         statusCode: 400,
         body: JSON.stringify({
-          message: 'User profile is incomplete - missing email address.',
+          message:
+            'El perfil del usuario está incompleto - falta la dirección de correo electrónico.',
         }),
       };
     }
@@ -264,7 +265,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       return {
         statusCode: 500,
         body: JSON.stringify({
-          message: 'Failed to generate authentication token.',
+          message: 'Error al generar el token de autenticación.',
         }),
       };
     }
@@ -272,10 +273,14 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     // Send magic link email
     await sendEmail(userProfile.email, userProfile.name || 'Builder', magicLink);
 
+    // Track WhatsApp delivery success
+    let whatsappSent = false;
+
     // Send WhatsApp message if user has a cell phone
     if (userProfile.cell_phone) {
       try {
         await sendWhatsAppMessage(userProfile.cell_phone, userProfile.name || 'Builder', magicLink);
+        whatsappSent = true;
         logger.info('WhatsApp message sent successfully', {
           email: userProfile.email,
           phone: userProfile.cell_phone,
@@ -290,10 +295,18 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       }
     }
 
+    // Create appropriate message based on delivery methods
+    let deliveryMessage: string;
+    if (whatsappSent) {
+      deliveryMessage = 'Enlace mágico enviado exitosamente a tu WhatsApp y correo electrónico.';
+    } else {
+      deliveryMessage = 'Enlace mágico enviado exitosamente a tu correo electrónico.';
+    }
+
     logger.info('Magic link sent successfully', {
       email: userProfile.email,
       short_id: userProfile.short_id,
-      whatsapp_sent: !!userProfile.cell_phone,
+      whatsapp_sent: whatsappSent,
     });
 
     metrics.addMetadata('short_id', short_id);
@@ -302,7 +315,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     return {
       statusCode: 202,
       body: JSON.stringify({
-        message: 'Magic link sent successfully to your registered email address.',
+        message: deliveryMessage,
       }),
     };
   } catch (error) {
@@ -313,7 +326,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Internal server error occurred while processing your request.',
+        message: 'Error interno del servidor al procesar tu solicitud.',
       }),
     };
   }
@@ -348,7 +361,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       statusCode: 400,
       headers: corsHeaders,
       body: JSON.stringify({
-        message: 'Invalid JSON in request body.',
+        message: 'JSON inválido en el cuerpo de la solicitud.',
       }),
     };
   }
