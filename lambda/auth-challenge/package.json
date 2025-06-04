@@ -1,0 +1,24 @@
+{
+  "name": "auth-challenge",
+  "version": "1.0.0",
+  "description": "Cognito Lambda triggers for custom auth challenge",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.16.0",
+    "@aws-lambda-powertools/metrics": "^2.16.0",
+    "@aws-lambda-powertools/tracer": "^2.16.0",
+    "@aws-sdk/client-kms": "^3.799.0",
+    "@aws-sdk/client-dynamodb": "^3.799.0",
+    "@aws-sdk/lib-dynamodb": "^3.799.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13"
+  }
+}

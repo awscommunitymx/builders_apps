@@ -12,6 +12,7 @@ import { AwsRumProvider } from './AwsRumProvider.tsx';
 import ErrorBoundary from './ErrorBoundary.tsx';
 import { MyProfileRoute } from './routes/MyProfileRoute.tsx';
 import { SponsorDashboardRoute } from './routes/SponsorDashboardRoute.tsx';
+import AuthCallbackRoute from './routes/AuthCallbackRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
         <ApolloProvider client={client}>
           <BrowserRouter>
             <Routes>
+              <Route path="/magic-link" element={<AuthCallbackRoute />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={<Layout />}>
                 <Route index element={<App />} />

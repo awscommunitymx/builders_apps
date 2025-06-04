@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { getAuthUrls, sanitizeDomainPrefix } from '../../utils/cognito';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
@@ -13,6 +14,9 @@ export interface CognitoStackProps {
   certificate: ICertificate;
   hostedZone: route53.IHostedZone;
   groups?: string[];
+  defineAuthChallengeFunction?: lambda.IFunction;
+  createAuthChallengeFunction?: lambda.IFunction;
+  verifyAuthChallengeFunction?: lambda.IFunction;
 }
 
 export class CognitoStack extends Construct {
@@ -81,6 +85,12 @@ export class CognitoStack extends Construct {
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_AND_PHONE_WITHOUT_MFA,
       removalPolicy: this.getRemovalPolicy(props.environmentName),
+      // Configure Lambda triggers for custom auth challenge
+      lambdaTriggers: {
+        defineAuthChallenge: props.defineAuthChallengeFunction,
+        createAuthChallenge: props.createAuthChallengeFunction,
+        verifyAuthChallengeResponse: props.verifyAuthChallengeFunction,
+      },
     });
 
     // Create a domain for the user pool
