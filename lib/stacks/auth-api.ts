@@ -11,11 +11,11 @@ interface AuthApiStackProps extends StackProps {
   userPool: UserPool;
 }
 
-export class AuthApiStack extends Stack {
+export class AuthApiStack extends Construct {
   public readonly api: RestApi;
 
   constructor(scope: Construct, id: string, props: AuthApiStackProps) {
-    super(scope, id, props);
+    super(scope, id);
 
     const { shortIdAuthFunction } = props;
 
@@ -25,9 +25,6 @@ export class AuthApiStack extends Stack {
       description: 'Authentication API for AWS Community Builders',
       deployOptions: {
         stageName: 'prod',
-        loggingLevel: MethodLoggingLevel.INFO,
-        dataTraceEnabled: true,
-        metricsEnabled: true,
       },
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
@@ -55,18 +52,5 @@ export class AuthApiStack extends Stack {
     shortIdResource.addMethod('POST', shortIdAuthIntegration, {
       operationName: 'AuthenticateWithShortId',
     });
-
-    // Add CORS to all methods
-    // shortIdResource.addCorsPreflight({
-    //   allowOrigins: Cors.ALL_ORIGINS,
-    //   allowMethods: ['POST', 'OPTIONS'],
-    //   allowHeaders: [
-    //     'Content-Type',
-    //     'X-Amz-Date',
-    //     'Authorization',
-    //     'X-Api-Key',
-    //     'X-Amz-Security-Token',
-    //   ],
-    // });
   }
 }

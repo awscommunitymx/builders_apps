@@ -91,12 +91,14 @@ export class BackendStack extends cdk.Stack {
       userPool: cognitoStack.userPool,
     });
 
-    // // Create Authentication API Stack
-    // const authApiStack = new AuthApiStack(this, 'AuthApiStack', {
-    //   shortIdAuthFunction: lambdaStack.shortIdAuthFunction,
-    //   userTable: databaseStack.table,
-    //   userPool: cognitoStack.userPool,
-    // });
+    // Create Authentication API Stack
+    const authApiStack = new AuthApiStack(this, 'AuthApiStack', {
+      shortIdAuthFunction: lambdaStack.shortIdAuthFunction,
+      userTable: databaseStack.table,
+      userPool: cognitoStack.userPool,
+    });
+
+    this.authApiUrl = authApiStack.api.url;
 
     // Add permissions for authenticated users to access API operations
     cognitoStack.authenticatedRole.addToPolicy(
@@ -181,10 +183,10 @@ export class BackendStack extends cdk.Stack {
       description: 'GraphQL API URL',
     });
 
-    // new cdk.CfnOutput(this, 'AuthApiUrl', {
-    //   value: this.authApiUrl,
-    //   description: 'Authentication REST API URL',
-    // });
+    new cdk.CfnOutput(this, 'AuthApiUrl', {
+      value: this.authApiUrl,
+      description: 'Authentication REST API URL',
+    });
 
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: this.userPoolId,
