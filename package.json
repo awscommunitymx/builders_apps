@@ -30,6 +30,7 @@
     "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@graphql-codegen/typescript-resolvers": "^4.4.4",
     "@playwright/test": "^1.52.0",
+    "@storybook/react": "^8.6.12",
     "@types/node": "22.7.9",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
@@ -46,6 +47,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.799.0",
+    "@cloudscape-design/chat-components": "^1.0.45",
     "aws-cdk-lib": "^2.189.1",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.7.1",

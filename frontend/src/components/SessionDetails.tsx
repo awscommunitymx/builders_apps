@@ -12,12 +12,13 @@ import {
   Icon,
 } from '@cloudscape-design/components';
 import Avatar from '@cloudscape-design/chat-components/avatar';
+import CountryFlag from './CountryFlag';
 
-// Sample images - replace with actual images for each session
+import sessionsData from '../data/sessions-transformed.json';
+
+// Sample images - usados como fallback en caso de no tener imágenes reales
 const sessionImages: { [key: string]: string } = {
-  '1': 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format',
-  '2': 'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?w=800&auto=format',
-  '3': 'https://images.unsplash.com/photo-1573164574511-73c773193279?w=800&auto=format',
+  default: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format',
 };
 
 // Define the Speaker interface
@@ -26,6 +27,7 @@ interface SpeakerType {
   bio: string;
   avatarUrl: string;
   company?: string;
+  nationality?: string; // Añadimos nacionalidad específica para cada ponente
   socialMedia?: {
     linkedin?: string;
     github?: string;
@@ -34,6 +36,7 @@ interface SpeakerType {
     instagram?: string;
     blog?: string;
     company?: string;
+    other?: string;
   };
 }
 
@@ -44,143 +47,61 @@ interface SessionType {
   extendedDescription: string;
   speakers: SpeakerType[];
   time: string;
+  dateStart?: string;
+  dateEnd?: string;
+  duration?: number;
   location: string;
   capacity: number;
-  tags: string[];
+  Nationality?: string;
+  level: string;
+  language: string;
+  catergory: string;
+  status?: string;
+  liveUrl?: string | null;
+  recordingUrl?: string | null;
+  tags?: string[]; // Añadimos el campo tags que se utiliza en la UI
 }
 
-// Extended session data with more details for the detail view
-const sessionData: { [key: string]: SessionType } = {
-  '1': {
-    id: '1',
-    name: 'Innovación en Inteligencia Artificial',
-    description: 'Explorando las últimas tendencias en IA y sus aplicaciones prácticas',
-    extendedDescription: `Esta charla profundiza en cómo la inteligencia artificial está transformando industrias enteras. 
-    Analizaremos los avances más recientes en machine learning y deep learning, así como casos de uso prácticos 
-    que están generando valor en diversos sectores. Los presentadores compartirán su experiencia en proyectos de IA aplicada
-    y ofrecerán una visión práctica de cómo implementar estas tecnologías en entornos reales.`,
-    speakers: [
-      {
-        name: 'Dra. María Rodríguez',
-        bio: 'Investigadora principal en el Instituto de Tecnología Avanzada y ex-directora de AI Research en Tech Innovations Inc. Cuenta con más de 15 años de experiencia en el campo de la IA y numerosas publicaciones académicas.',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format',
-        company: 'Instituto de Tecnología Avanzada',
-        socialMedia: {
-          linkedin: 'https://linkedin.com/in/maria-rodriguez',
-          github: 'https://github.com/maria-rodriguez',
-          twitter: 'https://twitter.com/mariarod_ai',
-          facebook: 'https://facebook.com/mariarod.ai',
-          instagram: 'https://instagram.com/mariarod_ai',
-          blog: 'https://mariarodriguezai.com/blog',
-          company: 'https://institutodetecnologiaavanzada.edu',
-        },
-      },
-      {
-        name: 'Dr. Juan Pérez',
-        bio: 'Director del Laboratorio de Inteligencia Artificial Aplicada y profesor investigador con especialidad en algoritmos de aprendizaje profundo. Pionero en la integración de IA en sistemas de manufactura inteligente.',
-        avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=150&auto=format',
-        socialMedia: {
-          linkedin: 'https://linkedin.com/in/juan-perez-ai',
-          github: 'https://github.com/jperez-ai',
-          twitter: 'https://twitter.com/jperez_deeplearn',
-          instagram: 'https://instagram.com/dr.juanperez',
-          blog: 'https://deeplearninglab.tech/blog',
-          company: 'https://iaalab.org',
-        },
-      },
-    ],
-    time: '09:00 - 10:30',
-    location: 'Sala Principal',
-    capacity: 200,
-    tags: ['Inteligencia Artificial', 'Machine Learning', 'Innovación'],
-  },
-  '2': {
-    id: '2',
-    name: 'Desarrollo Sostenible y Tecnología',
-    description: 'Cómo la tecnología puede impulsar iniciativas de sostenibilidad',
-    extendedDescription: `En esta presentación, exploraremos la intersección entre la tecnología moderna y la sostenibilidad ambiental.
-    Veremos ejemplos concretos de cómo las empresas están utilizando soluciones tecnológicas para reducir su huella de carbono,
-    optimizar el uso de recursos y contribuir a los Objetivos de Desarrollo Sostenible de la ONU.
-    Los presentadores compartirán casos de éxito y lecciones aprendidas de proyectos reales.`,
-    speakers: [
-      {
-        name: 'Ing. Carlos Mendoza',
-        bio: 'Ingeniero ambiental y consultor en tecnologías sostenibles con experiencia en más de 50 proyectos internacionales. Fundador de GreenTech Solutions y asesor para varias organizaciones comprometidas con la agenda medioambiental.',
-        avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format',
-        socialMedia: {
-          linkedin: 'https://linkedin.com/in/carlos-mendoza-env',
-          github: 'https://github.com/cmendoza-greentech',
-          twitter: 'https://twitter.com/cmendoza_eco',
-          facebook: 'https://facebook.com/carlosmendozasostenible',
-          instagram: 'https://instagram.com/carlosmendoza_eco',
-          blog: 'https://sostenibilidadtecnologica.com',
-          company: 'https://greentech-solutions.com',
-        },
-      },
-      {
-        name: 'Ing. Laura Vázquez',
-        bio: 'Especialista en energías renovables y directora del programa de Ciudades Sustentables. Su trabajo se ha centrado en la implementación de soluciones tecnológicas para el desarrollo urbano sostenible.',
-        avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format',
-        socialMedia: {
-          linkedin: 'https://linkedin.com/in/laura-vazquez-sustain',
-          github: 'https://github.com/lvazquez-sustain',
-          twitter: 'https://twitter.com/laura_vsustain',
-          facebook: 'https://facebook.com/lauravsustentable',
-          instagram: 'https://instagram.com/laurav_sustentable',
-          blog: 'https://ciudadessustentables.org/blog',
-          company: 'https://ciudadessustentables.org',
-        },
-      },
-    ],
-    time: '11:00 - 12:30',
-    location: 'Auditorio B',
-    capacity: 150,
-    tags: ['Sostenibilidad', 'Tecnología Verde', 'Medio Ambiente'],
-  },
-  '3': {
-    id: '3',
-    name: 'Seguridad en la Nube: Desafíos Actuales',
-    description: 'Estrategias para proteger datos e infraestructura en entornos cloud',
-    extendedDescription: `La adopción masiva de servicios en la nube ha creado nuevos desafíos de seguridad que requieren 
-    enfoques innovadores. En esta charla, se abordarán las amenazas más comunes en entornos cloud, 
-    estrategias efectivas de mitigación y buenas prácticas para proteger datos sensibles y garantizar la continuidad del negocio.
-    Se presentarán estudios de caso y recomendaciones prácticas basadas en estándares internacionales.`,
-    speakers: [
-      {
-        name: 'Lic. Ana Gómez',
-        bio: 'Especialista en ciberseguridad con certificación CISSP y AWS Security Specialist. Ha liderado equipos de seguridad en importantes empresas del sector financiero y actualmente es consultora independiente en seguridad cloud.',
-        avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=150&auto=format',
-        socialMedia: {
-          linkedin: 'https://linkedin.com/in/ana-gomez-security',
-          github: 'https://github.com/anagomez-security',
-          twitter: 'https://twitter.com/anagomez_sec',
-          facebook: 'https://facebook.com/anagomez.security',
-          instagram: 'https://instagram.com/anagomez_security',
-          blog: 'https://cloudsecurityblog.com',
-          company: 'https://securecloudconsulting.com',
-        },
-      },
-      {
-        name: 'Dr. Roberto Sánchez',
-        bio: 'Director de Seguridad de la Información en TechDefense Inc. Doctor en Informática con especialidad en modelos de seguridad para infraestructuras críticas y entornos distribuidos.',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format',
-        socialMedia: {
-          linkedin: 'https://linkedin.com/in/roberto-sanchez-security',
-          github: 'https://github.com/rsanchez-techdefense',
-          twitter: 'https://twitter.com/rsanchez_infosec',
-          facebook: 'https://facebook.com/robertosanchez.security',
-          instagram: 'https://instagram.com/robertosanchez_security',
-          blog: 'https://criticalinfrastructuresecurity.net',
-          company: 'https://techdefense.com',
-        },
-      },
-    ],
-    time: '14:00 - 15:30',
-    location: 'Sala de Conferencias C',
-    capacity: 120,
-    tags: ['Seguridad', 'Cloud Computing', 'Ciberseguridad'],
-  },
-};
+// Convertir los datos del JSON al formato necesario para SessionDetails
+const sessionData: { [key: string]: SessionType } = {};
+
+// Procesar cada sesión del archivo JSON y adaptarla a nuestro formato
+sessionsData.sessions.forEach((session: any) => {
+  // Crear tags a partir de los campos language y category para mantener compatibilidad con la UI
+  const tags = [];
+  if (session.language) tags.push(session.language);
+  if (session.catergory) tags.push(session.catergory);
+  if (session.level) tags.push(session.level);
+
+  sessionData[session.id] = {
+    id: session.id,
+    name: session.name,
+    description: session.description,
+    extendedDescription: session.extendedDescription || session.description,
+    speakers: session.speakers.map((speaker: any) => ({
+      name: speaker.name,
+      bio: speaker.bio || 'No hay biografía disponible para este ponente.',
+      avatarUrl: speaker.avatarUrl,
+      company: speaker.company,
+      nationality: speaker.nationality, // Añadir la nacionalidad del ponente
+      socialMedia: speaker.socialMedia,
+    })),
+    time: session.time,
+    dateStart: session.dateStart,
+    dateEnd: session.dateEnd,
+    duration: session.duration,
+    location: session.location,
+    capacity: session.capacity || 100,
+    Nationality: session.Nationality,
+    level: session.level,
+    language: session.language,
+    catergory: session.catergory,
+    status: session.status,
+    liveUrl: session.liveUrl,
+    recordingUrl: session.recordingUrl,
+    tags: tags,
+  };
+});
 
 export interface SessionDetailProps {
   sessionId: string;
@@ -196,7 +117,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
         <Box textAlign="center" padding="l">
           <SpaceBetween size="m">
             <div>La sesión solicitada no existe o ha sido eliminada.</div>
-            <Button onClick={() => navigate('/')}>Volver a la agenda</Button>
+            <Button onClick={() => navigate('/agenda')}>Volver a la agenda</Button>
           </SpaceBetween>
         </Box>
       </Container>
@@ -211,7 +132,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
         <Header
           variant="h1"
           actions={
-            <Button variant="primary" onClick={() => navigate('/')}>
+            <Button variant="primary" onClick={() => navigate('/agenda')}>
               Volver a la agenda
             </Button>
           }
@@ -224,6 +145,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
       <SpaceBetween size="l">
         <Container>
           <SpaceBetween size="l">
+            {/* Primera fila: Horario, Ubicación, Capacidad */}
             <div
               style={{
                 display: 'flex',
@@ -232,6 +154,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                 justifyContent: 'space-between',
                 width: '100%',
                 overflowX: 'auto', // Permite desplazamiento horizontal en pantallas muy pequeñas
+                marginBottom: '15px',
               }}
             >
               <div style={{ flex: '1', minWidth: '100px', paddingRight: '10px' }}>
@@ -248,6 +171,26 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                 <Box variant="awsui-key-label">Capacidad</Box>
                 <div>{session.capacity} asistentes</div>
               </div>
+            </div>
+
+            {/* Segunda fila: Fecha de inicio, Duración, Estado */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'nowrap',
+                justifyContent: 'space-between',
+                width: '100%',
+                overflowX: 'auto', // Permite desplazamiento horizontal en pantallas muy pequeñas
+                marginBottom: '15px',
+              }}
+            >
+              {session.duration && (
+                <div style={{ flex: '1', minWidth: '100px', padding: '0px' }}>
+                  <Box variant="awsui-key-label">Duración</Box>
+                  <div>{session.duration} minutos</div>
+                </div>
+              )}
             </div>
           </SpaceBetween>
         </Container>
@@ -269,10 +212,19 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                           <Avatar ariaLabel="" imgUrl={speaker.avatarUrl} width={40} />
                           <div style={{ marginLeft: '15px', flex: 1 }}>
-                            <div style={{ fontWeight: 'bold' }}>{speaker.name}</div>
+                            <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              {speaker.name}
+                              {speaker.nationality && <CountryFlag nationality={speaker.nationality} />}
+                            </div>
                             {speaker.company && (
                               <div style={{ fontSize: '14px', color: '#222' }}>
                                 {speaker.company}
+                              </div>
+                            )}
+                            {/* Mostrar nacionalidad si está disponible */}
+                            {speaker.nationality && (
+                              <div style={{ fontSize: '14px', color: '#444', marginBottom: '4px' }}>
+                                <span style={{ fontWeight: 'bold' }}>Nacionalidad:</span> {speaker.nationality}
                               </div>
                             )}
                             <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
@@ -443,25 +395,25 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                     ))}
                   </SpaceBetween>
                 </Box>
-
                 <Box>
                   <h3>Etiquetas</h3>
                   <div>
-                    {session.tags.map((tag: string) => (
-                      <span
-                        key={tag}
-                        style={{
-                          display: 'inline-block',
-                          margin: '0 8px 8px 0',
-                          padding: '4px 8px',
-                          backgroundColor: '#e0e0e3',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {session.tags &&
+                      session.tags.map((tag: string) => (
+                        <span
+                          key={tag}
+                          style={{
+                            display: 'inline-block',
+                            margin: '0 8px 8px 0',
+                            padding: '4px 8px',
+                            backgroundColor: '#e0e0e3',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
                   </div>
                 </Box>
               </SpaceBetween>

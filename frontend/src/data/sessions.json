@@ -1,0 +1,26 @@
+{
+  "sessions": [
+    {
+      "id": "1",
+      "name": "Innovación en Inteligencia Artificial",
+      "description": "Explorando las últimas tendencias en IA y sus aplicaciones prácticas en la industria, a cargo de la Dra. María Rodríguez, una experta en el campo de la inteligencia artificial.",
+      "speakers": [
+        {
+          "name": "Dra. María Rodríguez",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format",
+          "company": "Instituto de Tecnología Avanzada"
+        },
+        {
+          "name": "Dr. Juan Pérez",
+          "avatarUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=150&auto=format"
+        }
+      ],
+      "time": "09:00 - 10:30",
+      "location": "Sala Principal",
+      "Nationality": "España",
+      "level": "Intermedio",
+      "language": "Spanish",
+      "catergory": "breakout sesion"
+    }
+  ]
+}
