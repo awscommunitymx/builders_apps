@@ -94,6 +94,8 @@ export class BackendStack extends cdk.Stack {
     // Create Authentication API Stack
     const authApiStack = new AuthApiStack(this, 'AuthApiStack', {
       shortIdAuthFunction: lambdaStack.shortIdAuthFunction,
+      sessionPostFunction: lambdaStack.sessionPostFunction,
+      sessionDeleteFunction: lambdaStack.sessionDeleteFunction,
       userTable: databaseStack.table,
       userPool: cognitoStack.userPool,
     });
