@@ -117,7 +117,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
         <Box textAlign="center" padding="l">
           <SpaceBetween size="m">
             <div>La sesión solicitada no existe o ha sido eliminada.</div>
-            <Button onClick={() => navigate('/agenda')}>Volver a la agenda</Button>
+            <Button onClick={() => navigate('/')}>Volver a la agenda</Button>
           </SpaceBetween>
         </Box>
       </Container>
@@ -132,7 +132,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
         <Header
           variant="h1"
           actions={
-            <Button variant="primary" onClick={() => navigate('/agenda')}>
+            <Button variant="primary" onClick={() => navigate('/')}>
               Volver a la agenda
             </Button>
           }
