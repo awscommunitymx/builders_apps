@@ -20,6 +20,7 @@ interface AuthApiStackProps extends StackProps {
   shortIdAuthFunction: LambdaFunction;
   sessionPostFunction: LambdaFunction;
   sessionDeleteFunction: LambdaFunction;
+  sessionListFunction: LambdaFunction;
   userTable: Table;
   userPool: UserPool;
   certificate?: ICertificate;
@@ -38,6 +39,7 @@ export class AuthApiStack extends Construct {
       shortIdAuthFunction,
       sessionPostFunction,
       sessionDeleteFunction,
+      sessionListFunction,
       certificate,
       hostedZone,
       domainName,
@@ -92,6 +94,11 @@ export class AuthApiStack extends Construct {
       timeout: Duration.seconds(29),
     });
 
+    const sessionListIntegration = new LambdaIntegration(sessionListFunction, {
+      requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
+      timeout: Duration.seconds(29),
+    });
+
     // Add session POST endpoint
     sessionResource.addMethod('POST', sessionPostIntegration, {
       operationName: 'CreateSession',
@@ -100,6 +107,11 @@ export class AuthApiStack extends Construct {
     // Add session DELETE endpoint
     sessionResource.addMethod('DELETE', sessionDeleteIntegration, {
       operationName: 'DeleteSession',
+    });
+
+    // Add session GET endpoint (list favorite sessions)
+    sessionResource.addMethod('GET', sessionListIntegration, {
+      operationName: 'ListFavoriteSessions',
     });
 
     // Configure custom domain if provided

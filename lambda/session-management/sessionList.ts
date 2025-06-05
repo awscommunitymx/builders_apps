@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { PutCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { QueryCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
@@ -8,17 +8,15 @@ import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 const { TABLE_NAME } = process.env;
 
 // Initialize AWS Powertools
-const logger = new Logger({ serviceName: 'session-post' });
-const tracer = new Tracer({ serviceName: 'session-post' });
-const metrics = new Metrics({ namespace: 'SessionManagement', serviceName: 'session-post' });
+const logger = new Logger({ serviceName: 'session-list' });
+const tracer = new Tracer({ serviceName: 'session-list' });
+const metrics = new Metrics({ namespace: 'SessionManagement', serviceName: 'session-list' });
 
 // Initialize AWS clients
 const dynamoDBClient = tracer.captureAWSv3Client(new DynamoDBClient({}));
 const docClient = DynamoDBDocumentClient.from(dynamoDBClient);
 
-interface SessionRequest {
-  sessionId: string;
-}
+// Removed FavoriteSession interface - we'll just return session IDs
 
 // Helper function to parse cookies from request headers
 const parseCookies = (cookieHeader: string | undefined): Record<string, string> => {
@@ -44,32 +42,6 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     };
   }
 
-  // Parse JSON body
-  let requestBody: SessionRequest;
-  try {
-    requestBody = JSON.parse(event.body || '{}');
-  } catch (error) {
-    logger.warn('Invalid JSON in request body');
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: 'Invalid JSON in request body',
-      }),
-    };
-  }
-
-  const { sessionId } = requestBody;
-
-  if (!sessionId) {
-    logger.warn('Missing sessionId in request body');
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: 'sessionId is required',
-      }),
-    };
-  }
-
   // Parse cookies to extract anonUserId
   const cookies = parseCookies(event.headers.Cookie || event.headers.cookie);
   const anonUserId = cookies.anonUserId;
@@ -85,43 +57,37 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
   }
 
   try {
-    // Store session in DynamoDB with PK=AGENDA#anonUserId and SK=FAV#sessionId
-    const item = {
-      PK: `AGENDA#${anonUserId}`,
-      SK: `FAV#${sessionId}`,
-      anonUserId,
-      sessionId,
-      createdAt: new Date().toISOString(),
-      ttl: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60, // 1 year TTL
-    };
-
-    await docClient.send(
-      new PutCommand({
-        TableName: TABLE_NAME,
-        Item: item,
-      })
-    );
-
-    logger.info('Session stored successfully', {
-      anonUserId,
-      sessionId,
-      PK: item.PK,
-      SK: item.SK,
+    // Query DynamoDB for all favorite sessions for this user
+    const queryCommand = new QueryCommand({
+      TableName: TABLE_NAME,
+      KeyConditionExpression: 'PK = :pk AND begins_with(SK, :skPrefix)',
+      ExpressionAttributeValues: {
+        ':pk': `AGENDA#${anonUserId}`,
+        ':skPrefix': 'FAV#',
+      },
+      ProjectionExpression: 'sessionId',
     });
 
-    metrics.addMetric('SessionCreated', MetricUnit.Count, 1);
+    const response = await docClient.send(queryCommand);
+
+    // Transform the response to extract just the session IDs
+    const sessionIds: string[] = (response.Items || []).map((item: any) => item.sessionId);
+
+    logger.info('Favorite sessions retrieved successfully', {
+      anonUserId,
+      sessionCount: sessionIds.length,
+    });
+
+    metrics.addMetric('FavoriteSessionsRetrieved', MetricUnit.Count, 1);
+    metrics.addMetric('SessionCount', MetricUnit.Count, sessionIds.length);
 
     return {
-      statusCode: 201,
-      body: JSON.stringify({
-        message: 'Session created successfully',
-        anonUserId,
-        sessionId,
-      }),
+      statusCode: 200,
+      body: JSON.stringify(sessionIds),
     };
   } catch (error) {
-    logger.error('Error storing session', { error, anonUserId, sessionId });
-    metrics.addMetric('SessionCreateError', MetricUnit.Count, 1);
+    logger.error('Error retrieving favorite sessions', { error, anonUserId });
+    metrics.addMetric('SessionListError', MetricUnit.Count, 1);
 
     return {
       statusCode: 500,
@@ -138,7 +104,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers':
       'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Cookie',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST',
+    'Access-Control-Allow-Methods': 'OPTIONS,GET',
     'Content-Type': 'application/json',
   };
 

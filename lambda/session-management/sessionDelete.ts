@@ -85,13 +85,13 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
   }
 
   try {
-    // Delete session from DynamoDB with PK=AGENDA#anonUserId and SK=sessionId
+    // Delete session from DynamoDB with PK=AGENDA#anonUserId and SK=FAV#sessionId
     await docClient.send(
       new DeleteCommand({
         TableName: TABLE_NAME,
         Key: {
           PK: `AGENDA#${anonUserId}`,
-          SK: sessionId,
+          SK: `FAV#${sessionId}`,
         },
       })
     );
@@ -100,7 +100,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       anonUserId,
       sessionId,
       PK: `AGENDA#${anonUserId}`,
-      SK: sessionId,
+      SK: `FAV#${sessionId}`,
     });
 
     metrics.addMetric('SessionDeleted', MetricUnit.Count, 1);
