@@ -2,6 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { Amplify, Auth } from 'aws-amplify';
 import { CognitoUser } from 'amazon-cognito-identity-js';
+import {
+  Container,
+  Header,
+  Box,
+  SpaceBetween,
+  Alert,
+  Button,
+  Spinner,
+  StatusIndicator,
+  Icon,
+  ContentLayout,
+} from '@cloudscape-design/components';
 
 // Configure Amplify if not already configured
 // This should ideally be done in your main App.tsx or index.tsx file
@@ -12,8 +24,8 @@ const configureAmplify = () => {
 
   try {
     // Check if already configured
-    const config = Amplify.configure();
-    if (config.Auth) {
+    const config = Amplify.configure() as any;
+    if (config && config.Auth) {
       return;
     }
   } catch (e) {
@@ -131,37 +143,99 @@ const AuthCallbackRoute: React.FC = () => {
   // Render loading state
   if (state.isLoading) {
     return (
-      <div className="auth-callback-container">
-        <div className="loading-spinner">
-          <h2>Verifying your authentication...</h2>
-          <p>Please wait while we process your login.</p>
-        </div>
-      </div>
+      <Box padding={{ horizontal: 'l', vertical: 'l' }}>
+        <ContentLayout
+          header={
+            <Header variant="h1" description="Verificando tu autenticación...">
+              Enlace Mágico
+            </Header>
+          }
+        >
+          <Container>
+            <Box textAlign="center" padding={{ vertical: 'xl' }}>
+              <SpaceBetween size="l" direction="vertical">
+                <Box>
+                  <Icon name="external" size="big" variant="link" />
+                </Box>
+                <Header variant="h2">Verificando tu autenticación...</Header>
+                <Box variant="p" color="text-body-secondary">
+                  Por favor espera mientras procesamos tu enlace mágico. Esto solo tomará unos
+                  segundos.
+                </Box>
+                <Spinner size="large" />
+              </SpaceBetween>
+            </Box>
+          </Container>
+        </ContentLayout>
+      </Box>
     );
   }
 
   // Render error state
   if (state.error) {
     return (
-      <div className="auth-callback-container">
-        <div className="error-message">
-          <h2>Authentication Failed</h2>
-          <p>{state.error}</p>
-          <button onClick={() => navigate('/login')}>Return to Login</button>
-        </div>
-      </div>
+      <Box padding={{ horizontal: 'l', vertical: 'l' }}>
+        <ContentLayout
+          header={
+            <Header variant="h1" description="Ha ocurrido un error durante la autenticación">
+              Error de Autenticación
+            </Header>
+          }
+        >
+          <Container>
+            <SpaceBetween size="l" direction="vertical">
+              <Alert type="error" header="Autenticación Fallida" dismissible={false}>
+                {state.error}
+              </Alert>
+
+              <Box textAlign="center" padding={{ vertical: 'l' }}>
+                <SpaceBetween size="m" direction="vertical">
+                  <Box>
+                    <Icon name="status-negative" size="big" variant="error" />
+                  </Box>
+                  <Box variant="p" color="text-body-secondary">
+                    No te preocupes, puedes intentar nuevamente solicitando un nuevo enlace mágico.
+                  </Box>
+                  <Button variant="primary" onClick={() => navigate('/login')} iconName="refresh">
+                    Volver al Login
+                  </Button>
+                </SpaceBetween>
+              </Box>
+            </SpaceBetween>
+          </Container>
+        </ContentLayout>
+      </Box>
     );
   }
 
   // Render success state
   if (state.success) {
     return (
-      <div className="auth-callback-container">
-        <div className="success-message">
-          <h2>Authentication Successful!</h2>
-          <p>You have been successfully authenticated. Redirecting...</p>
-        </div>
-      </div>
+      <Box padding={{ horizontal: 'l', vertical: 'l' }}>
+        <ContentLayout
+          header={
+            <Header variant="h1" description="¡Tu enlace mágico ha funcionado perfectamente!">
+              Autenticación Exitosa
+            </Header>
+          }
+        >
+          <Container>
+            <Box textAlign="center" padding={{ vertical: 'xl' }}>
+              <SpaceBetween size="l" direction="vertical">
+                <Box>
+                  <Icon name="status-positive" size="big" variant="success" />
+                </Box>
+                <Header variant="h2">¡Autenticación Exitosa!</Header>
+                <Box variant="p" color="text-body-secondary">
+                  Has sido autenticado correctamente. Serás redirigido automáticamente a la
+                  aplicación en unos segundos.
+                </Box>
+                <StatusIndicator type="success">Redirigiendo...</StatusIndicator>
+              </SpaceBetween>
+            </Box>
+          </Container>
+        </ContentLayout>
+      </Box>
     );
   }
 

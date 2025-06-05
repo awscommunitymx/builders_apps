@@ -22,9 +22,9 @@ createRoot(document.getElementById('root')!).render(
         <ApolloProvider client={client}>
           <BrowserRouter>
             <Routes>
-              <Route path="/magic-link" element={<AuthCallbackRoute />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={<Layout />}>
+                <Route path="/magic-link" element={<AuthCallbackRoute />} />
                 <Route path="/login" element={<LoginRoute />} />
                 <Route index element={<App />} />
                 <Route path="/profile/:id" element={<UserProfileRoute />} />
