@@ -20,6 +20,7 @@ export interface AppStackProps extends cdk.StackProps {
   domainName: string;
   appDomain: string;
   authDomain: string;
+  authApiDomain: string;
   webhookDomain: string;
   eventbriteApiKeySecretArn: string;
   algoliaApiKeySecretArn: string;
@@ -98,9 +99,15 @@ export class BackendStack extends cdk.Stack {
       sessionDeleteFunction: lambdaStack.sessionDeleteFunction,
       userTable: databaseStack.table,
       userPool: cognitoStack.userPool,
+      certificate: domainCert,
+      hostedZone: hostedZone,
+      domainName: props.authApiDomain,
     });
 
-    this.authApiUrl = authApiStack.api.url;
+    this.authApiUrl =
+      props.authApiDomain && domainCert && hostedZone
+        ? `https://${props.authApiDomain}`
+        : authApiStack.api.url;
 
     // Add permissions for authenticated users to access API operations
     cognitoStack.authenticatedRole.addToPolicy(

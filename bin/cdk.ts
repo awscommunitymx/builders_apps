@@ -41,6 +41,11 @@ const backendDomain =
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
 
+const authApiDomain =
+  environmentName === 'production'
+    ? `auth-api.${hostedZoneName}`
+    : `auth-api-${environmentName}.${hostedZoneName}`;
+
 const webhookDomain =
   environmentName === 'production'
     ? `webhook.${hostedZoneName}`
@@ -59,6 +64,7 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   domainName: backendDomain,
   appDomain: frontendDomain,
   authDomain: authDomain,
+  authApiDomain: authApiDomain,
   webhookDomain: webhookDomain,
   eventbriteApiKeySecretArn: eventbriteApiKeySecretArn,
   algoliaApiKeySecretArn: algoliaApiKeySecretArn,

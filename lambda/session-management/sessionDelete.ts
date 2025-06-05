@@ -23,16 +23,14 @@ interface SessionRequest {
 // Helper function to parse cookies from request headers
 const parseCookies = (cookieHeader: string | undefined): Record<string, string> => {
   if (!cookieHeader) return {};
-  
-  return cookieHeader
-    .split(';')
-    .reduce((cookies: Record<string, string>, cookie) => {
-      const [name, value] = cookie.trim().split('=');
-      if (name && value) {
-        cookies[name] = decodeURIComponent(value);
-      }
-      return cookies;
-    }, {});
+
+  return cookieHeader.split(';').reduce((cookies: Record<string, string>, cookie) => {
+    const [name, value] = cookie.trim().split('=');
+    if (name && value) {
+      cookies[name] = decodeURIComponent(value);
+    }
+    return cookies;
+  }, {});
 };
 
 const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -132,7 +130,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   // Add CORS headers
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Cookie',
+    'Access-Control-Allow-Headers':
+      'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Cookie',
     'Access-Control-Allow-Methods': 'OPTIONS,DELETE',
     'Content-Type': 'application/json',
   };

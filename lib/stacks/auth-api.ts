@@ -1,9 +1,19 @@
 import { Construct } from 'constructs';
 import { StackProps, Stack, Duration } from 'aws-cdk-lib';
-import { RestApi, LambdaIntegration, Cors, MethodLoggingLevel } from 'aws-cdk-lib/aws-apigateway';
+import {
+  RestApi,
+  LambdaIntegration,
+  Cors,
+  MethodLoggingLevel,
+  DomainName,
+  BasePathMapping,
+} from 'aws-cdk-lib/aws-apigateway';
 import { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { IHostedZone, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { ApiGatewayDomain } from 'aws-cdk-lib/aws-route53-targets';
 import * as cdk from 'aws-cdk-lib';
 
 interface AuthApiStackProps extends StackProps {
@@ -12,15 +22,26 @@ interface AuthApiStackProps extends StackProps {
   sessionDeleteFunction: LambdaFunction;
   userTable: Table;
   userPool: UserPool;
+  certificate?: ICertificate;
+  hostedZone?: IHostedZone;
+  domainName?: string;
 }
 
 export class AuthApiStack extends Construct {
   public readonly api: RestApi;
+  public readonly domainName?: DomainName;
 
   constructor(scope: Construct, id: string, props: AuthApiStackProps) {
     super(scope, id);
 
-    const { shortIdAuthFunction, sessionPostFunction, sessionDeleteFunction } = props;
+    const {
+      shortIdAuthFunction,
+      sessionPostFunction,
+      sessionDeleteFunction,
+      certificate,
+      hostedZone,
+      domainName,
+    } = props;
 
     // Create REST API
     this.api = new RestApi(this, 'AuthApi', {
@@ -81,8 +102,30 @@ export class AuthApiStack extends Construct {
       operationName: 'DeleteSession',
     });
 
+    // Configure custom domain if provided
+    if (certificate && hostedZone && domainName) {
+      this.domainName = new DomainName(this, 'AuthApiDomain', {
+        domainName: domainName,
+        certificate: certificate,
+      });
+
+      // Create base path mapping
+      new BasePathMapping(this, 'AuthApiBasePathMapping', {
+        domainName: this.domainName,
+        restApi: this.api,
+        basePath: '',
+      });
+
+      // Create Route53 record
+      new ARecord(this, 'AuthApiAliasRecord', {
+        zone: hostedZone,
+        recordName: domainName,
+        target: RecordTarget.fromAlias(new ApiGatewayDomain(this.domainName)),
+      });
+    }
+
     new cdk.CfnOutput(this, 'AuthApiUrl', {
-      value: this.api.url,
+      value: domainName && certificate && hostedZone ? `https://${domainName}` : this.api.url,
       description: 'The URL of the Auth API',
       exportName: `${cdk.Stack.of(this).stackName}-AuthApiUrl`,
     });
