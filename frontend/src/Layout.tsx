@@ -28,7 +28,7 @@ export function Layout() {
         {
           type: 'button' as const,
           text: 'Login',
-          href: generateLoginUrl(),
+          href: '/login',
         },
       ];
     }

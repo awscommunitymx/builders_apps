@@ -8,7 +8,6 @@ import {
 import { onError } from '@apollo/client/link/error';
 import { setContext } from '@apollo/client/link/context';
 import { COGNITO_DOMAIN, CLIENT_ID } from './AuthConfig';
-import { generateLoginUrl } from './auth-utils';
 
 const httpLink = createHttpLink({
   uri: import.meta.env.VITE_GRAPHQL_API_URL,
@@ -74,7 +73,8 @@ const errorLink = onError(({ networkError, operation, forward }) => {
         .catch((err) => {
           console.error('Refresh failed:', err);
           localStorage.clear();
-          window.location.assign(generateLoginUrl());
+          // Redirect to /login in the current url
+          window.location.assign(`${window.location.origin}/login`);
           throw err;
         })
     ).flatMap(() => forward(operation));
