@@ -92,7 +92,6 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       anonUserId,
       sessionId,
       createdAt: new Date().toISOString(),
-      ttl: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60, // 1 year TTL
     };
 
     await docClient.send(
