@@ -53,8 +53,9 @@ export class AuthApiStack extends Construct {
         stageName: 'prod',
       },
       defaultCorsPreflightOptions: {
-        allowOrigins: Cors.ALL_ORIGINS,
+        allowOrigins: ['https://agenda.awscommunity.mx'],
         allowMethods: Cors.ALL_METHODS,
+        allowCredentials: true,
         allowHeaders: [
           'Content-Type',
           'X-Amz-Date',

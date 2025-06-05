@@ -101,10 +101,11 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Add CORS headers
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://agenda.awscommunity.mx',
     'Access-Control-Allow-Headers':
       'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Cookie',
     'Access-Control-Allow-Methods': 'OPTIONS,GET',
+    'Access-Control-Allow-Credentials': 'true',
     'Content-Type': 'application/json',
   };
 
