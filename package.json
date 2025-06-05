@@ -52,7 +52,8 @@
     "aws-sdk": "^2.1692.0",
     "axios": "^1.7.1",
     "constructs": "^10.4.2",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "react-world-flags": "^1.6.0"
   },
   "workspaces": [
     "lambda/*",

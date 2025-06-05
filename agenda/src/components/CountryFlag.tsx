@@ -1,4 +1,5 @@
 import React from 'react';
+import Flag from 'react-world-flags';
 
 interface CountryFlagProps {
   nationality: string | undefined;
@@ -39,16 +40,19 @@ const CountryFlag: React.FC<CountryFlagProps> = ({ nationality, size = 18 }) => 
   }
 
   const countryCode = nationalityToCode[nationality];
-  const flagUrl = `https://flagcdn.com/w20/${countryCode}.png`;
 
   return (
-    <img
-      src={flagUrl}
+    <Flag
+      code={countryCode}
       alt={`Bandera de ${nationality}`}
       title={nationality}
-      width={size}
-      height={size}
-      style={{ marginLeft: '6px', verticalAlign: 'middle', borderRadius: '2px' }}
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        marginLeft: '6px',
+        verticalAlign: 'middle',
+        borderRadius: '2px',
+      }}
     />
   );
 };
