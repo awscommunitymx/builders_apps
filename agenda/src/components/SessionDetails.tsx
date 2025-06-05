@@ -152,7 +152,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
     try {
       // Determinar el método HTTP según si estamos agregando o quitando de favoritos
       const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
-      const response = await fetch('https://auth-api-staging.app.awscommunity.mx/session', {
+      const response = await fetch('https://auth-api.app.awscommunity.mx/session', {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -189,8 +189,8 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        // Hacer GET a https://auth-api-staging.app.awscommunity.mx/session para obtener favoritos
-        const response = await fetch('https://auth-api-staging.app.awscommunity.mx/session', {
+        // Hacer GET a https://auth-api.app.awscommunity.mx/session para obtener favoritos
+        const response = await fetch('https://auth-api.app.awscommunity.mx/session', {
           method: 'GET',
           credentials: 'include', // Para enviar las cookies
         });
@@ -245,7 +245,6 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                 iconName={isFavorite ? 'heart-filled' : 'heart'}
                 onClick={toggleFavorite}
                 ariaLabel={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-              
               />
               <Button variant="primary" onClick={() => navigate('/')}>
                 Volver a la agenda
@@ -262,11 +261,6 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
         <Container>
           <SpaceBetween size="l">
             {/* Mostrar estado de favorito */}
-            {isFavorite && (
-              <div style={{ marginBottom: '10px' }}>
-                <StatusIndicator type="success">Esta sesión está en tus favoritos</StatusIndicator>
-              </div>
-            )}
             {/* Primera fila: Horario, Ubicación, Capacidad */}
             <div
               style={{
@@ -285,7 +279,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
               </div>
 
               <div style={{ flex: '1', minWidth: '100px', padding: '0 10px' }}>
-                <Box variant="awsui-key-label">Ubicación</Box>
+                <Box variant="awsui-key-label">Escenario</Box>
                 <div>{session.location}</div>
               </div>
 
@@ -311,6 +305,16 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                 <div style={{ flex: '1', minWidth: '100px', padding: '0px' }}>
                   <Box variant="awsui-key-label">Duración</Box>
                   <div>{session.duration} minutos</div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              {isFavorite && (
+                <div style={{ marginBottom: '0px' }}>
+                  <StatusIndicator type="success">
+                    Esta sesión está en tus favoritos
+                  </StatusIndicator>
                 </div>
               )}
             </div>
@@ -348,12 +352,6 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                               </div>
                             )}
                             {/* Mostrar nacionalidad si está disponible */}
-                            {speaker.nationality && (
-                              <div style={{ fontSize: '14px', color: '#444', marginBottom: '4px' }}>
-                                <span style={{ fontWeight: 'bold' }}>Nacionalidad:</span>{' '}
-                                {speaker.nationality}
-                              </div>
-                            )}
                             <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
                               {speaker.bio}
                             </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Cards,
@@ -60,7 +60,7 @@ const items: SessionType[] = sortSessionsByTime(sessionsData.sessions);
 
 export default function SessionLists() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<number[]>([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
 
   // Estados para los filtros
@@ -106,26 +106,68 @@ export default function SessionLists() {
     navigate(`/${sessionId}`);
   };
 
+  // Cargar favoritos al iniciar el componente
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        // Hacer GET a https://auth-api.app.awscommunity.mx/session para obtener favoritos
+        const response = await fetch('https://auth-api.app.awscommunity.mx/session', {
+          method: 'GET',
+          credentials: 'include', // Para enviar las cookies
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (Array.isArray(data)) {
+            // Convertir los IDs de string a número
+            const favoriteIds = data
+              .map((id) => {
+                // Asegurar que solo tenemos números válidos
+                const numId = parseInt(id, 10);
+                return isNaN(numId) ? null : numId;
+              })
+              .filter((id) => id !== null) as number[];
+
+            // Guardar la lista de favoritos
+            setFavorites(favoriteIds);
+
+            console.log('Sesiones favoritas cargadas:', favoriteIds);
+          }
+        } else {
+          console.error('Error al obtener favoritos:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error al cargar favoritos:', error);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
   const toggleFavorite = async (sessionId: string, event: CustomEvent) => {
     event.preventDefault(); // Evitar que el clic se propague al link
     event.stopPropagation();
 
+    // Convertir sessionId a número para comparar con la lista de favoritos
+    const sessionIdNum = parseInt(sessionId, 10);
+
     // Verificar si ya estaba en favoritos antes de actualizar el estado
-    const isCurrentlyFavorited = favorites.includes(sessionId);
+    const isCurrentlyFavorited = favorites.includes(sessionIdNum);
 
     // Actualizar el estado local primero para una UI responsiva
     setFavorites((prevFavorites) => {
-      if (prevFavorites.includes(sessionId)) {
-        return prevFavorites.filter((id) => id !== sessionId);
+      if (prevFavorites.includes(sessionIdNum)) {
+        return prevFavorites.filter((id) => id !== sessionIdNum);
       } else {
-        return [...prevFavorites, sessionId];
+        return [...prevFavorites, sessionIdNum];
       }
     });
 
     try {
       // Determinar el método HTTP según si estamos agregando o quitando de favoritos
       const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
-      const response = await fetch('https://auth-api-staging.app.awscommunity.mx/session', {
+      const response = await fetch('https://auth-api.app.awscommunity.mx/session', {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -147,9 +189,9 @@ export default function SessionLists() {
       // Revertir el cambio local en caso de error
       setFavorites((prevFavorites) => {
         if (isCurrentlyFavorited) {
-          return [...prevFavorites, sessionId]; // Volver a agregar
+          return [...prevFavorites, sessionIdNum]; // Volver a agregar
         } else {
-          return prevFavorites.filter((id) => id !== sessionId); // Volver a quitar
+          return prevFavorites.filter((id) => id !== sessionIdNum); // Volver a quitar
         }
       });
     }
@@ -306,10 +348,12 @@ export default function SessionLists() {
               </Link>
               <Button
                 variant="icon"
-                iconName={favorites.includes(item.id) ? 'heart-filled' : 'heart'}
+                iconName={favorites.includes(parseInt(item.id, 10)) ? 'heart-filled' : 'heart'}
                 onClick={(e) => toggleFavorite(item.id, e)}
                 ariaLabel={
-                  favorites.includes(item.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'
+                  favorites.includes(parseInt(item.id, 10))
+                    ? 'Quitar de favoritos'
+                    : 'Agregar a favoritos'
                 }
               />
             </div>
@@ -324,9 +368,9 @@ export default function SessionLists() {
                     ? item.description
                     : truncateText(item.description)}
                   {item.description.length > 100 && (
-                    <div style={{ marginTop: '8px' }}>
+                    <div style={{ marginTop: '0px' }}>
                       <Button
-                        variant="link"
+                        variant="inline-link"
                         onClick={(e) => toggleDescription(item.id, e)}
                         ariaLabel={
                           expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'
@@ -348,7 +392,7 @@ export default function SessionLists() {
                     <div>{item.time}</div>
                   </div>
                   <div>
-                    <div style={{ fontWeight: 'bold', fontSize: '13px' }}>Ubicación</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '13px' }}>Escenario</div>
                     <div>{item.location}</div>
                   </div>
                 </div>
