@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { JsonPath, Parallel, Pass, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
+import { JsonPath, Parallel, Pass, TaskInput, Result } from 'aws-cdk-lib/aws-stepfunctions';
 import {
   StateMachine,
   Choice,
@@ -700,16 +700,34 @@ export class UserStepFunctionStack extends Construct {
               )
           )
           .next(
-            new Pass(this, 'ProcessAttendeesUpdateComplete', {
-              parameters: {
-                'body.$': '$[1].body',
-                'config.$': '$[1].config',
-                'processedPhoneNumber.$': '$[1].processedPhoneNumber',
-              },
-            })
+            new Choice(this, 'ProcessAttendeesUpdateComplete')
+              .when(
+                Condition.isPresent('$[1].processedPhoneNumber'),
+                new Pass(this, 'ProcessAttendeesUpdateCompleteWithPhone', {
+                  parameters: {
+                    'body.$': '$[1].body',
+                    'config.$': '$[1].config',
+                    'processedPhoneNumber.$': '$[1].processedPhoneNumber',
+                  },
+                })
+              )
+              .otherwise(
+                new Pass(this, 'ProcessAttendeesUpdateCompleteWithoutPhone', {
+                  parameters: {
+                    'body.$': '$[1].body',
+                    'config.$': '$[1].config',
+                    processedPhoneNumber: {
+                      processedPhoneNumber: {
+                        clean_phone: '',
+                      },
+                    },
+                  },
+                })
+              )
+              .afterwards()
+              .next(updateAlgoliaAfterProfileUpdate)
+              .next(attendeeUpdatedSuccess)
           )
-          .next(updateAlgoliaAfterProfileUpdate)
-          .next(attendeeUpdatedSuccess)
       );
 
     const processAttendeesUpdate = Chain.start(
