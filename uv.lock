@@ -141,6 +141,7 @@ dependencies = [
     { name = "phonenumbers" },
     { name = "pillow" },
     { name = "qrcode" },
+    { name = "requests" },
     { name = "twilio" },
 ]
 
@@ -155,6 +156,7 @@ requires-dist = [
     { name = "phonenumbers", specifier = ">=9.0.6" },
     { name = "pillow", specifier = ">=11.2.1" },
     { name = "qrcode", specifier = ">=8.2" },
+    { name = "requests", specifier = ">=2.32.3" },
     { name = "twilio", specifier = ">=9.6.2" },
 ]
 

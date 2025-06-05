@@ -150,7 +150,7 @@ class EventbriteProcessor:
             "api_url": f"https://www.eventbriteapi.com/v3/events/1263605089839/attendees/{attendee['id']}/"
         }
     
-    def send_to_step_function(self, event_data: Dict, event_type: str, attendee_id: str) -> bool:
+    def send_to_step_function(self, event_data: Dict, event_type: str, attendee_id: str, wait_for_completion: bool = False) -> bool:
         """
         Send event to Step Function
         
@@ -158,12 +158,15 @@ class EventbriteProcessor:
             event_data: Event payload
             event_type: Type of event (order.placed or attendee.updated)
             attendee_id: Attendee ID for logging
+            wait_for_completion: If True, wait for the Step Function execution to complete
             
         Returns:
             True if successful, False otherwise
         """
         if self.dry_run:
             logger.info(f"[DRY RUN] Would send {event_type} event for attendee {attendee_id}")
+            if wait_for_completion:
+                logger.info(f"[DRY RUN] Would wait for {event_type} completion")
             logger.debug(f"[DRY RUN] Payload: {json.dumps(event_data, indent=2)}")
             return True
         
@@ -173,12 +176,66 @@ class EventbriteProcessor:
                 name=f"{event_type}-{attendee_id}-{int(time.time())}",
                 input=json.dumps(event_data)
             )
-            logger.info(f"Sent {event_type} event for attendee {attendee_id}. Execution ARN: {response['executionArn']}")
+            execution_arn = response['executionArn']
+            logger.info(f"Sent {event_type} event for attendee {attendee_id}. Execution ARN: {execution_arn}")
+            
+            if wait_for_completion:
+                logger.info(f"Waiting for {event_type} execution to complete for attendee {attendee_id}")
+                return self._wait_for_execution_completion(execution_arn, event_type, attendee_id)
+            
             return True
             
         except Exception as e:
             logger.error(f"Error sending {event_type} event for attendee {attendee_id}: {e}")
             return False
+    
+    def _wait_for_execution_completion(self, execution_arn: str, event_type: str, attendee_id: str, timeout: int = 300) -> bool:
+        """
+        Wait for Step Function execution to complete
+        
+        Args:
+            execution_arn: ARN of the execution to wait for
+            event_type: Type of event for logging
+            attendee_id: Attendee ID for logging
+            timeout: Maximum time to wait in seconds (default 5 minutes)
+            
+        Returns:
+            True if execution completed successfully, False otherwise
+        """
+        start_time = time.time()
+        
+        while True:
+            try:
+                response = self.sf_client.describe_execution(executionArn=execution_arn)
+                status = response['status']
+                
+                if status == 'SUCCEEDED':
+                    logger.info(f"{event_type} execution completed successfully for attendee {attendee_id}")
+                    return True
+                elif status == 'FAILED':
+                    logger.error(f"{event_type} execution failed for attendee {attendee_id}: {response.get('error', 'Unknown error')}")
+                    return False
+                elif status == 'TIMED_OUT':
+                    logger.error(f"{event_type} execution timed out for attendee {attendee_id}")
+                    return False
+                elif status == 'ABORTED':
+                    logger.error(f"{event_type} execution was aborted for attendee {attendee_id}")
+                    return False
+                elif status in ['RUNNING', 'PENDING']:
+                    # Check timeout
+                    if time.time() - start_time > timeout:
+                        logger.error(f"Timeout waiting for {event_type} execution for attendee {attendee_id}")
+                        return False
+                    
+                    # Wait before checking again
+                    time.sleep(2)
+                else:
+                    logger.warning(f"Unknown execution status '{status}' for {event_type} attendee {attendee_id}")
+                    time.sleep(2)
+                    
+            except Exception as e:
+                logger.error(f"Error checking execution status for {event_type} attendee {attendee_id}: {e}")
+                return False
     
     def process_attendee(self, attendee: Dict) -> bool:
         """
@@ -199,15 +256,11 @@ class EventbriteProcessor:
         order_event = self.create_order_event(attendee)
         attendee_event = self.create_attendee_event(attendee)
         
-        # Send order.placed event first
-        if not self.send_to_step_function(order_event, "order.placed", attendee_id):
+        # Send order.placed event first and wait for completion
+        if not self.send_to_step_function(order_event, "order.placed", attendee_id, wait_for_completion=True):
             return False
         
-        # Wait a bit before sending the second event (in real execution)
-        if not self.dry_run:
-            time.sleep(1)  # 1 second delay between events
-        
-        # Send attendee.updated event
+        # Send attendee.updated event after order.placed has completed
         if not self.send_to_step_function(attendee_event, "attendee.updated", attendee_id):
             return False
         
