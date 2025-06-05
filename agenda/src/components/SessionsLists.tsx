@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Container,
   Cards,
   Link,
   Button,
-  Icon,
   Badge,
   StatusIndicator,
   Multiselect,
@@ -107,10 +106,14 @@ export default function SessionLists() {
     navigate(`/${sessionId}`);
   };
 
-  const toggleFavorite = (sessionId: string, event: CustomEvent) => {
+  const toggleFavorite = async (sessionId: string, event: CustomEvent) => {
     event.preventDefault(); // Evitar que el clic se propague al link
     event.stopPropagation();
 
+    // Verificar si ya estaba en favoritos antes de actualizar el estado
+    const isCurrentlyFavorited = favorites.includes(sessionId);
+
+    // Actualizar el estado local primero para una UI responsiva
     setFavorites((prevFavorites) => {
       if (prevFavorites.includes(sessionId)) {
         return prevFavorites.filter((id) => id !== sessionId);
@@ -118,9 +121,38 @@ export default function SessionLists() {
         return [...prevFavorites, sessionId];
       }
     });
-    console.log(
-      `Sesión ${sessionId} ${favorites.includes(sessionId) ? 'eliminada de' : 'agregada a'} favoritos`
-    );
+
+    try {
+      // Determinar el método HTTP según si estamos agregando o quitando de favoritos
+      const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
+      const response = await fetch('https://auth-api-staging.app.awscommunity.mx/session', {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId }),
+        credentials: 'include', // Esto asegura que se envíen las cookies
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al ${isCurrentlyFavorited ? 'eliminar de' : 'agregar a'} favoritos`);
+      }
+
+      console.log(
+        `Sesión ${sessionId} ${isCurrentlyFavorited ? 'eliminada de' : 'agregada a'} favoritos con éxito`
+      );
+    } catch (error) {
+      console.error('Error al actualizar favoritos:', error);
+
+      // Revertir el cambio local en caso de error
+      setFavorites((prevFavorites) => {
+        if (isCurrentlyFavorited) {
+          return [...prevFavorites, sessionId]; // Volver a agregar
+        } else {
+          return prevFavorites.filter((id) => id !== sessionId); // Volver a quitar
+        }
+      });
+    }
   };
 
   const toggleDescription = (sessionId: string, event: CustomEvent) => {

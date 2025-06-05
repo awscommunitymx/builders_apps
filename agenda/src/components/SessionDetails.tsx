@@ -1,5 +1,5 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import {
   Container,
   ContentLayout,
@@ -8,8 +8,7 @@ import {
   Box,
   Button,
   Grid,
-  ColumnLayout,
-  Icon,
+  StatusIndicator,
 } from '@cloudscape-design/components';
 import Avatar from '@cloudscape-design/chat-components/avatar';
 import CountryFlag from './CountryFlag';
@@ -109,6 +108,8 @@ export interface SessionDetailProps {
 
 export default function SessionDetail({ sessionId }: SessionDetailProps) {
   const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favorites, setFavorites] = useState<number[]>([]);
 
   // Verificar si el ID de sesión es válido
   if (!sessionId || !sessionData[sessionId]) {
@@ -126,15 +127,130 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
 
   const session = sessionData[sessionId];
 
+  const toggleFavorite = async (event: CustomEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Convertir sessionId a número para comparar con la lista de favoritos
+    const sessionIdNum = parseInt(sessionId, 10);
+
+    // Verificar si ya estaba en favoritos antes de actualizar el estado
+    const isCurrentlyFavorited = favorites.includes(sessionIdNum);
+
+    // Actualizar el estado local primero para una UI responsiva
+    setIsFavorite(!isFavorite);
+
+    // Actualizar la lista de favoritos
+    if (isCurrentlyFavorited) {
+      // Quitar de favoritos
+      setFavorites(favorites.filter((id) => id !== sessionIdNum));
+    } else {
+      // Añadir a favoritos
+      setFavorites([...favorites, sessionIdNum]);
+    }
+
+    try {
+      // Determinar el método HTTP según si estamos agregando o quitando de favoritos
+      const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
+      const response = await fetch('https://auth-api-staging.app.awscommunity.mx/session', {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId }),
+        credentials: 'include', // Esto asegura que se envíen las cookies
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al ${isCurrentlyFavorited ? 'eliminar de' : 'agregar a'} favoritos`);
+      }
+
+      console.log(
+        `Sesión ${sessionId} ${isCurrentlyFavorited ? 'eliminada de' : 'agregada a'} favoritos con éxito`
+      );
+    } catch (error) {
+      console.error('Error al actualizar favoritos:', error);
+
+      // Revertir el cambio local en caso de error
+      setIsFavorite(isCurrentlyFavorited);
+
+      // Revertir la lista de favoritos
+      if (isCurrentlyFavorited) {
+        // Volver a agregar
+        setFavorites([...favorites, sessionIdNum]);
+      } else {
+        // Volver a quitar
+        setFavorites(favorites.filter((id) => id !== sessionIdNum));
+      }
+    }
+  };
+
+  // Obtener las sesiones favoritas y verificar si la sesión actual está en la lista
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        // Hacer GET a https://auth-api-staging.app.awscommunity.mx/session para obtener favoritos
+        const response = await fetch('https://auth-api-staging.app.awscommunity.mx/session', {
+          method: 'GET',
+          credentials: 'include', // Para enviar las cookies
+        });
+        if (response.ok) {
+          const data = await response.json();
+
+          if (Array.isArray(data)) {
+            // Convertir los IDs de string a número
+            const favoriteIds = data
+              .map((id) => {
+                // Asegurar que solo tenemos números válidos
+                const numId = parseInt(id, 10);
+                return isNaN(numId) ? null : numId;
+              })
+              .filter((id) => id !== null) as number[];
+
+            // Guardar la lista de favoritos
+            setFavorites(favoriteIds);
+
+            // Verificar si la sesión actual está en favoritos
+            const sessionIdNum = parseInt(sessionId, 10);
+            setIsFavorite(favoriteIds.includes(sessionIdNum));
+
+            console.log('Sesiones favoritas cargadas:', favoriteIds);
+            console.log(
+              'Sesión actual:',
+              sessionIdNum,
+              'Es favorita:',
+              favoriteIds.includes(sessionIdNum)
+            );
+          }
+        } else {
+          console.error('Error al obtener favoritos:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error al cargar favoritos:', error);
+      }
+    };
+
+    fetchFavorites();
+  }, [sessionId]);
+
   return (
     <ContentLayout
       header={
         <Header
           variant="h1"
           actions={
-            <Button variant="primary" onClick={() => navigate('/')}>
-              Volver a la agenda
-            </Button>
+            <SpaceBetween direction="horizontal" size="s">
+              <Button
+                variant="icon"
+                iconName={isFavorite ? 'heart-filled' : 'heart'}
+                onClick={toggleFavorite}
+                ariaLabel={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              
+              />
+              <Button variant="primary" onClick={() => navigate('/')}>
+                Volver a la agenda
+              </Button>
+            </SpaceBetween>
           }
         >
           {session.name}
@@ -145,6 +261,12 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
       <SpaceBetween size="l">
         <Container>
           <SpaceBetween size="l">
+            {/* Mostrar estado de favorito */}
+            {isFavorite && (
+              <div style={{ marginBottom: '10px' }}>
+                <StatusIndicator type="success">Esta sesión está en tus favoritos</StatusIndicator>
+              </div>
+            )}
             {/* Primera fila: Horario, Ubicación, Capacidad */}
             <div
               style={{

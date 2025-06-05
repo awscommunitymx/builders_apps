@@ -10,14 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router": "^7.5.2",
     "@cloudscape-design/board-components": "^3.0.101",
     "@cloudscape-design/chat-components": "^1.0.45",
     "@cloudscape-design/components": "^3.0.923",
     "@cloudscape-design/design-tokens": "^3.0.57",
-    "@cloudscape-design/global-styles": "^1.0.38"
+    "@cloudscape-design/global-styles": "^1.0.38",
+    "@types/uuid": "^10.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router": "^7.5.2",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
