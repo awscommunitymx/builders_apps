@@ -74,7 +74,7 @@ const LoginRoute: React.FC = () => {
       throw new Error('VITE_AUTH_API_URL environment variable is not configured');
     }
 
-    const response = await fetch(`${apiUrl}auth/short-id`, {
+    const response = await fetch(`${apiUrl}/auth/short-id`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
