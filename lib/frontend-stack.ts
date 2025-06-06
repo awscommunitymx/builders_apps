@@ -15,7 +15,6 @@ interface FrontendStackProps extends cdk.StackProps {
   apiKey: string;
   environment: string;
   certificateArn: string;
-  prodApexCertificateArn?: string;
   hostedZoneId: string;
   hostedZoneName: string;
   domainName: string;
@@ -30,15 +29,6 @@ export class FrontendStack extends cdk.Stack {
       'domainCert',
       props.certificateArn
     );
-
-    let prodApexCertificate: certificatemanager.ICertificate | undefined;
-    if (props.prodApexCertificateArn) {
-      prodApexCertificate = certificatemanager.Certificate.fromCertificateArn(
-        this,
-        'prodApexCertificate',
-        props.prodApexCertificateArn
-      );
-    }
 
     const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
       hostedZoneId: props.hostedZoneId,
@@ -84,7 +74,7 @@ export class FrontendStack extends cdk.Stack {
       ],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
       domainNames: [props.domainName],
-      certificate: prodApexCertificate || domainCert,
+      certificate: domainCert,
     });
 
     new route53.AaaaRecord(this, 'AliasAaaa', {

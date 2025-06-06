@@ -20,8 +20,6 @@ for (const [key, value] of Object.entries(tags)) {
 
 const certificateArn =
   'arn:aws:acm:us-east-1:662722197286:certificate/052de1f6-775c-4f54-86dd-d7775bd45cd7';
-const prodApexCertificateArn =
-  'arn:aws:acm:us-east-1:662722197286:certificate/91e7cd9b-b27e-430f-9d10-d2a4afb45154';
 const hostedZoneId = 'Z07406072VIH8HAEJ7AJX';
 const hostedZoneName = 'console.awscommunity.mx';
 const eventbriteApiKeySecretArn =
@@ -83,7 +81,6 @@ const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmen
     region: 'us-east-1',
   },
   certificateArn: certificateArn,
-  prodApexCertificateArn: environmentName === 'production' ? prodApexCertificateArn : undefined,
   hostedZoneId: hostedZoneId,
   hostedZoneName: hostedZoneName,
   domainName: frontendDomain,
