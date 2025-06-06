@@ -17,6 +17,7 @@ const {
   TABLE_NAME,
   TWILIO_SECRET_NAME,
   TWILIO_MESSAGING_SERVICE_SID,
+  FRONTEND_DOMAIN,
 } = process.env;
 const ONE_MIN = 60 * 1000;
 
@@ -341,7 +342,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Add CORS headers
   const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://agenda.awscommunity.mx',
+    'Access-Control-Allow-Origin': `https://${FRONTEND_DOMAIN}`,
     'Access-Control-Allow-Headers':
       'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
     'Access-Control-Allow-Methods': 'OPTIONS,POST',

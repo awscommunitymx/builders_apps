@@ -22,6 +22,7 @@ interface LambdaStackProps {
   baseUrl?: string;
   sesFromAddress?: string;
   kmsKey?: kms.Key;
+  frontendDomain: string;
 }
 
 export class LambdaStack extends Construct {
@@ -220,6 +221,7 @@ export class LambdaStack extends Construct {
         POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
         POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
         POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+        FRONTEND_DOMAIN: props.frontendDomain,
       },
       timeout: cdk.Duration.seconds(30),
       tracing: lambda.Tracing.ACTIVE,

@@ -26,6 +26,7 @@ interface AuthApiStackProps extends StackProps {
   certificate?: ICertificate;
   hostedZone?: IHostedZone;
   domainName?: string;
+  frontendDomain: string;
 }
 
 export class AuthApiStack extends Construct {
@@ -47,13 +48,13 @@ export class AuthApiStack extends Construct {
 
     // Create REST API
     this.api = new RestApi(this, 'AuthApi', {
-      restApiName: 'Auth API',
+      restApiName: `AuthApi-${cdk.Stack.of(this).stackName}`,
       description: 'Authentication API for AWS Community Builders',
       deployOptions: {
         stageName: 'prod',
       },
       defaultCorsPreflightOptions: {
-        allowOrigins: ['https://agenda.awscommunity.mx'],
+        allowOrigins: ['https://agenda.awscommunity.mx', `https://${props.frontendDomain}`],
         allowMethods: Cors.ALL_METHODS,
         allowCredentials: true,
         allowHeaders: [

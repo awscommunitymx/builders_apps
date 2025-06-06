@@ -71,6 +71,7 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   eventbriteApiKeySecretArn: eventbriteApiKeySecretArn,
   algoliaApiKeySecretArn: algoliaApiKeySecretArn,
   algoliaAppIdSecretArn: algoliaAppIdSecretArn,
+  frontendDomain: frontendDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {

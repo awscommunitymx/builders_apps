@@ -25,6 +25,7 @@ export interface AppStackProps extends cdk.StackProps {
   eventbriteApiKeySecretArn: string;
   algoliaApiKeySecretArn: string;
   algoliaAppIdSecretArn: string;
+  frontendDomain: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -79,6 +80,7 @@ export class BackendStack extends cdk.Stack {
       baseUrl: props.appDomain,
       sesFromAddress: 'noreply@awscommunity.mx',
       kmsKey: encryptionKey,
+      frontendDomain: props.frontendDomain,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -102,6 +104,7 @@ export class BackendStack extends cdk.Stack {
       certificate: domainCert,
       hostedZone: hostedZone,
       domainName: props.authApiDomain,
+      frontendDomain: props.frontendDomain,
     });
 
     this.authApiUrl =
