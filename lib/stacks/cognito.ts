@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import { getAuthUrls, sanitizeDomainPrefix } from '../../utils/cognito';
+import { getAuthUrls } from '../../utils/cognito';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -27,7 +27,6 @@ export interface CognitoStackProps {
 export class CognitoStack extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
-  public readonly userPoolDomain: cognito.UserPoolDomain;
   public readonly identityPool: cognito.CfnIdentityPool;
   public readonly authenticatedRole: iam.Role;
   public readonly unauthenticatedRole: iam.Role;
@@ -208,24 +207,6 @@ export class CognitoStack extends Construct {
       },
     });
 
-    // Create a domain for the user pool
-    // Ensure the prefix doesn't contain "cognito" (AWS restriction)
-    const finalDomainPrefix = sanitizeDomainPrefix(props.environmentName);
-
-    this.userPoolDomain = this.userPool.addDomain('CognitoDomain', {
-      customDomain: {
-        domainName: props.authDomain,
-        certificate: props.certificate,
-      },
-      managedLoginVersion: cognito.ManagedLoginVersion.NEWER_MANAGED_LOGIN,
-    });
-
-    new route53.CnameRecord(this, 'CognitoDomainAlias', {
-      zone: props.hostedZone,
-      recordName: props.authDomain,
-      domainName: this.userPoolDomain.cloudFrontEndpoint,
-    });
-
     const callbackUrls = getAuthUrls(props.environmentName, props.appDomain, 'callback');
     const logoutUrls = getAuthUrls(props.environmentName, props.appDomain, 'logout');
 
@@ -349,12 +330,6 @@ export class CognitoStack extends Construct {
       value: this.identityPool.ref,
       description: 'Cognito Identity Pool ID for authorization',
       exportName: `${props.environmentName}-IdentityPoolId`,
-    });
-
-    new cdk.CfnOutput(this, 'UserPoolDomain', {
-      value: this.userPoolDomain.domainName,
-      description: 'Cognito User Pool Domain for hosted UI',
-      exportName: `${props.environmentName}-UserPoolDomain`,
     });
   }
 

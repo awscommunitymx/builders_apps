@@ -193,7 +193,6 @@ else
   API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiUrl'].OutputValue" --output text)
   API_KEY=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-GraphQLApiKey'].OutputValue" --output text)
   USERPOOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolClientId'].OutputValue" --output text)
-  USERPOOL_DOMAIN=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?ExportName=='${ENV}-UserPoolDomain'].OutputValue" --output text)
   RUM_MONITOR_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='RumAppMonitorId'].OutputValue" --output text)
   RUM_APP_REGION=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='RumAppRegion'].OutputValue" --output text)
   IDENTITY_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='IdentityPoolId'].OutputValue" --output text)
@@ -206,7 +205,6 @@ else
   cat > frontend/.env << EOL
 VITE_GRAPHQL_API_URL=${API_URL}
 VITE_COGNITO_USER_POOL_CLIENT_ID=${USERPOOL_CLIENT_ID}
-VITE_COGNITO_USER_POOL_DOMAIN=${USERPOOL_DOMAIN}
 VITE_RUM_APP_MONITOR_ID=${RUM_MONITOR_ID}
 VITE_RUM_APP_REGION=${RUM_APP_REGION}
 VITE_IDENTITY_POOL_ID=${IDENTITY_POOL_ID}

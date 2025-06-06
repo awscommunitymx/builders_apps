@@ -33,7 +33,6 @@ export class BackendStack extends cdk.Stack {
   public readonly authApiUrl: string;
   public readonly userPoolId: string;
   public readonly userPoolClientId: string;
-  public readonly userPoolDomain: string;
   public readonly identityPoolId: string;
   public readonly userCreationQueue: sqs.Queue;
 
@@ -184,7 +183,6 @@ export class BackendStack extends cdk.Stack {
     // Expose Cognito information
     this.userPoolId = cognitoStack.userPool.userPoolId;
     this.userPoolClientId = cognitoStack.userPoolClient.userPoolClientId;
-    this.userPoolDomain = cognitoStack.userPoolDomain.domainName;
     this.identityPoolId = cognitoStack.identityPool.ref;
 
     // Output values
@@ -206,11 +204,6 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: this.userPoolClientId,
       description: 'Cognito User Pool Client ID',
-    });
-
-    new cdk.CfnOutput(this, 'UserPoolDomain', {
-      value: this.userPoolDomain,
-      description: 'Cognito User Pool Domain',
     });
 
     new cdk.CfnOutput(this, 'IdentityPoolId', {
