@@ -1,6 +1,7 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { Outlet } from 'react-router';
 import { useEffect, useState } from 'react';
+// @ts-ignore
 import imgUrl from './assets/logo.svg';
 import { v4 as uuidv4 } from 'uuid';
 
