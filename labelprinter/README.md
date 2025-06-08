@@ -1,86 +1,68 @@
 # Label Printer
 
-A Go application for managing and printing labels to Zebra printers using ZPL commands.
+A service that reads from an SQS FIFO queue and prints labels on Zebra printers.
 
-## Features
+## Configuration
 
-- Support for multiple printers with tags
-- Concurrent label printing using channels
-- Automatic reconnection handling
-- Accent normalization for ZPL compatibility
-- QR code generation
-- Text wrapping and formatting
+The service can be configured using a YAML file. Here's an example configuration:
 
-## Project Structure
-
-```
-labelprinter/
-├── cmd/
-│   └── labelprinter/
-│       └── main.go         # Main application entry point
-├── internal/
-│   └── printer/
-│       └── printer.go      # Core printer functionality
-├── go.mod                  # Go module file
-└── README.md              # This file
+```yaml
+queue_url: https://sqs.region.amazonaws.com/account-id/queue-name.fifo
+printers:
+  - id: printer1
+    ip: 192.168.1.100
+    tag: entrance
+  - id: printer2
+    ip: 192.168.1.101
+    tag: exit
 ```
 
-## Usage
+## Message Format
 
-1. Initialize the printer manager:
+Messages in the SQS queue should be JSON objects with the following structure:
 
-```go
-printerManager := printer.NewPrinterManager()
-defer printerManager.Close()
-```
-
-2. Add printers with tags:
-
-```go
-err := printerManager.AddPrinter("P1", "10.20.25.10")
-if err != nil {
-    // Handle error
+```json
+{
+  "name": "John Doe",
+  "company": "AWS Community Builders",
+  "role": "Software Engineer",
+  "employee_id": "EMP123",
+  "printer_id": "printer1"
 }
 ```
 
-3. Create a label:
+### Message Fields
 
-```go
-label := printer.LabelData{
-    Name:       "John Doe",
-    Company:    "Example Corp",
-    Role:       "Software Engineer",
-    EmployeeID: "JD123",
-}
-```
+- `name`: The person's name to print on the label
+- `company`: The company name
+- `role`: The person's role or title
+- `employee_id`: Unique identifier (will be encoded in QR code)
+- `printer_id`: ID of the printer to use (must match an ID in the config)
 
-4. Print the label:
+### Sending Messages
 
-```go
-generator := printer.NewZPLLabelGenerator()
-zplCode := generator.GenerateZPL(label)
-err := printerManager.PrintLabel("P1", zplCode)
-```
-
-## Building
+Since this uses a FIFO queue, messages must be sent with a message group ID and deduplication ID:
 
 ```bash
-go build -o labelprinter ./cmd/labelprinter
+aws sqs send-message \
+  --queue-url "https://sqs.region.amazonaws.com/account-id/queue-name.fifo" \
+  --message-body '{"name":"John Doe","company":"AWS Community Builders","role":"Software Engineer","employee_id":"EMP123","printer_id":"printer1"}' \
+  --message-group-id "labels" \
+  --message-deduplication-id "EMP123"
 ```
 
-## Running
+## Running the Service
 
 ```bash
-./labelprinter
+# Using config file
+go run cmd/main.go -config config.yaml
+
+# Using command line flags
+go run cmd/main.go -queue-url "https://sqs.region.amazonaws.com/account-id/queue-name.fifo" -printer-ips "printer1:192.168.1.100,printer2:192.168.1.101"
 ```
 
-## Future Improvements
+## Requirements
 
-- Add support for different label sizes
-- Implement printer status monitoring
-- Add support for different ZPL commands
-- Add configuration file support
-- Add queue integration
-- Add printer discovery
-- Add printer status monitoring
-- Add support for different label formats
+- Go 1.21 or later
+- AWS credentials configured
+- Zebra printer(s) with network connectivity
