@@ -11,6 +11,7 @@ import * as rum from 'aws-cdk-lib/aws-rum';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import { UserStepFunctionStack } from './stacks/user-step-function';
+import { CheckinQueues } from './stacks/checkin-queues';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
@@ -36,6 +37,8 @@ export class BackendStack extends cdk.Stack {
   public readonly userPoolClientId: string;
   public readonly identityPoolId: string;
   public readonly userCreationQueue: sqs.Queue;
+  public readonly mainCheckinQueue: sqs.Queue;
+  public readonly secondaryCheckinQueue: sqs.Queue;
 
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
@@ -178,6 +181,13 @@ export class BackendStack extends cdk.Stack {
       twilioMessageSender: lambdaStack.twilioMessageSender,
     });
 
+    const checkinQueues = new CheckinQueues(this, 'CheckinQueues', {
+      environmentName: props.environmentName,
+    });
+
+    this.mainCheckinQueue = checkinQueues.mainQueue;
+    this.secondaryCheckinQueue = checkinQueues.secondaryQueue;
+
     // Expose API URL and Key
     this.apiUrl = apiStack.api.graphqlUrl;
     this.apiKey = apiStack.api.apiKey || '';
@@ -232,6 +242,16 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserCreationQueueUrl', {
       value: this.userCreationQueue.queueUrl,
       description: 'URL of the User Creation SQS Queue',
+    });
+
+    new cdk.CfnOutput(this, 'MainCheckinQueueUrl', {
+      value: this.mainCheckinQueue.queueUrl,
+      description: 'URL of the Main Check-in FIFO Queue',
+    });
+
+    new cdk.CfnOutput(this, 'SecondaryCheckinQueueUrl', {
+      value: this.secondaryCheckinQueue.queueUrl,
+      description: 'URL of the Secondary Check-in FIFO Queue',
     });
   }
 }
