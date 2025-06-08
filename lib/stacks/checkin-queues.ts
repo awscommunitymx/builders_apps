@@ -15,17 +15,15 @@ export class CheckinQueues extends Construct {
 
     // Create the main FIFO queue
     this.mainQueue = new sqs.Queue(this, 'MainCheckinQueue', {
-      queueName: `main-checkin-queue-${props.environmentName}.fifo`,
-      fifo: true,
-      contentBasedDeduplication: true,
-      visibilityTimeout: cdk.Duration.minutes(5),
+      queueName: `main-checkin-queue-${props.environmentName}`,
+      fifo: false,
+      visibilityTimeout: cdk.Duration.seconds(30),
       retentionPeriod: cdk.Duration.days(4),
       deadLetterQueue: {
         queue: new sqs.Queue(this, 'MainCheckinDLQ', {
-          queueName: `main-checkin-dlq-${props.environmentName}.fifo`,
-          fifo: true,
-          contentBasedDeduplication: true,
-          visibilityTimeout: cdk.Duration.minutes(5),
+          queueName: `main-checkin-dlq-${props.environmentName}`,
+          fifo: false,
+          visibilityTimeout: cdk.Duration.seconds(30),
           retentionPeriod: cdk.Duration.days(14),
         }),
         maxReceiveCount: 3,
@@ -34,17 +32,15 @@ export class CheckinQueues extends Construct {
 
     // Create the secondary FIFO queue
     this.secondaryQueue = new sqs.Queue(this, 'SecondaryCheckinQueue', {
-      queueName: `secondary-checkin-queue-${props.environmentName}.fifo`,
-      fifo: true,
-      contentBasedDeduplication: true,
-      visibilityTimeout: cdk.Duration.minutes(5),
+      queueName: `secondary-checkin-queue-${props.environmentName}`,
+      fifo: false,
+      visibilityTimeout: cdk.Duration.seconds(30),
       retentionPeriod: cdk.Duration.days(4),
       deadLetterQueue: {
         queue: new sqs.Queue(this, 'SecondaryCheckinDLQ', {
-          queueName: `secondary-checkin-dlq-${props.environmentName}.fifo`,
-          fifo: true,
-          contentBasedDeduplication: true,
-          visibilityTimeout: cdk.Duration.minutes(5),
+          queueName: `secondary-checkin-dlq-${props.environmentName}`,
+          fifo: false,
+          visibilityTimeout: cdk.Duration.seconds(30),
           retentionPeriod: cdk.Duration.days(14),
         }),
         maxReceiveCount: 3,

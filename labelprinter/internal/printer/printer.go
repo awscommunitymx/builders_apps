@@ -21,13 +21,15 @@ type LabelData struct {
 type ZPLLabelGenerator struct {
 	labelWidth  int
 	labelHeight int
+	baseURL     string
 }
 
 // NewZPLLabelGenerator creates a new label generator
-func NewZPLLabelGenerator() *ZPLLabelGenerator {
+func NewZPLLabelGenerator(baseURL string) *ZPLLabelGenerator {
 	return &ZPLLabelGenerator{
 		labelWidth:  609, // 3 inches * 203 DPI
 		labelHeight: 406, // 2 inches * 203 DPI
+		baseURL:     baseURL,
 	}
 }
 
@@ -119,13 +121,13 @@ func (g *ZPLLabelGenerator) GenerateZPL(data LabelData) string {
 	role := g.normalizeText(data.Role)
 
 	// Calculate positions
-	qrSize := 180
-	qrX := g.labelWidth - qrSize - 8
+	qrSize := 120
+	qrX := g.labelWidth - qrSize - 100
 	qrY := 60
 
-	// ID text position
-	idX := qrX + (qrSize / 2) - 25
-	idY := qrY + qrSize + 12
+	// ID text position - centered under QR code with more vertical space
+	idX := qrX + (qrSize / 2)  // Adjusted from -35 to -40 for perfect centering
+	idY := qrY + qrSize + 70  // Increased from 35 to 40 for optimal spacing
 
 	// Text positions
 	textX := 12
@@ -168,8 +170,11 @@ func (g *ZPLLabelGenerator) GenerateZPL(data LabelData) string {
 		currentY += 45
 	}
 
-	// Add QR code and ID
-	zpl.WriteString(fmt.Sprintf("REM *** QR Code ***\n^FO%d,%d^BQN,2,7^FDQA,%s^FS\n\n", qrX, qrY, data.EmployeeID))
+	// Create the full URL for the QR code
+	fullURL := fmt.Sprintf("%s%s", g.baseURL, data.EmployeeID)
+
+	// Add QR code and ID with reduced error correction level (L instead of M)
+	zpl.WriteString(fmt.Sprintf("REM *** QR Code ***\n^FO%d,%d^BQN,2,5^FDQA,%s^FS\n\n", qrX, qrY, fullURL))
 	zpl.WriteString(fmt.Sprintf("REM *** Employee ID ***\n^FO%d,%d^A0N,28,22^FD%s^FS\n\n^XZ", idX, idY, data.EmployeeID))
 
 	return zpl.String()

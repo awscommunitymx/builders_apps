@@ -29,6 +29,7 @@ type PrinterConfig struct {
 
 type Config struct {
 	QueueURL  string         `yaml:"queue_url"`
+	BaseURL   string         `yaml:"base_url"`
 	Printers  []PrinterConfig `yaml:"printers"`
 }
 
@@ -51,6 +52,7 @@ func main() {
 	queueURL := flag.String("queue-url", "", "SQS queue URL to read from")
 	printerIPs := flag.String("printer-ips", "", "Comma-separated list of printer IPs (e.g., 'printer1:192.168.1.100,printer2:192.168.1.101')")
 	configPath := flag.String("config", "", "Path to printer configuration file (YAML)")
+	baseURL := flag.String("base-url", "", "Base URL for QR code generation")
 	flag.Parse()
 
 	// Load config if provided
@@ -70,6 +72,15 @@ func main() {
 	}
 	if queueURLToUse == "" {
 		log.Fatal("queue-url must be provided either via --queue-url flag or in config file")
+	}
+
+	// Use base URL from config if available, otherwise from command line
+	baseURLToUse := *baseURL
+	if baseURLToUse == "" && cfg != nil {
+		baseURLToUse = cfg.BaseURL
+	}
+	if baseURLToUse == "" {
+		log.Fatal("base-url must be provided either via --base-url flag or in config file")
 	}
 
 	// Create printer manager
@@ -99,8 +110,8 @@ func main() {
 
 	defer printerManager.Close()
 
-	// Create label generator
-	labelGen := printer.NewZPLLabelGenerator()
+	// Create label generator with base URL
+	labelGen := printer.NewZPLLabelGenerator(baseURLToUse)
 
 	// Load AWS configuration
 	awsCfg, err := config.LoadDefaultConfig(context.TODO())
