@@ -14,6 +14,7 @@ import {
 import iamUrl from './assets/iam.svg';
 import eventbridgeUrl from './assets/EventBridge.svg';
 import { getLoggedInUser } from './utils/getAuthenticatedUser';
+import Checkin from './routes/Checkin';
 
 // Interface for the data property in board items
 interface BoardItemData {
@@ -59,11 +60,16 @@ function App() {
       imgUrl: eventbridgeUrl,
       url: '/agenda',
     },
+    {
+      title: 'Check-in',
+      imgUrl: iamUrl,
+      url: '/checkin',
+    },
     ...(loggedInUser?.groups.includes('Sponsors')
       ? [
           {
             title: 'Panel de Patrocinadores',
-            imgUrl: iamUrl, // Using IAM icon for now, can be changed later
+            imgUrl: iamUrl,
             url: '/sponsor-dashboard',
           },
         ]
@@ -83,6 +89,7 @@ function App() {
             items={[
               { type: 'link' as const, text: `Mi perfil`, href: `/profile` },
               { type: 'link' as const, text: `Agenda`, href: `/agenda` },
+              { type: 'link' as const, text: `Check-in`, href: `/checkin` },
               ...(loggedInUser?.groups.includes('Sponsors')
                 ? [
                     {

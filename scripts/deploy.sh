@@ -201,6 +201,10 @@ else
   USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
   AUTH_API_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStack-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='AuthApiUrl'].OutputValue" --output text)
   
+  # Get Algolia keys from Secrets Manager
+  ALGOLIA_APP_ID=$(aws secretsmanager get-secret-value --secret-id algolia/app_id --query SecretString --output text)
+  ALGOLIA_SEARCH_KEY=$(aws secretsmanager get-secret-value --secret-id algolia/api_key --query SecretString --output text)
+  
   # Create .env file in the frontend directory
   cat > frontend/.env << EOL
 VITE_GRAPHQL_API_URL=${API_URL}
@@ -212,6 +216,9 @@ VITE_GUEST_ROLE_ARN=${GUEST_ROLE_ARN}
 VITE_USER_POOL_CLIENT_ID=${USER_POOL_CLIENT_ID}
 VITE_USER_POOL_ID=${USER_POOL_ID}
 VITE_AUTH_API_URL=${AUTH_API_URL}
+VITE_ALGOLIA_APP_ID=${ALGOLIA_APP_ID}
+VITE_ALGOLIA_SEARCH_KEY=${ALGOLIA_SEARCH_KEY}
+VITE_ALGOLIA_INDEX_NAME=${ENV}_attendees
 EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"
