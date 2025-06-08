@@ -39,6 +39,15 @@ export class ApiStack extends Construct {
           authorizationType: appsync.AuthorizationType.USER_POOL,
           userPoolConfig: { userPool: props.userPool },
         },
+        additionalAuthorizationModes: [
+          {
+            authorizationType: appsync.AuthorizationType.API_KEY,
+            apiKeyConfig: {
+              description: 'API Key for external access',
+              expires: cdk.Expiration.after(cdk.Duration.days(365)),
+            },
+          },
+        ],
       },
       logConfig: {
         fieldLogLevel: this.getFieldLogLevel(props.environmentName),

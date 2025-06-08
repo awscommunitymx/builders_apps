@@ -20,7 +20,8 @@
     "deploy:with-frontend": "bash scripts/deploy.sh --deploy-frontend",
     "deploy:destroy": "bash scripts/deploy.sh --destroy",
     "deploy:help": "bash scripts/deploy.sh --help",
-    "storybook": "npm run storybook --workspace=frontend"
+    "storybook": "npm run storybook --workspace=frontend",
+    "codegen": "grep -Ev '^\\s*@' schema.graphql > schema.no-directives.graphql && graphql-codegen --config codegen.yml && rm schema.no-directives.graphql"
   },
   "devDependencies": {
     "@aws-cdk/aws-lambda-python-alpha": "^2.198.0-alpha.0",

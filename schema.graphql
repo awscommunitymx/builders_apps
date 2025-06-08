@@ -38,8 +38,11 @@ type SponsorDashboard {
 
 type Query {
   getMyProfile: User
+  @aws_auth(cognito_groups: ["Attendees"])
   getSponsorVisit(short_id: ID!): SponsorUser
+  @aws_auth(cognito_groups: ["Sponsors"])
   getSponsorDashboard: SponsorDashboard!
+  @aws_auth(cognito_groups: ["Sponsors"])
 }
 
 input UpdateUserInput {
@@ -55,22 +58,13 @@ input RegisterSponsorVisitInput {
   message: String
 }
 
-mutation UpdateUser($input: UpdateUserInput!) {
-  updateUser(input: $input) {
-    user_id
-    short_id
-    first_name
-    last_name
-    company
-    role
-    pin
-  }
-}
-
 type Mutation {
   viewProfile(id: String!, pin: String!): User
+  @aws_auth(cognito_groups: ["Attendees"])
   updateUser(input: UpdateUserInput!): User
+  @aws_auth(cognito_groups: ["Attendees"])
   registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
+  @aws_auth(cognito_groups: ["Attendees"])
 }
 
 schema {
