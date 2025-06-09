@@ -3,6 +3,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as path from 'path';
 import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
@@ -23,6 +24,7 @@ interface LambdaStackProps {
   sesFromAddress?: string;
   kmsKey?: kms.Key;
   frontendDomain: string;
+  labelPrinterQueue: sqs.Queue;
 }
 
 export class LambdaStack extends Construct {
@@ -59,6 +61,7 @@ export class LambdaStack extends Construct {
         TWILIO_CONTENT_SID: TWILIO_CONTENT_SID,
         BASE_URL: props.baseUrl || '',
         KMS_KEY_ID: props.kmsKey?.keyId || '',
+        LABEL_PRINTER_QUEUE_URL: props.labelPrinterQueue.queueUrl,
       },
       timeout: cdk.Duration.seconds(30),
       tracing: lambda.Tracing.ACTIVE,
@@ -97,6 +100,11 @@ export class LambdaStack extends Construct {
     // Grant KMS permissions for encryption/decryption
     if (props.kmsKey) {
       props.kmsKey.grantEncryptDecrypt(this.graphQLResolver);
+    }
+
+    // Grant SQS permissions for label printer queue
+    if (props.labelPrinterQueue) {
+      props.labelPrinterQueue.grantSendMessages(this.graphQLResolver);
     }
 
     // Create the Lambda function for eventbriteWebhookHandler

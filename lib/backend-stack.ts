@@ -76,6 +76,10 @@ export class BackendStack extends cdk.Stack {
       kmsKey: encryptionKey,
     });
 
+    const checkinQueues = new CheckinQueues(this, 'CheckinQueues', {
+      environmentName: props.environmentName,
+    });
+
     const lambdaStack = new LambdaStack(this, 'LambdaStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
@@ -84,6 +88,7 @@ export class BackendStack extends cdk.Stack {
       sesFromAddress: 'noreply@awscommunity.mx',
       kmsKey: encryptionKey,
       frontendDomain: props.frontendDomain,
+      labelPrinterQueue: checkinQueues.mainQueue,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -179,10 +184,6 @@ export class BackendStack extends cdk.Stack {
       algoliaApiKeySecretArn: props.algoliaApiKeySecretArn,
       algoliaAppIdSecretArn: props.algoliaAppIdSecretArn,
       twilioMessageSender: lambdaStack.twilioMessageSender,
-    });
-
-    const checkinQueues = new CheckinQueues(this, 'CheckinQueues', {
-      environmentName: props.environmentName,
     });
 
     this.mainCheckinQueue = checkinQueues.mainQueue;

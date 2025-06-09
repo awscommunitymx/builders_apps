@@ -11,6 +11,7 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { encrypt } from '../../../utils/encryption';
 import { TIMEOUT_MINS } from '../../../utils/constants';
 import Twilio from 'twilio';
@@ -23,11 +24,13 @@ const metrics = new Metrics({ namespace: 'Profiles', serviceName: SERVICE_NAME }
 const client = new DynamoDBClient({});
 const dynamoDB = DynamoDBDocumentClient.from(client);
 const secretsClient = new SecretsManagerClient({});
+const sqsClient = new SQSClient({});
 const TABLE_NAME = process.env.TABLE_NAME!;
 const TWILIO_SECRET_NAME = 'twilio-credentials';
 const TWILIO_MESSAGING_SERVICE_SID = 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90';
 const TWILIO_CONTENT_SID = 'HXe650886b56ae897af0d34b0b3c267389';
 const BASE_URL = process.env.BASE_URL!;
+const LABEL_PRINTER_QUEUE_URL = process.env.LABEL_PRINTER_QUEUE_URL!;
 const ONE_MIN = 60 * 1000;
 const MAGIC_LINK_TIMEOUT_MINS = 30; // 30 minutes timeout for magic links
 
@@ -274,6 +277,36 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
           email: user.email,
           phone: user.cell_phone,
         });
+      }
+    }
+
+    // Send message to label printer queue
+    if (LABEL_PRINTER_QUEUE_URL) {
+      try {
+        const labelMessage = {
+          name: user.name,
+          company: user.company || '',
+          role: user.job_title || '',
+          employee_id: user.short_id,
+          printer_id: 'printer1', // Default printer ID
+        };
+
+        await sqsClient.send(
+          new SendMessageCommand({
+            QueueUrl: LABEL_PRINTER_QUEUE_URL,
+            MessageBody: JSON.stringify(labelMessage),
+          })
+        );
+
+        logger.info('Label printer message sent successfully', { user_id: user.user_id });
+        metrics.addMetric('LabelPrinterMessageSent', MetricUnit.Count, 1);
+      } catch (sqsError) {
+        // Log the error but don't fail the check-in since it was successful
+        logger.error('Failed to send label printer message, but check-in was successful', {
+          error: sqsError,
+          user_id: user.user_id,
+        });
+        metrics.addMetric('LabelPrinterMessageError', MetricUnit.Count, 1);
       }
     }
 
