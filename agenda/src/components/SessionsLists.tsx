@@ -110,8 +110,8 @@ export default function SessionLists() {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        // Hacer GET a https://auth-api.app.awscommunity.mx/session para obtener favoritos
-        const response = await fetch('https://auth-api.app.awscommunity.mx/session', {
+        // Hacer GET a https://auth-api.console.awscommunity.mx/session para obtener favoritos
+        const response = await fetch('https://auth-api.console.awscommunity.mx/session', {
           method: 'GET',
           credentials: 'include', // Para enviar las cookies
         });
@@ -167,7 +167,7 @@ export default function SessionLists() {
     try {
       // Determinar el método HTTP según si estamos agregando o quitando de favoritos
       const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
-      const response = await fetch('https://auth-api.app.awscommunity.mx/session', {
+      const response = await fetch('https://auth-api.console.awscommunity.mx/session', {
         method,
         headers: {
           'Content-Type': 'application/json',
