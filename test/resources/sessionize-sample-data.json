@@ -1,0 +1,203 @@
+{
+  "sessions": [
+    {
+      "id": "915715",
+      "title": "Del caos al K8s‑Zen: presentando el Kubernetes Maturity Model",
+      "description": "El Kubernetes Maturity Model (KMM) condensa...",
+      "startsAt": "2025-06-13T11:00:00",
+      "endsAt": "2025-06-13T11:30:00",
+      "isServiceSession": false,
+      "isPlenumSession": false,
+      "speakers": [
+        "4c0f7763-9f64-496b-bcd1-86b37294c8b9"
+      ],
+      "categoryItems": [
+        363105,
+        350080,
+        363099
+      ],
+      "questionAnswers": [],
+      "roomId": 67752,
+      "liveUrl": null,
+      "recordingUrl": null,
+      "status": "Accepted",
+      "isInformed": true,
+      "isConfirmed": true
+    }
+  ],
+  "speakers": [
+    {
+      "id": "4c0f7763-9f64-496b-bcd1-86b37294c8b9",
+      "firstName": "Adolfo",
+      "lastName": "Cabrera",
+      "bio": "DevOps and AI enthusiastic",
+      "tagLine": "Ms. Computer Scientist",
+      "profilePicture": "https://sessionize.com/image/de9f-400o400o1-hLKip5NsDnWFnsWYcVtuBF.jpg",
+      "isTopSpeaker": false,
+      "links": [
+        {
+          "title": "X (Twitter)",
+          "url": "https://twitter.com/adolfcg",
+          "linkType": "Twitter"
+        },
+        {
+          "title": "LinkedIn",
+          "url": "http://linkedin.com/in/adolfcg",
+          "linkType": "LinkedIn"
+        }
+      ],
+      "sessions": [
+        915715
+      ],
+      "fullName": "Adolfo Cabrera",
+      "categoryItems": [],
+      "questionAnswers": [
+        {
+          "questionId": 100798,
+          "answerValue": "Mexico"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": 100798,
+      "question": "Nationality",
+      "questionType": "Short_Text",
+      "sort": 17
+    }
+  ],
+  "categories": [
+    {
+      "id": 97040,
+      "title": "Session format",
+      "items": [
+        {
+          "id": 363098,
+          "name": "Lightning Talk (15 min)",
+          "sort": 1
+        },
+        {
+          "id": 363099,
+          "name": "Breakout Session (30 min)",
+          "sort": 2
+        },
+        {
+          "id": 363100,
+          "name": "Deep Dive Session (60 min)",
+          "sort": 3
+        },
+        {
+          "id": 363101,
+          "name": "Hands-on Workshop (Up to 120 min)",
+          "sort": 4
+        }
+      ],
+      "sort": 0,
+      "type": "session"
+    },
+    {
+      "id": 97038,
+      "title": "Level",
+      "items": [
+        {
+          "id": 363102,
+          "name": "L100 (Beginner)",
+          "sort": 1
+        },
+        {
+          "id": 363103,
+          "name": "L200 (Intermediate)",
+          "sort": 2
+        },
+        {
+          "id": 363104,
+          "name": "L300 (Advanced)",
+          "sort": 3
+        },
+        {
+          "id": 363105,
+          "name": "L400 (Expert)",
+          "sort": 4
+        }
+      ],
+      "sort": 1,
+      "type": "session"
+    },
+    {
+      "id": 97039,
+      "title": "Language",
+      "items": [
+        {
+          "id": 350079,
+          "name": "English",
+          "sort": 1
+        },
+        {
+          "id": 350080,
+          "name": "Spanish",
+          "sort": 2
+        }
+      ],
+      "sort": 2,
+      "type": "session"
+    }
+  ],
+  "rooms": [
+    {
+      "id": 61768,
+      "name": "El Gorrito",
+      "sort": 0
+    },
+    {
+      "id": 61769,
+      "name": "La Corona",
+      "sort": 1
+    },
+    {
+      "id": 66231,
+      "name": "El Mundo",
+      "sort": 3
+    },
+    {
+      "id": 61770,
+      "name": "El Sol",
+      "sort": 4
+    },
+    {
+      "id": 66232,
+      "name": "La Campana",
+      "sort": 5
+    },
+    {
+      "id": 66233,
+      "name": "La Botella",
+      "sort": 5
+    },
+    {
+      "id": 66234,
+      "name": "El Barril",
+      "sort": 7
+    },
+    {
+      "id": 66235,
+      "name": "La Calavera",
+      "sort": 7
+    },
+    {
+      "id": 66285,
+      "name": "El Corazón",
+      "sort": 7
+    },
+    {
+      "id": 66236,
+      "name": "La Mano",
+      "sort": 9
+    },
+    {
+      "id": 67752,
+      "name": "Virtual stage",
+      "sort": 10
+    }
+  ]
+}
