@@ -74,6 +74,15 @@ function App() {
           },
         ]
       : []),
+    ...(loggedInUser?.groups.some((group) => group.startsWith('CheckInVolunteer'))
+      ? [
+          {
+            title: 'Check-in',
+            imgUrl: iamUrl,
+            url: '/checkin',
+          },
+        ]
+      : []),
   ];
 
   return (

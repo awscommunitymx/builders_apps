@@ -84,7 +84,7 @@ type Mutation {
     email: String
     phone: String
   ): CheckInResponse!
-  @aws_auth(cognito_groups: ["CheckInVolunteers"])
+  @aws_auth(cognito_groups: ["CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
 }
 
 schema {
