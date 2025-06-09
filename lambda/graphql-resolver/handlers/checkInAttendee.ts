@@ -1,10 +1,19 @@
 import { AppSyncResolverHandler } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  QueryCommand,
+  UpdateCommand,
+  PutCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { CheckInResponse, CheckInStatus } from '@awscommunity/generated-ts';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { encrypt } from '../../../utils/encryption';
+import { TIMEOUT_MINS } from '../../../utils/constants';
+import Twilio from 'twilio';
 
 const SERVICE_NAME = 'check-in-attendee';
 const logger = new Logger({ serviceName: SERVICE_NAME });
@@ -13,7 +22,85 @@ const metrics = new Metrics({ namespace: 'Profiles', serviceName: SERVICE_NAME }
 
 const client = new DynamoDBClient({});
 const dynamoDB = DynamoDBDocumentClient.from(client);
+const secretsClient = new SecretsManagerClient({});
 const TABLE_NAME = process.env.TABLE_NAME!;
+const TWILIO_SECRET_NAME = 'twilio-credentials';
+const TWILIO_MESSAGING_SERVICE_SID = 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90';
+const TWILIO_CONTENT_SID = 'HXe650886b56ae897af0d34b0b3c267389';
+const BASE_URL = process.env.BASE_URL!;
+const ONE_MIN = 60 * 1000;
+const MAGIC_LINK_TIMEOUT_MINS = 30; // 30 minutes timeout for magic links
+
+// Twilio credentials cache
+let twilioCredentials: { account_sid: string; auth_token: string } | null = null;
+
+const getTwilioCredentials = async (): Promise<{ account_sid: string; auth_token: string }> => {
+  if (twilioCredentials) {
+    return twilioCredentials;
+  }
+
+  try {
+    const command = new GetSecretValueCommand({ SecretId: TWILIO_SECRET_NAME });
+    const response = await secretsClient.send(command);
+
+    if (!response.SecretString) {
+      throw new Error('No secret string found in Twilio credentials');
+    }
+
+    twilioCredentials = JSON.parse(response.SecretString);
+
+    if (!twilioCredentials?.account_sid || !twilioCredentials?.auth_token) {
+      throw new Error('Invalid Twilio credentials structure');
+    }
+
+    return twilioCredentials;
+  } catch (error) {
+    logger.error('Failed to retrieve Twilio credentials', { error });
+    throw error;
+  }
+};
+
+const sendWhatsAppMessage = async (
+  phoneNumber: string,
+  name: string,
+  magicLink: string
+): Promise<void> => {
+  try {
+    const credentials = await getTwilioCredentials();
+
+    // Initialize Twilio client
+    const client = Twilio(credentials.account_sid, credentials.auth_token);
+
+    // Format phone number for WhatsApp
+    const formattedPhone = phoneNumber.startsWith('whatsapp:')
+      ? phoneNumber
+      : `whatsapp:${phoneNumber.replace(/^\+/, '')}`;
+
+    // Extract first name
+    const firstName = name.split(' ')[0];
+
+    // Send the message using Twilio Content API
+    const message = await client.messages.create({
+      from: TWILIO_MESSAGING_SERVICE_SID,
+      to: formattedPhone,
+      contentSid: TWILIO_CONTENT_SID,
+      contentVariables: JSON.stringify({
+        '1': firstName,
+        '2': magicLink,
+      }),
+      shortenUrls: true,
+    });
+
+    logger.info('WhatsApp message sent successfully', {
+      messageSid: message.sid,
+      phone: formattedPhone,
+      status: message.status,
+    });
+  } catch (error) {
+    logger.error('Failed to send WhatsApp message', { error, phoneNumber });
+    throw error;
+  }
+};
 
 type CheckInEvent = {
   arguments: {
@@ -27,7 +114,7 @@ type CheckInEvent = {
 };
 
 export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => {
-  const correlationId = `check-in-${Date.now()}`;
+  const correlationId = `${Date.now()}`;
   logger.appendKeys({ correlationId });
 
   try {
@@ -127,6 +214,67 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
         message: 'Profile is missing required information',
         missingFields,
       };
+    }
+
+    // Generate magic link token
+    const now = new Date();
+    const expiration = new Date(now.getTime() + ONE_MIN * MAGIC_LINK_TIMEOUT_MINS);
+    const payload = {
+      email: user.email,
+      short_id: user.short_id,
+      expiration: expiration.toJSON(),
+    };
+
+    const tokenRaw = await encrypt(JSON.stringify(payload));
+    const tokenB64 = Buffer.from(tokenRaw).toString('base64');
+    const token = encodeURIComponent(tokenB64);
+    const magicLink = `https://${BASE_URL}/magic-link?email=${user.email}&token=${token}`;
+
+    // Store auth challenge token in DynamoDB
+    try {
+      await dynamoDB.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: {
+            PK: `AUTH#${user.email}`,
+            SK: 'AUTH_CHALLENGE',
+            token: tokenB64,
+            expiration: expiration.toJSON(),
+            created_at: now.toJSON(),
+            ttl: Math.floor(expiration.getTime() / 1000), // TTL for automatic cleanup
+          },
+        })
+      );
+
+      logger.info('Stored auth challenge token in DynamoDB', { email: user.email });
+    } catch (dynamoError) {
+      logger.error('Failed to store auth challenge token in DynamoDB', {
+        error: dynamoError,
+        email: user.email,
+      });
+      return {
+        status: CheckInStatus.IncompleteProfile,
+        message: 'Error generating authentication token',
+        missingFields: ['token'],
+      };
+    }
+
+    // Send WhatsApp message if user has a cell phone
+    if (user.cell_phone) {
+      try {
+        await sendWhatsAppMessage(user.cell_phone, user.name, magicLink);
+        logger.info('WhatsApp message sent successfully', {
+          email: user.email,
+          phone: user.cell_phone,
+        });
+      } catch (whatsappError) {
+        // Log the error but don't fail the check-in since it was successful
+        logger.error('Failed to send WhatsApp message, but check-in was successful', {
+          error: whatsappError,
+          email: user.email,
+          phone: user.cell_phone,
+        });
+      }
     }
 
     logger.info('Check-in successful', { user_id: user.user_id });

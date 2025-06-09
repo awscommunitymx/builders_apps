@@ -54,6 +54,11 @@ export class LambdaStack extends Construct {
         POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
         POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
         POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+        TWILIO_SECRET_NAME: 'twilio-credentials',
+        TWILIO_MESSAGING_SERVICE_SID: TWILIO_MESSAGING_SERVICE_SID,
+        TWILIO_CONTENT_SID: TWILIO_CONTENT_SID,
+        BASE_URL: props.baseUrl || '',
+        KMS_KEY_ID: props.kmsKey?.keyId || '',
       },
       timeout: cdk.Duration.seconds(30),
       tracing: lambda.Tracing.ACTIVE,
@@ -79,6 +84,20 @@ export class LambdaStack extends Construct {
 
     // Grant the Lambda function access to DynamoDB
     props.table.grantReadWriteData(this.graphQLResolver);
+
+    // Grant Secrets Manager permissions for Twilio credentials
+    this.graphQLResolver.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [`arn:aws:secretsmanager:*:*:secret:twilio-credentials*`],
+      })
+    );
+
+    // Grant KMS permissions for encryption/decryption
+    if (props.kmsKey) {
+      props.kmsKey.grantEncryptDecrypt(this.graphQLResolver);
+    }
 
     // Create the Lambda function for eventbriteWebhookHandler
     this.eventbriteWebhookHandler = new NodejsFunction(this, 'EventbriteWebhookHandler', {
