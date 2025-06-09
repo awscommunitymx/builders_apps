@@ -10,12 +10,15 @@ import {
   User,
   MutationRegisterSponsorVisitArgs,
   QueryGetSponsorVisitArgs,
+  MutationCheckInAttendeeArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
 import handleRegisterSponsorVisit from './handlers/registerSponsorVisit';
 import handleViewSponsorVisit from './handlers/viewSponsorVisit';
 import getSponsorDashboard from './handlers/getSponsorDashboard';
+import { handler as handleCheckInAttendee } from './handlers/checkInAttendee';
+import { AppSyncResolverEvent } from 'aws-lambda';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -27,7 +30,8 @@ type HandlerArgs =
   | MutationViewProfileArgs
   | MutationUpdateUserArgs
   | MutationRegisterSponsorVisitArgs
-  | QueryGetSponsorVisitArgs;
+  | QueryGetSponsorVisitArgs
+  | MutationCheckInAttendeeArgs;
 
 export const handler = middy((async (event) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -61,6 +65,14 @@ export const handler = middy((async (event) => {
 
     if (event.info.fieldName === 'getSponsorDashboard') {
       return getSponsorDashboard(identity);
+    }
+
+    if (event.info.fieldName === 'checkInAttendee') {
+      const { barcode_id, user_id, bypass_email, bypass_phone, email, phone } =
+        event.arguments as MutationCheckInAttendeeArgs;
+      return handleCheckInAttendee({
+        arguments: { barcode_id, user_id, bypass_email, bypass_phone, email, phone },
+      });
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

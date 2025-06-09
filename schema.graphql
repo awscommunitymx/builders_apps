@@ -58,6 +58,17 @@ input RegisterSponsorVisitInput {
   message: String
 }
 
+type CheckInResponse {
+  status: CheckInStatus!
+  message: String
+  missingFields: [String]
+}
+
+enum CheckInStatus {
+  SUCCESS
+  INCOMPLETE_PROFILE
+}
+
 type Mutation {
   viewProfile(id: String!, pin: String!): User
   @aws_auth(cognito_groups: ["Attendees"])
@@ -65,6 +76,15 @@ type Mutation {
   @aws_auth(cognito_groups: ["Attendees"])
   registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
   @aws_auth(cognito_groups: ["Attendees"])
+  checkInAttendee(
+    barcode_id: ID
+    user_id: ID
+    bypass_email: Boolean
+    bypass_phone: Boolean
+    email: String
+    phone: String
+  ): CheckInResponse!
+  @aws_auth(cognito_groups: ["CheckInVolunteers"])
 }
 
 schema {

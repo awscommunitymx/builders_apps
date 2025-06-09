@@ -34,11 +34,34 @@ export type CategoryItem = {
   name: Scalars['String']['output'];
 };
 
+export type CheckInResponse = {
+  __typename?: 'CheckInResponse';
+  message?: Maybe<Scalars['String']['output']>;
+  missingFields?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  status: CheckInStatus;
+};
+
+export enum CheckInStatus {
+  IncompleteProfile = 'INCOMPLETE_PROFILE',
+  Success = 'SUCCESS'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
+  checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
   updateUser?: Maybe<User>;
   viewProfile?: Maybe<User>;
+};
+
+
+export type MutationCheckInAttendeeArgs = {
+  barcode_id?: InputMaybe<Scalars['ID']['input']>;
+  bypass_email?: InputMaybe<Scalars['Boolean']['input']>;
+  bypass_phone?: InputMaybe<Scalars['Boolean']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  user_id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

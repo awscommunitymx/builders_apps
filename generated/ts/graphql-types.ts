@@ -35,11 +35,34 @@ export type CategoryItem = {
   name: Scalars['String']['output'];
 };
 
+export type CheckInResponse = {
+  __typename?: 'CheckInResponse';
+  message?: Maybe<Scalars['String']['output']>;
+  missingFields?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  status: CheckInStatus;
+};
+
+export enum CheckInStatus {
+  IncompleteProfile = 'INCOMPLETE_PROFILE',
+  Success = 'SUCCESS'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
+  checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
   updateUser?: Maybe<User>;
   viewProfile?: Maybe<User>;
+};
+
+
+export type MutationCheckInAttendeeArgs = {
+  barcode_id?: InputMaybe<Scalars['ID']['input']>;
+  bypass_email?: InputMaybe<Scalars['Boolean']['input']>;
+  bypass_phone?: InputMaybe<Scalars['Boolean']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  user_id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -237,6 +260,8 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Category: ResolverTypeWrapper<Category>;
   CategoryItem: ResolverTypeWrapper<CategoryItem>;
+  CheckInResponse: ResolverTypeWrapper<CheckInResponse>;
+  CheckInStatus: CheckInStatus;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -260,6 +285,7 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   Category: Category;
   CategoryItem: CategoryItem;
+  CheckInResponse: CheckInResponse;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
@@ -295,7 +321,15 @@ export type CategoryItemResolvers<ContextType = any, ParentType extends Resolver
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type CheckInResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['CheckInResponse'] = ResolversParentTypes['CheckInResponse']> = {
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  missingFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['CheckInStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  checkInAttendee?: Resolver<ResolversTypes['CheckInResponse'], ParentType, ContextType, Partial<MutationCheckInAttendeeArgs>>;
   registerSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<MutationRegisterSponsorVisitArgs, 'input'>>;
   updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
   viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'id' | 'pin'>>;
@@ -384,6 +418,7 @@ export type Resolvers<ContextType = any> = {
   AgendaData?: AgendaDataResolvers<ContextType>;
   Category?: CategoryResolvers<ContextType>;
   CategoryItem?: CategoryItemResolvers<ContextType>;
+  CheckInResponse?: CheckInResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   ProfileAccess?: ProfileAccessResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

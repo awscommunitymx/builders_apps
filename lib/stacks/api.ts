@@ -117,6 +117,11 @@ export class ApiStack extends Construct {
       typeName: 'Query',
       fieldName: 'getSponsorDashboard',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverCheckInAttendee', {
+      typeName: 'Mutation',
+      fieldName: 'checkInAttendee',
+    });
   }
 
   private createOutputs(environmentName: string): void {

@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
-import { Button, Input, SpaceBetween, Container, Header, Box } from '@cloudscape-design/components';
+import {
+  Button,
+  Input,
+  SpaceBetween,
+  Container,
+  Header,
+  Box,
+  Modal,
+  Checkbox,
+  Flashbar,
+} from '@cloudscape-design/components';
 import algoliasearch from 'algoliasearch/lite';
+import { gql, useMutation } from '@apollo/client';
 
 // Initialize Algolia client
 const searchClient = algoliasearch(
@@ -10,6 +21,30 @@ const searchClient = algoliasearch(
 
 const index = searchClient.initIndex(import.meta.env.VITE_ALGOLIA_INDEX_NAME || '');
 
+const CHECK_IN_ATTENDEE = gql`
+  mutation CheckInAttendee(
+    $barcode_id: ID
+    $user_id: ID
+    $bypass_email: Boolean
+    $bypass_phone: Boolean
+    $email: String
+    $phone: String
+  ) {
+    checkInAttendee(
+      barcode_id: $barcode_id
+      user_id: $user_id
+      bypass_email: $bypass_email
+      bypass_phone: $bypass_phone
+      email: $email
+      phone: $phone
+    ) {
+      status
+      message
+      missingFields
+    }
+  }
+`;
+
 interface Attendee {
   objectID: string;
   name: string;
@@ -17,9 +52,32 @@ interface Attendee {
   company?: string;
 }
 
+interface CheckInResponse {
+  status: 'SUCCESS' | 'INCOMPLETE_PROFILE';
+  message: string;
+  missingFields: string[] | null;
+}
+
+interface Notification {
+  type: 'success' | 'error';
+  content: string;
+  dismissible: boolean;
+  onDismiss: () => void;
+}
+
 const Checkin: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Attendee[]>([]);
+  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [bypassEmail, setBypassEmail] = useState(false);
+  const [bypassPhone, setBypassPhone] = useState(false);
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingAttendeeId, setLoadingAttendeeId] = useState<string | null>(null);
+
+  const [checkInAttendee] = useMutation(CHECK_IN_ATTENDEE);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -35,12 +93,79 @@ const Checkin: React.FC = () => {
     }
   };
 
-  const handleCheckin = (attendee: Attendee) => {
-    console.log('Checkin function called for:', attendee);
+  const canSubmit = () => {
+    if (!email && !bypassEmail) return false;
+    if (!phone && !bypassPhone) return false;
+    return true;
+  };
+
+  const handleCheckin = async (attendee: Attendee) => {
+    setLoadingAttendeeId(attendee.objectID);
+    try {
+      const { data } = await checkInAttendee({
+        variables: {
+          user_id: attendee.objectID,
+          bypass_email: bypassEmail,
+          bypass_phone: bypassPhone,
+          email: email || undefined,
+          phone: phone || undefined,
+        },
+      });
+
+      const response = data.checkInAttendee as CheckInResponse;
+
+      if (response.status === 'SUCCESS') {
+        setNotifications([
+          {
+            type: 'success',
+            content: 'Check-in successful!',
+            dismissible: true,
+            onDismiss: () => setNotifications([]),
+          },
+        ]);
+        setShowModal(false);
+        setBypassEmail(false);
+        setBypassPhone(false);
+        setEmail('');
+        setPhone('');
+      } else {
+        setSelectedAttendee(attendee);
+        setShowModal(true);
+      }
+    } catch (error) {
+      setNotifications([
+        {
+          type: 'error',
+          content: 'Error during check-in. Please try again.',
+          dismissible: true,
+          onDismiss: () => setNotifications([]),
+        },
+      ]);
+    } finally {
+      setLoadingAttendeeId(null);
+    }
+  };
+
+  const handleRetryCheckin = () => {
+    if (!canSubmit()) {
+      setNotifications([
+        {
+          type: 'error',
+          content: 'Please provide email and phone or use bypass options',
+          dismissible: true,
+          onDismiss: () => setNotifications([]),
+        },
+      ]);
+      return;
+    }
+    if (selectedAttendee) {
+      handleCheckin(selectedAttendee);
+    }
   };
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+      <Flashbar items={notifications} />
       <Container header={<Header variant="h1">Check-in</Header>}>
         <SpaceBetween size="l">
           <Input
@@ -70,7 +195,12 @@ const Checkin: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <Button variant="primary" onClick={() => handleCheckin(result)}>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleCheckin(result)}
+                      loading={loadingAttendeeId === result.objectID}
+                      disabled={loadingAttendeeId === result.objectID}
+                    >
                       Check In
                     </Button>
                   </SpaceBetween>
@@ -80,6 +210,69 @@ const Checkin: React.FC = () => {
           )}
         </SpaceBetween>
       </Container>
+
+      <Modal
+        visible={showModal}
+        onDismiss={() => setShowModal(false)}
+        header="Perfil incompleto"
+        size="medium"
+      >
+        <SpaceBetween size="l">
+          <div>
+            Faltan datos obligatorios en el perfil del asistente. Por favor, actualiza su perfil o
+            utiliza las opciones de omisión.
+          </div>
+          <SpaceBetween size="m">
+            <Input
+              type="email"
+              value={email}
+              onChange={({ detail }) => setEmail(detail.value)}
+              placeholder="Correo electrónico"
+              invalid={!email && !bypassEmail}
+            />
+            {!email && !bypassEmail && (
+              <div style={{ color: 'red', fontSize: '0.85em' }}>
+                El correo electrónico es obligatorio o debe ser omitido
+              </div>
+            )}
+            <Input
+              type="text"
+              value={phone}
+              onChange={({ detail }) => setPhone(detail.value)}
+              placeholder="Número de teléfono"
+              invalid={!phone && !bypassPhone}
+            />
+            {!phone && !bypassPhone && (
+              <div style={{ color: 'red', fontSize: '0.85em' }}>
+                El número de teléfono es obligatorio o debe ser omitido
+              </div>
+            )}
+            <Checkbox
+              checked={bypassEmail}
+              onChange={({ detail }) => setBypassEmail(detail.checked)}
+            >
+              Omitir requisito de correo electrónico
+            </Checkbox>
+            <Checkbox
+              checked={bypassPhone}
+              onChange={({ detail }) => setBypassPhone(detail.checked)}
+            >
+              Omitir requisito de teléfono
+            </Checkbox>
+          </SpaceBetween>
+          <SpaceBetween size="m" direction="horizontal">
+            <Button onClick={() => setShowModal(false)}>Cancelar</Button>
+            <Button
+              variant="primary"
+              onClick={handleRetryCheckin}
+              loading={loadingAttendeeId === selectedAttendee?.objectID}
+              disabled={loadingAttendeeId === selectedAttendee?.objectID || !canSubmit()}
+            >
+              Registrar de todas formas
+            </Button>
+          </SpaceBetween>
+        </SpaceBetween>
+      </Modal>
     </div>
   );
 };
