@@ -134,6 +134,9 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
 
     if (!barcode_id && !user_id) {
       logger.warn('Missing identifier', { barcode_id, user_id });
+      metrics.addMetric('CheckInFailed', MetricUnit.Count, 1, {
+        reason: 'missing_identifier',
+      } as any);
       return {
         status: CheckInStatus.IncompleteProfile,
         message: 'Either barcode_id or user_id must be provided',
@@ -159,6 +162,7 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
 
     if (!result.Items || result.Items.length === 0) {
       logger.warn('User not found', { barcode_id, user_id });
+      metrics.addMetric('CheckInFailed', MetricUnit.Count, 1, { reason: 'user_not_found' } as any);
       return {
         status: CheckInStatus.IncompleteProfile,
         message: 'User not found',
@@ -212,6 +216,9 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
 
     if (missingFields.length > 0) {
       logger.info('Profile incomplete', { missingFields, bypass_email, bypass_phone });
+      metrics.addMetric('CheckInFailed', MetricUnit.Count, 1, {
+        reason: 'incomplete_profile',
+      } as any);
       return {
         status: CheckInStatus.IncompleteProfile,
         message: 'Profile is missing required information',
@@ -312,6 +319,7 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
 
     logger.info('Check-in successful', { user_id: user.user_id });
     metrics.addMetric('CheckInSuccess', MetricUnit.Count, 1);
+    metrics.addMetric('CheckInTotal', MetricUnit.Count, 1);
 
     return {
       status: CheckInStatus.Success,
@@ -321,6 +329,7 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
   } catch (error) {
     logger.error('Error in checkInAttendee', { error });
     metrics.addMetric('CheckInError', MetricUnit.Count, 1);
+    metrics.addMetric('CheckInFailed', MetricUnit.Count, 1, { reason: 'internal_error' } as any);
     throw new Error('Failed to process check-in');
   } finally {
     metrics.publishStoredMetrics();
