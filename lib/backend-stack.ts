@@ -71,7 +71,15 @@ export class BackendStack extends cdk.Stack {
       authDomain: props.authDomain,
       certificate: domainCert,
       hostedZone: hostedZone,
-      groups: ['Attendees', 'Sponsors', 'CheckInVolunteers'],
+      groups: [
+        'Attendees',
+        'Sponsors',
+        'CheckInVolunteerMain1',
+        'CheckInVolunteerMain2',
+        'CheckInVolunteerMain3',
+        'CheckInVolunteerMain4',
+        'CheckInVolunteerSecondary',
+      ],
       table: databaseStack.table,
       kmsKey: encryptionKey,
     });
@@ -89,6 +97,7 @@ export class BackendStack extends cdk.Stack {
       kmsKey: encryptionKey,
       frontendDomain: props.frontendDomain,
       labelPrinterQueue: checkinQueues.mainQueue,
+      secondaryQueue: checkinQueues.secondaryQueue,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {

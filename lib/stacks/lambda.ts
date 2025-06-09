@@ -25,6 +25,7 @@ interface LambdaStackProps {
   kmsKey?: kms.Key;
   frontendDomain: string;
   labelPrinterQueue: sqs.Queue;
+  secondaryQueue: sqs.Queue;
 }
 
 export class LambdaStack extends Construct {
@@ -62,6 +63,7 @@ export class LambdaStack extends Construct {
         BASE_URL: props.baseUrl || '',
         KMS_KEY_ID: props.kmsKey?.keyId || '',
         LABEL_PRINTER_QUEUE_URL: props.labelPrinterQueue.queueUrl,
+        SECONDARY_QUEUE_URL: props.secondaryQueue.queueUrl,
       },
       timeout: cdk.Duration.seconds(30),
       tracing: lambda.Tracing.ACTIVE,
@@ -75,6 +77,14 @@ export class LambdaStack extends Construct {
         ],
       },
     });
+
+    // Grant SQS permissions for queues
+    if (props.labelPrinterQueue) {
+      props.labelPrinterQueue.grantSendMessages(this.graphQLResolver);
+    }
+    if (props.secondaryQueue) {
+      props.secondaryQueue.grantSendMessages(this.graphQLResolver);
+    }
 
     // Grant additional permissions for CloudWatch Metrics
     this.graphQLResolver.addToRolePolicy(
@@ -100,11 +110,6 @@ export class LambdaStack extends Construct {
     // Grant KMS permissions for encryption/decryption
     if (props.kmsKey) {
       props.kmsKey.grantEncryptDecrypt(this.graphQLResolver);
-    }
-
-    // Grant SQS permissions for label printer queue
-    if (props.labelPrinterQueue) {
-      props.labelPrinterQueue.grantSendMessages(this.graphQLResolver);
     }
 
     // Create the Lambda function for eventbriteWebhookHandler

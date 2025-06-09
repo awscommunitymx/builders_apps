@@ -72,6 +72,7 @@ export const handler = middy((async (event) => {
         event.arguments as MutationCheckInAttendeeArgs;
       return handleCheckInAttendee({
         arguments: { barcode_id, user_id, bypass_email, bypass_phone, email, phone },
+        identity,
       });
     }
 

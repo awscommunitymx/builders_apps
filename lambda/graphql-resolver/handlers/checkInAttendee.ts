@@ -15,6 +15,7 @@ import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { encrypt } from '../../../utils/encryption';
 import { TIMEOUT_MINS } from '../../../utils/constants';
 import Twilio from 'twilio';
+import { AppSyncIdentityCognito } from 'aws-lambda';
 
 const SERVICE_NAME = 'check-in-attendee';
 const logger = new Logger({ serviceName: SERVICE_NAME });
@@ -31,6 +32,7 @@ const TWILIO_MESSAGING_SERVICE_SID = 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90';
 const TWILIO_CONTENT_SID = 'HXe650886b56ae897af0d34b0b3c267389';
 const BASE_URL = process.env.BASE_URL!;
 const LABEL_PRINTER_QUEUE_URL = process.env.LABEL_PRINTER_QUEUE_URL!;
+const SECONDARY_QUEUE_URL = process.env.SECONDARY_QUEUE_URL!;
 const ONE_MIN = 60 * 1000;
 const MAGIC_LINK_TIMEOUT_MINS = 30; // 30 minutes timeout for magic links
 
@@ -114,6 +116,7 @@ type CheckInEvent = {
     email: string | null | undefined;
     phone: string | null | undefined;
   };
+  identity: AppSyncIdentityCognito;
 };
 
 export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => {
@@ -122,6 +125,7 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
 
   try {
     const { barcode_id, user_id, bypass_email, bypass_phone, email, phone } = event.arguments;
+    const { groups } = event.identity;
     logger.info('Processing check-in request', {
       barcode_id,
       user_id,
@@ -129,6 +133,7 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
       bypass_phone,
       email,
       phone,
+      groups,
     });
     metrics.addMetric('CheckInAttempt', MetricUnit.Count, 1);
 
@@ -290,22 +295,45 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
     // Send message to label printer queue
     if (LABEL_PRINTER_QUEUE_URL) {
       try {
+        // Determine printer ID based on the user's groups
+        let printerId = 'printer1'; // Default printer ID
+        if (groups?.includes('CheckInVolunteerMain1')) {
+          printerId = 'MainPrinter1';
+        } else if (groups?.includes('CheckInVolunteerMain2')) {
+          printerId = 'MainPrinter2';
+        } else if (groups?.includes('CheckInVolunteerMain3')) {
+          printerId = 'MainPrinter3';
+        } else if (groups?.includes('CheckInVolunteerMain4')) {
+          printerId = 'MainPrinter4';
+        } else if (groups?.includes('CheckInVolunteerSecondary')) {
+          printerId = 'SecondaryPrinter';
+        }
+
         const labelMessage = {
           name: user.name,
           company: user.company || '',
           role: user.job_title || '',
           employee_id: user.short_id,
-          printer_id: 'printer1', // Default printer ID
+          printer_id: printerId,
         };
+
+        // Determine which queue to use based on the user's groups
+        const queueUrl = groups?.includes('CheckInVolunteerSecondary')
+          ? SECONDARY_QUEUE_URL
+          : LABEL_PRINTER_QUEUE_URL;
 
         await sqsClient.send(
           new SendMessageCommand({
-            QueueUrl: LABEL_PRINTER_QUEUE_URL,
+            QueueUrl: queueUrl,
             MessageBody: JSON.stringify(labelMessage),
           })
         );
 
-        logger.info('Label printer message sent successfully', { user_id: user.user_id });
+        logger.info('Label printer message sent successfully', {
+          user_id: user.user_id,
+          queue_url: queueUrl,
+          printer_id: printerId,
+        });
         metrics.addMetric('LabelPrinterMessageSent', MetricUnit.Count, 1);
       } catch (sqsError) {
         // Log the error but don't fail the check-in since it was successful

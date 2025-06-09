@@ -13,7 +13,7 @@ export class CheckinQueues extends Construct {
   constructor(scope: Construct, id: string, props: CheckinQueuesProps) {
     super(scope, id);
 
-    // Create the main FIFO queue
+    // Create the main FIFO queue for the main location (used by all 4 main location check-in volunteers)
     this.mainQueue = new sqs.Queue(this, 'MainCheckinQueue', {
       queueName: `main-checkin-queue-${props.environmentName}`,
       fifo: false,
@@ -30,7 +30,7 @@ export class CheckinQueues extends Construct {
       },
     });
 
-    // Create the secondary FIFO queue
+    // Create the secondary FIFO queue for the secondary location (used by the single secondary location check-in volunteer)
     this.secondaryQueue = new sqs.Queue(this, 'SecondaryCheckinQueue', {
       queueName: `secondary-checkin-queue-${props.environmentName}`,
       fifo: false,
