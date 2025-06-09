@@ -13,7 +13,6 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  DateTime: { input: any; output: any; }
 };
 
 export type AgendaData = {
@@ -72,8 +71,8 @@ export type Session = {
   __typename?: 'Session';
   capacity?: Maybe<Scalars['Int']['output']>;
   category?: Maybe<Scalars['String']['output']>;
-  dateEnd: Scalars['DateTime']['output'];
-  dateStart: Scalars['DateTime']['output'];
+  dateEnd: Scalars['String']['output'];
+  dateStart: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   duration?: Maybe<Scalars['Int']['output']>;
   extendedDescription?: Maybe<Scalars['String']['output']>;
@@ -93,8 +92,8 @@ export type Session = {
 export type SessionInput = {
   capacity?: InputMaybe<Scalars['Int']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
-  dateEnd: Scalars['DateTime']['input'];
-  dateStart: Scalars['DateTime']['input'];
+  dateEnd: Scalars['String']['input'];
+  dateStart: Scalars['String']['input'];
   description?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
   extendedDescription?: InputMaybe<Scalars['String']['input']>;

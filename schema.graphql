@@ -34,16 +34,18 @@ input AgendaDataInput {
   sessions: [SessionInput!]!
 }
 
-type AgendaData {
+type AgendaData 
+@aws_api_key
+{
   sessions: [Session!]!
 }
 
-type RoomAgendaData {
+type RoomAgendaData 
+@aws_api_key
+{
   location: String!
   sessions: [Session!]!
 }
-
-scalar DateTime
 
 input SessionInput {
   id: ID!
@@ -52,8 +54,8 @@ input SessionInput {
   extendedDescription: String
   speakers: [SpeakerInput]
   time: String!
-  dateStart: DateTime!
-  dateEnd: DateTime!
+  dateStart: String!
+  dateEnd: String!
   duration: Int
   location: String
   nationality: String
@@ -66,15 +68,17 @@ input SessionInput {
   recordingUrl: String
 }
 
-type Session {
+type Session 
+@aws_api_key
+{
   id: ID!
   name: String
   description: String
   extendedDescription: String
   speakers: [Speaker]
   time: String!
-  dateStart: DateTime!
-  dateEnd: DateTime!
+  dateStart: String!
+  dateEnd: String!
   duration: Int
   location: String
   nationality: String
@@ -120,13 +124,15 @@ input SocialMediaInput {
 }
 
 type Subscription {
-  onRoomAgendaUpdate(location: String!): RoomAgendaData @aws_subscribe(mutations: ["updateRoomAgenda"])
+  onRoomAgendaUpdate(location: String!): RoomAgendaData 
+    @aws_subscribe(mutations: ["updateRoomAgenda"])
 }
 
 type Mutation {
   viewProfile(id: String!, pin: String!): User
   updateUser(input: UpdateUserInput!): User
-  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData
+  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
+    @aws_api_key
 }
 
 schema {

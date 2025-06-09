@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { DatabaseStack } from './stacks/database';
 import { ApiStack } from './stacks/api';
 import { LambdaStack } from './stacks/lambda';
+import { AgendaFetcherStack } from './stacks/agenda-fetcher';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
@@ -74,6 +75,12 @@ export class BackendStack extends cdk.Stack {
       hostedZone: hostedZone,
       domainName: props.domainName,
       userPool: cognitoStack.userPool,
+    });
+
+    new AgendaFetcherStack(this, 'AgendaFetcherStack', {
+      environmentName: props.environmentName,
+      table: databaseStack.table,
+      graphqlApi: apiStack.api,
     });
 
     // Add permissions for authenticated users to access API operations

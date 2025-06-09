@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { GraphQLResolveInfo } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -14,7 +14,6 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  DateTime: { input: any; output: any; }
 };
 
 export type AgendaData = {
@@ -73,8 +72,8 @@ export type Session = {
   __typename?: 'Session';
   capacity?: Maybe<Scalars['Int']['output']>;
   category?: Maybe<Scalars['String']['output']>;
-  dateEnd: Scalars['DateTime']['output'];
-  dateStart: Scalars['DateTime']['output'];
+  dateEnd: Scalars['String']['output'];
+  dateStart: Scalars['String']['output'];
   description?: Maybe<Scalars['String']['output']>;
   duration?: Maybe<Scalars['Int']['output']>;
   extendedDescription?: Maybe<Scalars['String']['output']>;
@@ -94,8 +93,8 @@ export type Session = {
 export type SessionInput = {
   capacity?: InputMaybe<Scalars['Int']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
-  dateEnd: Scalars['DateTime']['input'];
-  dateStart: Scalars['DateTime']['input'];
+  dateEnd: Scalars['String']['input'];
+  dateStart: Scalars['String']['input'];
   description?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
   extendedDescription?: InputMaybe<Scalars['String']['input']>;
@@ -252,7 +251,6 @@ export type ResolversTypes = {
   AgendaData: ResolverTypeWrapper<AgendaData>;
   AgendaDataInput: AgendaDataInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -276,7 +274,6 @@ export type ResolversParentTypes = {
   AgendaData: AgendaData;
   AgendaDataInput: AgendaDataInput;
   Boolean: Scalars['Boolean']['output'];
-  DateTime: Scalars['DateTime']['output'];
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
@@ -299,10 +296,6 @@ export type AgendaDataResolvers<ContextType = any, ParentType extends ResolversP
   sessions?: Resolver<Array<ResolversTypes['Session']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
-
-export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
-  name: 'DateTime';
-}
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   updateRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateRoomAgendaArgs, 'location' | 'sessions'>>;
@@ -331,8 +324,8 @@ export type RoomAgendaDataResolvers<ContextType = any, ParentType extends Resolv
 export type SessionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Session'] = ResolversParentTypes['Session']> = {
   capacity?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  dateEnd?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  dateStart?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  dateEnd?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  dateStart?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   duration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   extendedDescription?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -388,7 +381,6 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 
 export type Resolvers<ContextType = any> = {
   AgendaData?: AgendaDataResolvers<ContextType>;
-  DateTime?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   ProfileAccess?: ProfileAccessResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

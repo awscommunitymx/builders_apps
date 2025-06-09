@@ -91,6 +91,5 @@ describe('sessionize-parser', () => {
     expect(session).toBeDefined();
     expect(session!.name).toContain('Kubernetes Maturity Model');
     expect(session!.speakers.length).toBe(1);
-    // ⚠️ Note: your sample only has "Adolfo Cabrera" with no matching session id, so expect may need adjusting
   });
 });
