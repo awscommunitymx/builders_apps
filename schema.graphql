@@ -30,18 +30,6 @@ input UpdateUserInput {
   share_phone: Boolean
 }
 
-mutation UpdateUser($input: UpdateUserInput!) {
-  updateUser(input: $input) {
-    user_id
-    short_id
-    first_name
-    last_name
-    company
-    role
-    pin
-  }
-}
-
 input AgendaDataInput {
   sessions: [SessionInput!]!
 }
@@ -50,101 +38,95 @@ type AgendaData {
   sessions: [Session!]!
 }
 
-type Session {
-  id: ID!
-  roomId: ID!
-  title: String!
-  description: String
-  startsAt: String!
-  endsAt: String!
-  isServiceSession: Boolean!
-  isPlenumSession: Boolean!
-  speakers: [Speaker!]!
-  categories: [Category!]!
-  room: Room!
-  liveUrl: String
-  recordingUrl: String
-  status: SessionStatus
-  isInformed: Boolean!
-  isConfirmed: Boolean!
+type RoomAgendaData {
+  location: String!
+  sessions: [Session!]!
 }
 
-type Speaker {
-  id: ID!
-  name: String!
-}
-
-type Category {
-  id: ID!
-  name: String!
-  categoryItems: [CategoryItem!]!
-  sort: Int!
-}
-
-type CategoryItem {
-  id: ID!
-  name: String!
-}
-
-type Room {
-  id: ID!
-  name: String!
-}
-
-enum SessionStatus {
-  Accepted
-}
+scalar DateTime
 
 input SessionInput {
   id: ID!
-  title: String!
+  name: String
   description: String
-  startsAt: String!
-  endsAt: String!
-  isServiceSession: Boolean!
-  isPlenumSession: Boolean!
+  extendedDescription: String
+  speakers: [SpeakerInput]
+  time: String!
+  dateStart: DateTime!
+  dateEnd: DateTime!
+  duration: Int
+  location: String
+  nationality: String
+  level: String
+  language: String
+  category: String
+  capacity: Int
+  status: String
   liveUrl: String
   recordingUrl: String
-  status: SessionStatus
-  isInformed: Boolean!
-  isConfirmed: Boolean!
-  room: RoomInput!
-  speakers: [SpeakerInput!]!
-  categories: [CategoryInput!]!
 }
 
-input RoomInput {
+type Session {
   id: ID!
-  name: String!
+  name: String
+  description: String
+  extendedDescription: String
+  speakers: [Speaker]
+  time: String!
+  dateStart: DateTime!
+  dateEnd: DateTime!
+  duration: Int
+  location: String
+  nationality: String
+  level: String
+  language: String
+  category: String
+  capacity: Int
+  status: String
+  liveUrl: String
+  recordingUrl: String
 }
 
 input SpeakerInput {
-  id: ID!
+  id: ID
   name: String!
+  avatarUrl: String
+  company: String
+  bio: String
+  nationality: String
+  socialMedia: SocialMediaInput
 }
 
-input CategoryInput {
-  id: ID!
+type Speaker {
+  id: ID
   name: String!
-  categoryItems: [CategoryItemInput!]!
-  sort: Int!
+  avatarUrl: String
+  company: String
+  bio: String
+  nationality: String
+  socialMedia: SocialMedia
 }
 
-input CategoryItemInput {
-  id: ID!
-  name: String!
+type SocialMedia {
+  twitter: String
+  linkedin: String
+  company: String
+}
+
+input SocialMediaInput {
+  twitter: String
+  linkedin: String
+  company: String
 }
 
 type Subscription {
-  onAgendaUpdate: AgendaData @aws_subscribe(mutations: ["updateAgenda"])
-  onRoomAgendaUpdate(roomId: ID!): Session @aws_subscribe(mutations: ["updateRoomAgenda"])
+  onRoomAgendaUpdate(location: String!): RoomAgendaData @aws_subscribe(mutations: ["updateRoomAgenda"])
 }
 
 type Mutation {
   viewProfile(id: String!, pin: String!): User
   updateUser(input: UpdateUserInput!): User
-  updateAgenda(data: AgendaDataInput!): AgendaData
-  updateRoomAgenda(roomId: ID!, session: SessionInput!): Session
+  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData
 }
 
 schema {
