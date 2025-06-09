@@ -2074,70 +2074,6 @@
       "recordingUrl": null
     },
     {
-      "id": "935400",
-      "name": "AWS Community in LatAm: Scaling, Leading, and Building the Future Together",
-      "description": "Latin America is home to one of the most passionate, fast-growing AWS communities in the world. In this panel, leaders from across the AWS community ecosystem will explore how collaboration, inclusion, and a shared builder mindset are powering the region's momentum.\r\n\r\nJoin Ross Barich (Global Head of AWS Community), Nelly Andrade (Head of AWS Developer Relations LATAM), AWS Hero -----, AWS User Group Leader -----, and AWS Community Builder ----- for a dynamic conversation on how communities across Mexico and Latin America are creating spaces to learn, grow, and lead together.\r\n\r\nLearn how local leaders are driving impact through meetups, events, mentorship, and hands-on projects—and why community is a key force behind AWS adoption and innovation in the region.\r\n\r\nWhether you're a student, a startup founder, or a seasoned architect, this session will show you how to plug in, give back, and help shape the future of cloud in LatAm.\r\n\r\nBecause in Latin America, we believe something powerful: we build better—together.",
-      "extendedDescription": "Latin America is home to one of the most passionate, fast-growing AWS communities in the world. In this panel, leaders from across the AWS community ecosystem will explore how collaboration, inclusion, and a shared builder mindset are powering the region's momentum.\r\n\r\nJoin Ross Barich (Global Head of AWS Community), Nelly Andrade (Head of AWS Developer Relations LATAM), AWS Hero -----, AWS User Group Leader -----, and AWS Community Builder ----- for a dynamic conversation on how communities across Mexico and Latin America are creating spaces to learn, grow, and lead together.\r\n\r\nLearn how local leaders are driving impact through meetups, events, mentorship, and hands-on projects—and why community is a key force behind AWS adoption and innovation in the region.\r\n\r\nWhether you're a student, a startup founder, or a seasoned architect, this session will show you how to plug in, give back, and help shape the future of cloud in LatAm.\r\n\r\nBecause in Latin America, we believe something powerful: we build better—together.",
-      "speakers": [
-        {
-          "name": "Ross Barich",
-          "avatarUrl": "https://sessionize.com/image/5e12-400o400o1-TxaxKpJvm42Ha3kuJQqCtE.jpg",
-          "company": "Head of AWS Community at AWS",
-          "bio": "Ross Barich is the Head of AWS Community at AWS, based in Seattle, where he focuses on supporting community-led AWS groups, events, and initiatives around the world. He oversees all AWS Community programs, including the AWS Community Heroes and Community Builders programs, the AWS Community Day global event series, and the AWS community experience at re:Invent.\r\n\r\nRoss was born and raised in the Seattle area and has worked in technology marketing for 20 years, holding various roles at both large and small companies.",
-          "nationality": "USA",
-          "socialMedia": {
-            "linkedin": "https://www.linkedin.com/in/rossbarich/",
-            "company": "https://community.aws/"
-          }
-        },
-        {
-          "name": "Nelly Andrade",
-          "avatarUrl": "https://sessionize.com/image/2494-400o400o1-ULiV7c69LxurTEWEvdfG8d.jpg",
-          "company": "Head of DevRel LATAM at AWS",
-          "bio": "Head of DevRel LATAM at AWS. Environmental engineer that ended up in the cloud. I’m passionate about building communities, and the power of tech to change lives. Worked in the non-profit space and social entrepreneurial sphere for 10+ years where I became a multi-awarded professional by the government of Mexico, UN Women, and others. Transitioned into tech 3+ years ago, and I now lead an (amazing) tech team to build exciting things in the cloud. ",
-          "nationality": "Mexico",
-          "socialMedia": {
-            "linkedin": "https://linkedin.com/in/nellyandradediaz",
-            "instagram": "https://instagram.com/nellyandrade"
-          }
-        },
-        {
-          "name": "Franchesco Romero",
-          "avatarUrl": "",
-          "company": "",
-          "bio": "",
-          "nationality": ""
-        },
-        {
-          "name": "Alejandra Bricio",
-          "avatarUrl": "",
-          "company": "",
-          "bio": "",
-          "nationality": ""
-        },
-        {
-          "name": "David Victoria",
-          "avatarUrl": "",
-          "company": "",
-          "bio": "",
-          "nationality": ""
-        }
-      ],
-      "time": "16:25 - 16:55",
-      "dateStart": "2025-06-14T22:25:00.000Z",
-      "dateEnd": "2025-06-14T22:55:00.000Z",
-      "duration": 30,
-      "location": "La Corona",
-      "Nationality": "USA",
-      "level": "Principiante",
-      "language": "English",
-      "catergory": "Breakout Session",
-      "capacity": 200,
-      "status": "Accepted",
-      "liveUrl": null,
-      "recordingUrl": null
-    },
-    {
       "id": "948609",
       "name": "AWS for Startups Placeholder",
       "description": "",
@@ -2409,7 +2345,7 @@
           "avatarUrl": "https://sessionize.com/image/4f13-400o400o1-Go4FynTYsBYsAXYKP3TA3A.png",
           "company": "Computer Engineering Student @ ITESM",
           "bio": "Student of Computer Engineering at Tec de Monterrey, passionate about technology and committed to contributing to the development of a promising future.",
-          "nationality": "México ",
+          "nationality": "Mexico ",
           "socialMedia": {
             "linkedin": "https://www.linkedin.com/in/patricio-maya",
             "blog": "https://Patriciomaya.com"
