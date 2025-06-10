@@ -198,22 +198,24 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
         updateExpressions.push('email = :email');
         expressionAttributeValues[':email'] = email;
       }
+
       if (phone) {
         updateExpressions.push('cell_phone = :phone');
         expressionAttributeValues[':phone'] = phone;
       }
 
-      if (updateExpressions.length > 0) {
-        await dynamoDB.send(
-          new UpdateCommand({
-            TableName: TABLE_NAME,
-            Key: { PK: `USER#${user.user_id}`, SK: 'PROFILE' },
-            UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-            ExpressionAttributeValues: expressionAttributeValues,
-          })
-        );
-        logger.info('Updated user profile', { user_id: user.user_id, updates: { email, phone } });
-      }
+      const updateParams = {
+        TableName: TABLE_NAME,
+        Key: {
+          PK: `USER#${user_id}`,
+          SK: 'PROFILE',
+        },
+        UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ReturnValues: 'ALL_NEW' as const,
+      };
+
+      await dynamoDB.send(new UpdateCommand(updateParams));
     }
 
     if (missingFields.length > 0) {
@@ -350,6 +352,11 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
       status: CheckInStatus.Success,
       message: 'Check-in successful',
       missingFields: null,
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        ticket_class_id: user.ticket_class_id || '',
+      },
     };
   } catch (error) {
     logger.error('Error in checkInAttendee', { error });

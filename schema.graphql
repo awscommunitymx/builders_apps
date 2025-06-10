@@ -10,6 +10,7 @@ type User {
   pin: Int
   initialized: Boolean
   short_id: String
+  ticket_class_id: String
 }
 
 type SponsorUser {
@@ -62,6 +63,7 @@ type CheckInResponse {
   status: CheckInStatus!
   message: String
   missingFields: [String]
+  user: User
 }
 
 enum CheckInStatus {

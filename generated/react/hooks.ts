@@ -39,6 +39,7 @@ export type CheckInResponse = {
   message?: Maybe<Scalars['String']['output']>;
   missingFields?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   status: CheckInStatus;
+  user?: Maybe<User>;
 };
 
 export enum CheckInStatus {
@@ -181,5 +182,6 @@ export type User = {
   share_email?: Maybe<Scalars['Boolean']['output']>;
   share_phone?: Maybe<Scalars['Boolean']['output']>;
   short_id?: Maybe<Scalars['String']['output']>;
+  ticket_class_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };

@@ -43,6 +43,11 @@ const CHECK_IN_ATTENDEE = gql`
       status
       message
       missingFields
+      user {
+        user_id
+        name
+        ticket_class_id
+      }
     }
   }
 `;
@@ -58,6 +63,11 @@ interface CheckInResponse {
   status: 'SUCCESS' | 'INCOMPLETE_PROFILE';
   message: string;
   missingFields: string[] | null;
+  user?: {
+    user_id: string;
+    name: string;
+    ticket_class_id: string;
+  };
 }
 
 interface Notification {
@@ -65,6 +75,11 @@ interface Notification {
   content: string;
   dismissible: boolean;
   onDismiss: () => void;
+  user?: {
+    user_id: string;
+    name: string;
+    ticket_class_id: string;
+  };
 }
 
 const Checkin: React.FC = () => {
@@ -80,6 +95,10 @@ const Checkin: React.FC = () => {
   const [loadingAttendeeId, setLoadingAttendeeId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [checkInResult, setCheckInResult] = useState<{
+    name: string;
+    ticket_class_id: string;
+  } | null>(null);
 
   const [checkInAttendee] = useMutation(CHECK_IN_ATTENDEE);
 
@@ -118,11 +137,15 @@ const Checkin: React.FC = () => {
 
       const response = data.checkInAttendee as CheckInResponse;
 
-      if (response.status === 'SUCCESS') {
+      if (response.status === 'SUCCESS' && response.user) {
+        setCheckInResult({
+          name: response.user.name,
+          ticket_class_id: response.user.ticket_class_id,
+        });
         setNotifications([
           {
             type: 'success',
-            content: 'Check-in successful!',
+            content: `Check-in successful for ${response.user.name} (${response.user.ticket_class_id})`,
             dismissible: true,
             onDismiss: () => setNotifications([]),
           },
@@ -186,11 +209,15 @@ const Checkin: React.FC = () => {
       })
         .then(({ data }) => {
           const response = data.checkInAttendee as CheckInResponse;
-          if (response.status === 'SUCCESS') {
+          if (response.status === 'SUCCESS' && response.user) {
+            setCheckInResult({
+              name: response.user.name,
+              ticket_class_id: response.user.ticket_class_id,
+            });
             setNotifications([
               {
                 type: 'success',
-                content: 'Check-in successful!',
+                content: `Check-in successful for ${response.user.name} (${response.user.ticket_class_id})`,
                 dismissible: true,
                 onDismiss: () => setNotifications([]),
               },
@@ -227,9 +254,22 @@ const Checkin: React.FC = () => {
     console.error('QR Scanner error:', error);
   };
 
+  const getLanyardImage = (ticketClassId: string) => {
+    return `/assets/lanyards/${ticketClassId}.png`;
+  };
+
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <Flashbar items={notifications} />
+      {checkInResult && (
+        <div style={{ width: '100%', marginTop: '24px', marginBottom: '24px' }}>
+          <img
+            src={getLanyardImage(checkInResult.ticket_class_id)}
+            alt="Lanyard"
+            style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain' }}
+          />
+        </div>
+      )}
       <Container header={<Header variant="h1">Check-in</Header>}>
         <SpaceBetween size="l">
           <SpaceBetween size="m" direction="horizontal">
