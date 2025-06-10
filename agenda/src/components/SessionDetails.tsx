@@ -111,6 +111,16 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favorites, setFavorites] = useState<number[]>([]);
 
+  // Función para convertir saltos de línea a elementos <br>
+  const formatTextWithBreaks = (text: string) => {
+    return text.split(/\r\n|\r|\n/).map((line, index, array) => (
+      <span key={index}>
+        {line}
+        {index < array.length - 1 && <br />}
+      </span>
+    ));
+  };
+
   // Verificar si el ID de sesión es válido
   if (!sessionId || !sessionData[sessionId]) {
     return (
@@ -296,7 +306,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
           <SpaceBetween size="s">
             <Box>
               <h3>Descripción</h3>
-              <p>{session.extendedDescription}</p>
+              <p>{formatTextWithBreaks(session.extendedDescription)}</p>
             </Box>
 
             <Box>

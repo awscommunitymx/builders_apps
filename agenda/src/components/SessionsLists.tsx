@@ -213,6 +213,16 @@ export default function SessionLists() {
     return text.substring(0, maxLength) + '...';
   };
 
+  // Función para convertir saltos de línea a elementos <br>
+  const formatTextWithBreaks = (text: string) => {
+    return text.split(/\r\n|\r|\n/).map((line, index, array) => (
+      <span key={index}>
+        {line}
+        {index < array.length - 1 && <br />}
+      </span>
+    ));
+  };
+
   // Función para resetear todos los filtros
   const resetFilters = () => {
     setSelectedLevels([]);
@@ -377,8 +387,8 @@ export default function SessionLists() {
               content: (item) => (
                 <div>
                   {expandedDescriptions.includes(item.id)
-                    ? item.description
-                    : truncateText(item.description)}
+                    ? formatTextWithBreaks(item.description)
+                    : formatTextWithBreaks(truncateText(item.description))}
                   {item.description.length > 100 && (
                     <div style={{ marginTop: '0px' }}>
                       <Button
