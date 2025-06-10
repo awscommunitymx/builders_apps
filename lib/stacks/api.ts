@@ -103,6 +103,16 @@ export class ApiStack extends Construct {
       fieldName: 'getAgenda',
     });
 
+    lambdaDataSource.createResolver('GraphQLResolverGetAgendaHash', {
+      typeName: 'Query',
+      fieldName: 'getAgendaHash',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetRoomAgendaHash', {
+      typeName: 'Query',
+      fieldName: 'getRoomAgendaHash',
+    });
+
     lambdaDataSource.createResolver('GraphQLResolverGetRoomAgenda', {
       typeName: 'Query',
       fieldName: 'getRoomAgenda',

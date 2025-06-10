@@ -58,12 +58,19 @@ export type ProfileAccess = {
 export type Query = {
   __typename?: 'Query';
   getAgenda?: Maybe<AgendaData>;
+  getAgendaHash: Scalars['String']['output'];
   getMyProfile?: Maybe<User>;
   getRoomAgenda?: Maybe<RoomAgendaData>;
+  getRoomAgendaHash: Scalars['String']['output'];
 };
 
 
 export type QueryGetRoomAgendaArgs = {
+  location: Scalars['String']['input'];
+};
+
+
+export type QueryGetRoomAgendaHashArgs = {
   location: Scalars['String']['input'];
 };
 

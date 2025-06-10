@@ -4,12 +4,6 @@ import { Metrics, MetricUnit } from "@aws-lambda-powertools/metrics";
 import { Logger } from "@aws-lambda-powertools/logger";
 import { fetchFromS3 } from "../utils/fetchFromS3";
 
-/**
- * Fetches and parses JSON data from S3
- */
-/**
- * Handles getAgenda query - returns all sessions
- */
 export const handleGetAgenda = async (s3Client: S3Client, s3Bucket: string, serviceName: string): Promise<AgendaData> => {
   const logger = new Logger({ serviceName: serviceName });
   const metrics = new Metrics({ namespace: 'Profiles', serviceName: serviceName });

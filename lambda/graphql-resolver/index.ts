@@ -3,18 +3,20 @@ import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client } from '@aws-sdk/client-s3';
 import middy from '@middy/core';
 import {
   MutationViewProfileArgs,
   MutationUpdateUserArgs,
   MutationUpdateRoomAgendaArgs,
   QueryGetRoomAgendaArgs,
+  QueryGetRoomAgendaHashArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
 import { handleGetRoomAgenda } from './handlers/getRoomAgenda';
 import { handleGetAgenda } from './handlers/getAgenda';
+import { getHash } from './handlers/getHash';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -27,9 +29,14 @@ const s3Client = tracer.captureAWSv3Client(new S3Client({}));
 
 // Environment variables
 const S3_BUCKET = process.env.S3_BUCKET!;
+const TABLE_NAME = process.env.TABLE_NAME!;
 
 if (!S3_BUCKET) {
   throw new Error('Missing required environment variable: S3_BUCKET');
+}
+
+if (!TABLE_NAME) {
+  throw new Error('Missing DYNAMODB_TABLE_NAME');
 }
 
 type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs | MutationUpdateRoomAgendaArgs | QueryGetRoomAgendaArgs;
@@ -72,7 +79,29 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
       };
     }
 
-    // Handle Mutation operations (require authentication)
+    if (event.info.fieldName === 'getAgendaHash') {
+      // Always uses the “ALL” key
+      const hash = await getHash('ALL', TABLE_NAME, SERVICE_NAME);
+      logger.info(`Hash received: ${hash}`);
+      if (!hash) {
+        throw new Error('No agenda hash found in DynamoDB');
+      }
+      return hash;
+    }
+
+    if (event.info.fieldName === 'getRoomAgendaHash') {
+      const { location } = event.arguments as QueryGetRoomAgendaHashArgs;
+      if (!location) {
+        throw new Error('Location parameter is required for getRoomAgendaHash');
+      }
+      const hash = await getHash(location, TABLE_NAME, SERVICE_NAME);
+      logger.info(`Hash received: ${hash}`);
+      if (!hash) {
+        throw new Error('No agenda hash found in DynamoDB');
+      }
+      return hash;
+    }
+
     const identity = event.identity as AppSyncIdentityCognito;
     
     if (!identity) {

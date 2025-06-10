@@ -21,6 +21,8 @@ type Query {
   getMyProfile: User
   getAgenda: AgendaData
   getRoomAgenda(location: String!): RoomAgendaData
+  getAgendaHash: String!
+  getRoomAgendaHash(location: String!): String!
 }
 
 input UpdateUserInput {
