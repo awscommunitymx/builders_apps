@@ -80,9 +80,7 @@ export const getSessionCardDefinition = ({
         iconName={favorites.includes(parseInt(item.id, 10)) ? 'heart-filled' : 'heart'}
         onClick={(e) => onToggleFavorite(item.id, e)}
         ariaLabel={
-          favorites.includes(parseInt(item.id, 10))
-            ? 'Quitar de favoritos'
-            : 'Agregar a favoritos'
+          favorites.includes(parseInt(item.id, 10)) ? 'Quitar de favoritos' : 'Agregar a favoritos'
         }
       />
     </div>
@@ -101,9 +99,7 @@ export const getSessionCardDefinition = ({
               <Button
                 variant="inline-link"
                 onClick={(e) => onToggleDescription(item.id, e)}
-                ariaLabel={
-                  expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'
-                }
+                ariaLabel={expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
               >
                 {expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
               </Button>
