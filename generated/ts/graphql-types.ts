@@ -25,36 +25,6 @@ export type AgendaDataInput = {
   sessions: Array<SessionInput>;
 };
 
-export type Mutation = {
-  __typename?: 'Mutation';
-  updateAgenda?: Maybe<AgendaData>;
-  updateRoomAgenda?: Maybe<RoomAgendaData>;
-  updateUser?: Maybe<User>;
-  viewProfile?: Maybe<User>;
-};
-
-
-export type MutationUpdateAgendaArgs = {
-  sessions: AgendaDataInput;
-};
-
-
-export type MutationUpdateRoomAgendaArgs = {
-  location: Scalars['String']['input'];
-  sessions: AgendaDataInput;
-};
-
-
-export type MutationUpdateUserArgs = {
-  input: UpdateUserInput;
-};
-
-
-export type MutationViewProfileArgs = {
-  id: Scalars['String']['input'];
-  pin: Scalars['String']['input'];
-};
-
 export type ProfileAccess = {
   __typename?: 'ProfileAccess';
   PK: Scalars['String']['output'];
@@ -69,6 +39,8 @@ export type Query = {
   getMyProfile?: Maybe<User>;
   getRoomAgenda?: Maybe<RoomAgendaData>;
   getRoomAgendaHash: Scalars['String']['output'];
+  getSponsorDashboard: SponsorDashboard;
+  getSponsorVisit?: Maybe<SponsorUser>;
 };
 
 
@@ -79,6 +51,11 @@ export type QueryGetRoomAgendaArgs = {
 
 export type QueryGetRoomAgendaHashArgs = {
   location: Scalars['String']['input'];
+};
+
+
+export type QueryGetSponsorVisitArgs = {
+  short_id: Scalars['ID']['input'];
 };
 
 export type RoomAgendaData = {
@@ -164,15 +141,24 @@ export type SpeakerInput = {
   socialMedia?: InputMaybe<SocialMediaInput>;
 };
 
-export type Subscription = {
-  __typename?: 'Subscription';
-  onAgendaUpdate?: Maybe<AgendaData>;
-  onRoomAgendaUpdate?: Maybe<RoomAgendaData>;
+export type SponsorDashboard = {
+  __typename?: 'SponsorDashboard';
+  sponsor_name: Scalars['String']['output'];
+  total_visits: Scalars['Int']['output'];
+  visits: Array<SponsorUser>;
 };
 
-
-export type SubscriptionOnRoomAgendaUpdateArgs = {
-  location: Scalars['String']['input'];
+export type SponsorUser = {
+  __typename?: 'SponsorUser';
+  cell_phone?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  job_title?: Maybe<Scalars['String']['output']>;
+  last_visit?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  short_id?: Maybe<Scalars['String']['output']>;
+  user_id: Scalars['ID']['output'];
 };
 
 export type UpdateUserInput = {
@@ -194,6 +180,7 @@ export type User = {
   pin?: Maybe<Scalars['Int']['output']>;
   share_email?: Maybe<Scalars['Boolean']['output']>;
   share_phone?: Maybe<Scalars['Boolean']['output']>;
+  short_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };
 
@@ -273,7 +260,6 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
-  Mutation: ResolverTypeWrapper<{}>;
   ProfileAccess: ResolverTypeWrapper<ProfileAccess>;
   Query: ResolverTypeWrapper<{}>;
   RoomAgendaData: ResolverTypeWrapper<RoomAgendaData>;
@@ -283,8 +269,9 @@ export type ResolversTypes = {
   SocialMediaInput: SocialMediaInput;
   Speaker: ResolverTypeWrapper<Speaker>;
   SpeakerInput: SpeakerInput;
+  SponsorDashboard: ResolverTypeWrapper<SponsorDashboard>;
+  SponsorUser: ResolverTypeWrapper<SponsorUser>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
-  Subscription: ResolverTypeWrapper<{}>;
   UpdateUserInput: UpdateUserInput;
   User: ResolverTypeWrapper<User>;
 };
@@ -296,7 +283,6 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
-  Mutation: {};
   ProfileAccess: ProfileAccess;
   Query: {};
   RoomAgendaData: RoomAgendaData;
@@ -306,8 +292,9 @@ export type ResolversParentTypes = {
   SocialMediaInput: SocialMediaInput;
   Speaker: Speaker;
   SpeakerInput: SpeakerInput;
+  SponsorDashboard: SponsorDashboard;
+  SponsorUser: SponsorUser;
   String: Scalars['String']['output'];
-  Subscription: {};
   UpdateUserInput: UpdateUserInput;
   User: User;
 };
@@ -315,13 +302,6 @@ export type ResolversParentTypes = {
 export type AgendaDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgendaData'] = ResolversParentTypes['AgendaData']> = {
   sessions?: Resolver<Array<ResolversTypes['Session']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  updateAgenda?: Resolver<Maybe<ResolversTypes['AgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateAgendaArgs, 'sessions'>>;
-  updateRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateRoomAgendaArgs, 'location' | 'sessions'>>;
-  updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
-  viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'id' | 'pin'>>;
 };
 
 export type ProfileAccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProfileAccess'] = ResolversParentTypes['ProfileAccess']> = {
@@ -337,6 +317,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   getRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<QueryGetRoomAgendaArgs, 'location'>>;
   getRoomAgendaHash?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetRoomAgendaHashArgs, 'location'>>;
+  getSponsorDashboard?: Resolver<ResolversTypes['SponsorDashboard'], ParentType, ContextType>;
+  getSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<QueryGetSponsorVisitArgs, 'short_id'>>;
 };
 
 export type RoomAgendaDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoomAgendaData'] = ResolversParentTypes['RoomAgendaData']> = {
@@ -385,9 +367,24 @@ export type SpeakerResolvers<ContextType = any, ParentType extends ResolversPare
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
-  onAgendaUpdate?: SubscriptionResolver<Maybe<ResolversTypes['AgendaData']>, "onAgendaUpdate", ParentType, ContextType>;
-  onRoomAgendaUpdate?: SubscriptionResolver<Maybe<ResolversTypes['RoomAgendaData']>, "onRoomAgendaUpdate", ParentType, ContextType, RequireFields<SubscriptionOnRoomAgendaUpdateArgs, 'location'>>;
+export type SponsorDashboardResolvers<ContextType = any, ParentType extends ResolversParentTypes['SponsorDashboard'] = ResolversParentTypes['SponsorDashboard']> = {
+  sponsor_name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  total_visits?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  visits?: Resolver<Array<ResolversTypes['SponsorUser']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SponsorUserResolvers<ContextType = any, ParentType extends ResolversParentTypes['SponsorUser'] = ResolversParentTypes['SponsorUser']> = {
+  cell_phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  job_title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  last_visit?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  short_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
@@ -400,20 +397,21 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   pin?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   share_email?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   share_phone?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  short_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = any> = {
   AgendaData?: AgendaDataResolvers<ContextType>;
-  Mutation?: MutationResolvers<ContextType>;
   ProfileAccess?: ProfileAccessResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RoomAgendaData?: RoomAgendaDataResolvers<ContextType>;
   Session?: SessionResolvers<ContextType>;
   SocialMedia?: SocialMediaResolvers<ContextType>;
   Speaker?: SpeakerResolvers<ContextType>;
-  Subscription?: SubscriptionResolvers<ContextType>;
+  SponsorDashboard?: SponsorDashboardResolvers<ContextType>;
+  SponsorUser?: SponsorUserResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
 

@@ -12,9 +12,14 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.19.2",
+    "@algolia/autocomplete-theme-classic": "^1.19.2",
     "@cloudscape-design/board-components": "^3.0.101",
     "@cloudscape-design/components": "^3.0.923",
     "@cloudscape-design/global-styles": "^1.0.38",
+    "algoliasearch": "^4.24.0",
+    "amazon-cognito-identity-js": "^6.3.15",
+    "aws-amplify": "^5.0.18",
     "aws-rum-web": "^1.22.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

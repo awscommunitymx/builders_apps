@@ -11,6 +11,10 @@ import { AuthProvider } from './AuthContext.tsx';
 import { AwsRumProvider } from './AwsRumProvider.tsx';
 import ErrorBoundary from './ErrorBoundary.tsx';
 import { MyProfileRoute } from './routes/MyProfileRoute.tsx';
+import { SponsorDashboardRoute } from './routes/SponsorDashboardRoute.tsx';
+import AuthCallbackRoute from './routes/AuthCallbackRoute.tsx';
+import LoginRoute from './routes/Login.tsx';
+import Checkin from './routes/Checkin.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -21,9 +25,13 @@ createRoot(document.getElementById('root')!).render(
             <Routes>
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={<Layout />}>
+                <Route path="/magic-link" element={<AuthCallbackRoute />} />
+                <Route path="/login" element={<LoginRoute />} />
                 <Route index element={<App />} />
                 <Route path="/profile/:id" element={<UserProfileRoute />} />
                 <Route path="/profile" element={<MyProfileRoute />} />
+                <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
+                <Route path="checkin" element={<Checkin />} />
               </Route>
             </Routes>
           </BrowserRouter>

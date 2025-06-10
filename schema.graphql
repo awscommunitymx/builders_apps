@@ -9,6 +9,19 @@ type User {
   share_email: Boolean
   pin: Int
   initialized: Boolean
+  short_id: String
+}
+
+type SponsorUser {
+  user_id: ID!
+  name: String!
+  company: String
+  job_title: String
+  cell_phone: String
+  email: String
+  short_id: String
+  message: String
+  last_visit: String
 }
 
 type ProfileAccess {
@@ -17,12 +30,20 @@ type ProfileAccess {
   timestamp: String!
 }
 
+type SponsorDashboard {
+  sponsor_name: String!
+  visits: [SponsorUser!]!
+  total_visits: Int!
+}
+
 type Query {
   getMyProfile: User
   getAgenda: AgendaData
   getRoomAgenda(location: String!): RoomAgendaData
   getAgendaHash: String!
   getRoomAgendaHash(location: String!): String!
+  getSponsorVisit(short_id: ID!): SponsorUser
+  getSponsorDashboard: SponsorDashboard!
 }
 
 input UpdateUserInput {
@@ -133,26 +154,4 @@ input SocialMediaInput {
   twitter: String
   linkedin: String
   company: String
-}
-
-type Subscription {
-  onAgendaUpdate: AgendaData
-    @aws_subscribe(mutations: ["updateAgenda"])
-  onRoomAgendaUpdate(location: String!): RoomAgendaData 
-    @aws_subscribe(mutations: ["updateRoomAgenda"])
-}
-
-type Mutation {
-  viewProfile(id: String!, pin: String!): User
-  updateUser(input: UpdateUserInput!): User
-  updateAgenda(sessions: AgendaDataInput!): AgendaData 
-    @aws_api_key
-  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
-    @aws_api_key
-}
-
-schema {
-  query: Query
-  mutation: Mutation
-  subscription: Subscription
 }

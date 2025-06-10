@@ -12,6 +12,9 @@ import {
   MutationUpdateRoomAgendaArgs,
   QueryGetRoomAgendaArgs,
   QueryGetRoomAgendaHashArgs,
+  User,
+  MutationRegisterSponsorVisitArgs,
+  QueryGetSponsorVisitArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
@@ -129,6 +132,20 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
     if (event.info.fieldName === 'updateUser') {
       const { input } = event.arguments as MutationUpdateUserArgs;
       return handleUpdateUser(identity.sub, input);
+    }
+
+    if (event.info.fieldName === 'registerSponsorVisit') {
+      const { input } = event.arguments as MutationRegisterSponsorVisitArgs;
+      return handleRegisterSponsorVisit(identity, input);
+    }
+
+    if (event.info.fieldName === 'getSponsorVisit') {
+      const { short_id } = event.arguments as QueryGetSponsorVisitArgs;
+      return handleViewSponsorVisit(identity, short_id);
+    }
+
+    if (event.info.fieldName === 'getSponsorDashboard') {
+      return getSponsorDashboard(identity);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

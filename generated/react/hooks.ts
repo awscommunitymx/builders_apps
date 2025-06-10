@@ -24,36 +24,6 @@ export type AgendaDataInput = {
   sessions: Array<SessionInput>;
 };
 
-export type Mutation = {
-  __typename?: 'Mutation';
-  updateAgenda?: Maybe<AgendaData>;
-  updateRoomAgenda?: Maybe<RoomAgendaData>;
-  updateUser?: Maybe<User>;
-  viewProfile?: Maybe<User>;
-};
-
-
-export type MutationUpdateAgendaArgs = {
-  sessions: AgendaDataInput;
-};
-
-
-export type MutationUpdateRoomAgendaArgs = {
-  location: Scalars['String']['input'];
-  sessions: AgendaDataInput;
-};
-
-
-export type MutationUpdateUserArgs = {
-  input: UpdateUserInput;
-};
-
-
-export type MutationViewProfileArgs = {
-  id: Scalars['String']['input'];
-  pin: Scalars['String']['input'];
-};
-
 export type ProfileAccess = {
   __typename?: 'ProfileAccess';
   PK: Scalars['String']['output'];
@@ -68,6 +38,8 @@ export type Query = {
   getMyProfile?: Maybe<User>;
   getRoomAgenda?: Maybe<RoomAgendaData>;
   getRoomAgendaHash: Scalars['String']['output'];
+  getSponsorDashboard: SponsorDashboard;
+  getSponsorVisit?: Maybe<SponsorUser>;
 };
 
 
@@ -78,6 +50,11 @@ export type QueryGetRoomAgendaArgs = {
 
 export type QueryGetRoomAgendaHashArgs = {
   location: Scalars['String']['input'];
+};
+
+
+export type QueryGetSponsorVisitArgs = {
+  short_id: Scalars['ID']['input'];
 };
 
 export type RoomAgendaData = {
@@ -163,15 +140,24 @@ export type SpeakerInput = {
   socialMedia?: InputMaybe<SocialMediaInput>;
 };
 
-export type Subscription = {
-  __typename?: 'Subscription';
-  onAgendaUpdate?: Maybe<AgendaData>;
-  onRoomAgendaUpdate?: Maybe<RoomAgendaData>;
+export type SponsorDashboard = {
+  __typename?: 'SponsorDashboard';
+  sponsor_name: Scalars['String']['output'];
+  total_visits: Scalars['Int']['output'];
+  visits: Array<SponsorUser>;
 };
 
-
-export type SubscriptionOnRoomAgendaUpdateArgs = {
-  location: Scalars['String']['input'];
+export type SponsorUser = {
+  __typename?: 'SponsorUser';
+  cell_phone?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  job_title?: Maybe<Scalars['String']['output']>;
+  last_visit?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  short_id?: Maybe<Scalars['String']['output']>;
+  user_id: Scalars['ID']['output'];
 };
 
 export type UpdateUserInput = {
@@ -193,5 +179,6 @@ export type User = {
   pin?: Maybe<Scalars['Int']['output']>;
   share_email?: Maybe<Scalars['Boolean']['output']>;
   share_phone?: Maybe<Scalars['Boolean']['output']>;
+  short_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };
