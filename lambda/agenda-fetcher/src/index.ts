@@ -146,7 +146,7 @@ const sessionToInput = (session: Session) => {
     nationality: session.nationality || null,
     level: session.level || null,
     language: session.language || null,
-    category: session.category || null, // Fixed: was 'catergory' in original example
+    category: session.category || null,
     capacity: session.capacity || null,
     status: session.status || null,
     liveUrl: session.liveUrl || null,
@@ -155,9 +155,142 @@ const sessionToInput = (session: Session) => {
 };
 
 /**
+ * Publishes global agenda update via GraphQL mutation
+ */
+const publishGlobalUpdate = async (sessions: Session[]): Promise<void> => {
+  const mutation = `
+    mutation UpdateAgenda($sessions: AgendaDataInput!) {
+      updateAgenda(sessions: $sessions) {
+        sessions {
+          id
+          name
+          description
+          extendedDescription
+          time
+          dateStart
+          dateEnd
+          duration
+          location
+          nationality
+          level
+          language
+          category
+          capacity
+          status
+          liveUrl
+          recordingUrl
+          speakers {
+            id
+            name
+            avatarUrl
+            company
+            bio
+            nationality
+            socialMedia {
+              twitter
+              linkedin
+              company
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  // Convert sessions to input format
+  const sessionInputs = sessions.map(sessionToInput);
+
+  const variables = {
+    sessions: {
+      sessions: sessionInputs
+    } as AgendaDataInput
+  };
+
+  logger.info('Publishing global agenda update', {
+    sessionCount: sessions.length,
+    apiEndpoint: APPSYNC_ENDPOINT
+  });
+
+  logger.debug('GraphQL mutation variables', { 
+    variables: {
+      sessionCount: variables.sessions.sessions.length,
+      sampleSession: variables.sessions.sessions[0] ? {
+        id: variables.sessions.sessions[0].id,
+        name: variables.sessions.sessions[0].name,
+        speakerCount: variables.sessions.sessions[0].speakers?.length || 0
+      } : null
+    }
+  });
+
+  try {
+    const response = await fetch(APPSYNC_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': APPSYNC_API_KEY,
+        'User-Agent': 'AgendaFetcher/1.0'
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables: variables
+      })
+    });
+
+    logger.debug('GraphQL response status', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      logger.error('AppSync HTTP error', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody
+      });
+      throw new Error(`AppSync HTTP error: ${response.status} ${response.statusText} - ${errorBody}`);
+    }
+
+    const result = await response.json() as any;
+    logger.debug('GraphQL response body', { result });
+
+    if (result.errors && result.errors.length > 0) {
+      logger.error('GraphQL errors in response', {
+        errors: result.errors,
+        sessionCount: sessions.length
+      });
+      throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    if (!result.data || !result.data.updateAgenda) {
+      logger.error('Unexpected GraphQL response structure', { result });
+      throw new Error('Unexpected GraphQL response: missing data.updateAgenda');
+    }
+
+    logger.info('Successfully published global agenda update', {
+      sessionCount: sessions.length,
+      updatedSessionCount: result.data.updateAgenda.sessions?.length || 0
+    });
+
+    metrics.addMetric('GlobalGraphQLSuccess', MetricUnit.Count, 1);
+
+  } catch (error) {
+    logger.error('Error publishing global agenda update', {
+      sessionCount: sessions.length,
+      error: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
+    
+    metrics.addMetric('GlobalGraphQLError', MetricUnit.Count, 1);
+    throw error;
+  }
+};
+
+/**
  * Publishes room agenda update via GraphQL mutation
  */
-const publishUpdate = async (
+const publishRoomUpdate = async (
   location: string,
   sessions: Session[]
 ): Promise<void> => {
@@ -280,7 +413,7 @@ const publishUpdate = async (
       updatedSessionCount: result.data.updateRoomAgenda.sessions?.length || 0
     });
 
-    metrics.addMetric('GraphQLSuccess', MetricUnit.Count, 1);
+    metrics.addMetric('RoomGraphQLSuccess', MetricUnit.Count, 1);
 
   } catch (error) {
     logger.error('Error publishing room agenda update', {
@@ -290,7 +423,7 @@ const publishUpdate = async (
       errorStack: error instanceof Error ? error.stack : undefined
     });
     
-    metrics.addMetric('GraphQLError', MetricUnit.Count, 1);
+    metrics.addMetric('RoomGraphQLError', MetricUnit.Count, 1);
     throw error;
   }
 };
@@ -338,7 +471,7 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
     });
 
     if (fullHash !== oldFull) {
-      logger.info('Global agenda changed, updating S3 and hash');
+      logger.info('Global agenda changed, updating S3, hash, and broadcasting');
       
       await s3Client.send(
         new PutObjectCommand({
@@ -352,6 +485,10 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
       
       await putHash('ALL', fullHash);
       metrics.addMetric('HashUpdates', MetricUnit.Count, 1);
+
+      // Publish global agenda update via GraphQL
+      await publishGlobalUpdate(agendaData.sessions);
+      metrics.addMetric('GlobalBroadcasts', MetricUnit.Count, 1);
       
       logger.info('Global agenda updated successfully');
     } else {
@@ -402,8 +539,8 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
       metrics.addMetric('HashUpdates', MetricUnit.Count, 1);
 
       // Publish GraphQL update
-      await publishUpdate(location, sessions);
-      metrics.addMetric('Broadcasts', MetricUnit.Count, 1);
+      await publishRoomUpdate(location, sessions);
+      metrics.addMetric('RoomBroadcasts', MetricUnit.Count, 1);
       
       roomsUpdated++;
       logger.info(`Successfully updated room: ${location}`);

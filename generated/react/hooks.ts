@@ -26,9 +26,15 @@ export type AgendaDataInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  updateAgenda?: Maybe<AgendaData>;
   updateRoomAgenda?: Maybe<RoomAgendaData>;
   updateUser?: Maybe<User>;
   viewProfile?: Maybe<User>;
+};
+
+
+export type MutationUpdateAgendaArgs = {
+  sessions: AgendaDataInput;
 };
 
 
@@ -159,6 +165,7 @@ export type SpeakerInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  onAgendaUpdate?: Maybe<AgendaData>;
   onRoomAgendaUpdate?: Maybe<RoomAgendaData>;
 };
 

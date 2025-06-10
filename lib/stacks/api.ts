@@ -123,7 +123,11 @@ export class ApiStack extends Construct {
       fieldName: 'updateUser',
     });
     
-    // IMPORTANT: Create resolver for updateRoomAgenda that allows API Key auth
+    lambdaDataSource.createResolver('GraphQLResolverUpdateAgenda', {
+      typeName: 'Mutation',
+      fieldName: 'updateAgenda',
+    });
+
     lambdaDataSource.createResolver('GraphQLResolverUpdateRoomAgenda', {
       typeName: 'Mutation',
       fieldName: 'updateRoomAgenda',

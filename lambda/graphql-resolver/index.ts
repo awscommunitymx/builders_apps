@@ -8,6 +8,7 @@ import middy from '@middy/core';
 import {
   MutationViewProfileArgs,
   MutationUpdateUserArgs,
+  MutationUpdateAgendaArgs,
   MutationUpdateRoomAgendaArgs,
   QueryGetRoomAgendaArgs,
   QueryGetRoomAgendaHashArgs,
@@ -39,7 +40,7 @@ if (!TABLE_NAME) {
   throw new Error('Missing DYNAMODB_TABLE_NAME');
 }
 
-type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs | MutationUpdateRoomAgendaArgs | QueryGetRoomAgendaArgs;
+type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs | MutationUpdateAgendaArgs | MutationUpdateRoomAgendaArgs | QueryGetRoomAgendaArgs;
 
 export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -65,6 +66,18 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
       return await handleGetRoomAgenda(location, s3Client, S3_BUCKET, SERVICE_NAME);
     }
 
+    if (event.info.fieldName === 'updateAgenda') {
+      // Echo back for subscription broadcasting
+      const { sessions } = event.arguments as MutationUpdateAgendaArgs;
+      logger.info('Broadcasting agenda update', { 
+        sessionCount: sessions.sessions?.length || 0 
+      });
+      
+      return {
+        sessions: sessions.sessions,
+      };
+    }
+
     if (event.info.fieldName === 'updateRoomAgenda') {
       // Echo back for subscription broadcasting
       const { location, sessions } = event.arguments as MutationUpdateRoomAgendaArgs;
@@ -80,7 +93,7 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
     }
 
     if (event.info.fieldName === 'getAgendaHash') {
-      // Always uses the “ALL” key
+      // Always uses the "ALL" key
       const hash = await getHash('ALL', TABLE_NAME, SERVICE_NAME);
       logger.info(`Hash received: ${hash}`);
       if (!hash) {
