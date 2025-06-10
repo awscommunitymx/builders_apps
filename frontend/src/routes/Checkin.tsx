@@ -9,9 +9,11 @@ import {
   Modal,
   Checkbox,
   Flashbar,
+  Spinner,
 } from '@cloudscape-design/components';
 import algoliasearch from 'algoliasearch/lite';
 import { gql, useMutation } from '@apollo/client';
+import { Scanner, IDetectedBarcode } from '@yudiel/react-qr-scanner';
 
 // Initialize Algolia client
 const searchClient = algoliasearch(
@@ -76,6 +78,8 @@ const Checkin: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingAttendeeId, setLoadingAttendeeId] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
 
   const [checkInAttendee] = useMutation(CHECK_IN_ATTENDEE);
 
@@ -133,6 +137,7 @@ const Checkin: React.FC = () => {
         setShowModal(true);
       }
     } catch (error) {
+      console.error('Check-in error:', error);
       setNotifications([
         {
           type: 'error',
@@ -163,17 +168,102 @@ const Checkin: React.FC = () => {
     }
   };
 
+  const handleScan = (detectedCodes: IDetectedBarcode[]) => {
+    if (detectedCodes.length > 0) {
+      const barcode_id = detectedCodes[0].rawValue;
+      console.log('QR Code content:', barcode_id);
+      setShowScanner(false);
+      setIsCheckingIn(true);
+
+      checkInAttendee({
+        variables: {
+          barcode_id,
+          bypass_email: bypassEmail,
+          bypass_phone: bypassPhone,
+          email: email || undefined,
+          phone: phone || undefined,
+        },
+      })
+        .then(({ data }) => {
+          const response = data.checkInAttendee as CheckInResponse;
+          if (response.status === 'SUCCESS') {
+            setNotifications([
+              {
+                type: 'success',
+                content: 'Check-in successful!',
+                dismissible: true,
+                onDismiss: () => setNotifications([]),
+              },
+            ]);
+          } else {
+            setNotifications([
+              {
+                type: 'error',
+                content: response.message || 'Check-in failed',
+                dismissible: true,
+                onDismiss: () => setNotifications([]),
+              },
+            ]);
+          }
+        })
+        .catch((error) => {
+          console.error('Check-in error:', error);
+          setNotifications([
+            {
+              type: 'error',
+              content: 'Error during check-in. Please try again.',
+              dismissible: true,
+              onDismiss: () => setNotifications([]),
+            },
+          ]);
+        })
+        .finally(() => {
+          setIsCheckingIn(false);
+        });
+    }
+  };
+
+  const handleError = (error: unknown) => {
+    console.error('QR Scanner error:', error);
+  };
+
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <Flashbar items={notifications} />
       <Container header={<Header variant="h1">Check-in</Header>}>
         <SpaceBetween size="l">
-          <Input
-            type="search"
-            value={searchQuery}
-            onChange={({ detail }) => handleSearch(detail.value)}
-            placeholder="Search attendees..."
-          />
+          <SpaceBetween size="m" direction="horizontal">
+            <Input
+              type="search"
+              value={searchQuery}
+              onChange={({ detail }) => handleSearch(detail.value)}
+              placeholder="Search attendees..."
+            />
+            <Button onClick={() => setShowScanner(!showScanner)} disabled={isCheckingIn}>
+              {showScanner ? 'Close Scanner' : 'Scan QR Code'}
+            </Button>
+          </SpaceBetween>
+
+          {showScanner && (
+            <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+              {isCheckingIn ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                  <SpaceBetween size="m" direction="vertical">
+                    <Spinner size="large" />
+                    <Box textAlign="center">Checking in attendee...</Box>
+                  </SpaceBetween>
+                </div>
+              ) : (
+                <Scanner
+                  onScan={handleScan}
+                  onError={handleError}
+                  constraints={{ facingMode: 'environment' }}
+                  styles={{ container: { width: '100%' } }}
+                />
+              )}
+            </div>
+          )}
+
           {searchResults.length > 0 && (
             <SpaceBetween size="m">
               {searchResults.map((result) => (

@@ -60,11 +60,6 @@ function App() {
       imgUrl: eventbridgeUrl,
       url: '/agenda',
     },
-    {
-      title: 'Check-in',
-      imgUrl: iamUrl,
-      url: '/checkin',
-    },
     ...(loggedInUser?.groups.includes('Sponsors')
       ? [
           {
@@ -98,7 +93,16 @@ function App() {
             items={[
               { type: 'link' as const, text: `Mi perfil`, href: `/profile` },
               { type: 'link' as const, text: `Agenda`, href: `/agenda` },
-              { type: 'link' as const, text: `Check-in`, href: `/checkin` },
+              // { type: 'link' as const, text: `Check-in`, href: `/checkin` },
+              ...(loggedInUser?.groups.some((group) => group.startsWith('CheckInVolunteer'))
+                ? [
+                    {
+                      type: 'link' as const,
+                      text: `Check-in`,
+                      href: `/checkin`,
+                    },
+                  ]
+                : []),
               ...(loggedInUser?.groups.includes('Sponsors')
                 ? [
                     {
