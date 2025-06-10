@@ -60,6 +60,12 @@ export type Query = {
   __typename?: 'Query';
   getAgenda?: Maybe<AgendaData>;
   getMyProfile?: Maybe<User>;
+  getRoomAgenda?: Maybe<RoomAgendaData>;
+};
+
+
+export type QueryGetRoomAgendaArgs = {
+  location: Scalars['String']['input'];
 };
 
 export type RoomAgendaData = {
@@ -313,6 +319,7 @@ export type ProfileAccessResolvers<ContextType = any, ParentType extends Resolve
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getAgenda?: Resolver<Maybe<ResolversTypes['AgendaData']>, ParentType, ContextType>;
   getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  getRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<QueryGetRoomAgendaArgs, 'location'>>;
 };
 
 export type RoomAgendaDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoomAgendaData'] = ResolversParentTypes['RoomAgendaData']> = {

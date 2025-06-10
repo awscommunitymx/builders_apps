@@ -11,10 +11,15 @@ import fetch from 'node-fetch';
 import { Context } from 'aws-lambda';
 import * as crypto from 'crypto';
 import {
-  SessionInput,
+  Session,
   RoomAgendaData,
+  AgendaDataInput,
 } from '@awscommunity/generated-ts';
-import { parseSessions, SessionizePayload, parseAgenda } from '../../../utils/sessionizeParser';
+import { 
+  parseSessions, 
+  parseAgenda, 
+  SessionizePayload 
+} from '../../../utils/sessionizeParser';
 
 // Powertools setup
 const logger = new Logger({ serviceName: 'agenda-fetcher' });
@@ -26,7 +31,7 @@ const dynamoClient = tracer.captureAWSv3Client(new DynamoDBClient({}));
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 const s3Client = tracer.captureAWSv3Client(new S3Client({}));
 
-// Env vars
+// Environment variables
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const S3_BUCKET = process.env.S3_BUCKET!;
 const SESSIONIZE_API_URL = process.env.SESSIONIZE_API_URL!;
@@ -47,7 +52,7 @@ logger.info('Configuration loaded', {
   apiKeyPrefix: APPSYNC_API_KEY.substring(0, 8) + '...'
 });
 
-// Helpers
+// Helper functions
 const canonicalize = (obj: any): any => {
   if (Array.isArray(obj)) {
     return obj.map(canonicalize).sort((a, b) =>
@@ -67,15 +72,17 @@ const canonicalize = (obj: any): any => {
 const computeHash = (data: any): string =>
   crypto.createHash('md5').update(JSON.stringify(canonicalize(data))).digest('hex');
 
-// Updated to use correct key structure
-const getHash = async (key: string) => {
+/**
+ * Retrieves hash from DynamoDB
+ */
+const getHash = async (key: string): Promise<string | null> => {
   try {
     const resp = await docClient.send(
       new GetCommand({ 
         TableName: TABLE_NAME, 
         Key: { 
-          PK: `AGENDA#${key}`,  // Using PK with prefix
-          SK: 'HASH'            // Using SK for sort key
+          PK: `AGENDA#${key}`,
+          SK: 'HASH'
         } 
       })
     );
@@ -86,16 +93,18 @@ const getHash = async (key: string) => {
   }
 };
 
-// Updated to use correct key structure
-const putHash = async (key: string, hash: string) => {
+/**
+ * Stores hash in DynamoDB
+ */
+const putHash = async (key: string, hash: string): Promise<void> => {
   try {
     await docClient.send(
       new PutCommand({ 
         TableName: TABLE_NAME, 
         Item: { 
-          PK: `AGENDA#${key}`,  // Using PK with prefix
-          SK: 'HASH',           // Using SK for sort key
-          hash,                 // Store the hash value
+          PK: `AGENDA#${key}`,
+          SK: 'HASH',
+          hash,
           updatedAt: new Date().toISOString()
         } 
       })
@@ -107,9 +116,50 @@ const putHash = async (key: string, hash: string) => {
   }
 };
 
+/**
+ * Converts Session objects to the format expected by GraphQL mutation
+ */
+const sessionToInput = (session: Session) => {
+  return {
+    id: session.id,
+    name: session.name || null,
+    description: session.description || null,
+    extendedDescription: session.extendedDescription || null,
+    speakers: session.speakers?.map(speaker => ({
+      id: speaker.id || null,
+      name: speaker.name,
+      avatarUrl: speaker.avatarUrl || null,
+      company: speaker.company || null,
+      bio: speaker.bio || null,
+      nationality: speaker.nationality || null,
+      socialMedia: speaker.socialMedia ? {
+        twitter: speaker.socialMedia.twitter || null,
+        linkedin: speaker.socialMedia.linkedin || null,
+        company: speaker.socialMedia.company || null,
+      } : null,
+    })) || null,
+    time: session.time,
+    dateStart: session.dateStart,
+    dateEnd: session.dateEnd,
+    duration: session.duration || null,
+    location: session.location || null,
+    nationality: session.nationality || null,
+    level: session.level || null,
+    language: session.language || null,
+    category: session.category || null, // Fixed: was 'catergory' in original example
+    capacity: session.capacity || null,
+    status: session.status || null,
+    liveUrl: session.liveUrl || null,
+    recordingUrl: session.recordingUrl || null,
+  };
+};
+
+/**
+ * Publishes room agenda update via GraphQL mutation
+ */
 const publishUpdate = async (
   location: string,
-  sessions: SessionInput[]
+  sessions: Session[]
 ): Promise<void> => {
   const mutation = `
     mutation UpdateRoomAgenda($location: String!, $sessions: AgendaDataInput!) {
@@ -121,16 +171,42 @@ const publishUpdate = async (
           time
           dateStart
           dateEnd
+          duration
+          location
+          nationality
+          level
+          language
+          category
+          capacity
+          status
+          liveUrl
+          recordingUrl
+          speakers {
+            id
+            name
+            avatarUrl
+            company
+            bio
+            nationality
+            socialMedia {
+              twitter
+              linkedin
+              company
+            }
+          }
         }
       }
     }
   `;
 
+  // Convert sessions to input format
+  const sessionInputs = sessions.map(sessionToInput);
+
   const variables = {
     location: location,
     sessions: {
-      sessions: sessions
-    }
+      sessions: sessionInputs
+    } as AgendaDataInput
   };
 
   logger.info('Publishing room agenda update', {
@@ -139,7 +215,17 @@ const publishUpdate = async (
     apiEndpoint: APPSYNC_ENDPOINT
   });
 
-  logger.debug('GraphQL mutation variables', { variables });
+  logger.debug('GraphQL mutation variables', { 
+    variables: {
+      location: variables.location,
+      sessionCount: variables.sessions.sessions.length,
+      sampleSession: variables.sessions.sessions[0] ? {
+        id: variables.sessions.sessions[0].id,
+        name: variables.sessions.sessions[0].name,
+        speakerCount: variables.sessions.sessions[0].speakers?.length || 0
+      } : null
+    }
+  });
 
   try {
     const response = await fetch(APPSYNC_ENDPOINT, {
@@ -191,7 +277,7 @@ const publishUpdate = async (
     logger.info('Successfully published room agenda update', {
       location,
       sessionCount: sessions.length,
-      response: result.data.updateRoomAgenda
+      updatedSessionCount: result.data.updateRoomAgenda.sessions?.length || 0
     });
 
     metrics.addMetric('GraphQLSuccess', MetricUnit.Count, 1);
@@ -209,6 +295,9 @@ const publishUpdate = async (
   }
 };
 
+/**
+ * Main Lambda handler
+ */
 const baseHandler = async (_evt: any, _ctx: Context) => {
   logger.info('Starting agenda fetch process');
   metrics.addMetric('FetchAttempt', MetricUnit.Count, 1);
@@ -229,7 +318,11 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
     }
 
     const payload = (await resp.json()) as SessionizePayload;
-    logger.info('Successfully fetched Sessionize data');
+    logger.info('Successfully fetched Sessionize data', {
+      sessionsCount: payload.sessions?.length || 0,
+      speakersCount: payload.speakers?.length || 0,
+      roomsCount: payload.rooms?.length || 0
+    });
 
     // Process global agenda blob
     logger.info('Processing global agenda data');
@@ -240,7 +333,8 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
     logger.debug('Global agenda hash comparison', {
       newHash: fullHash,
       oldHash: oldFull,
-      changed: fullHash !== oldFull
+      changed: fullHash !== oldFull,
+      sessionCount: agendaData.sessions.length
     });
 
     if (fullHash !== oldFull) {
@@ -272,11 +366,12 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
     let roomsUpdated = 0;
     let roomsSkipped = 0;
 
-    for (const { location, sessions } of allRooms) {
+    for (const roomData of allRooms) {
+      const { location, sessions } = roomData;
+      
       logger.debug(`Processing room: ${location}`, { sessionCount: sessions.length });
       
-      const blob: RoomAgendaData = { location, sessions };
-      const roomHash = computeHash(blob);
+      const roomHash = computeHash(roomData);
       const oldRoomHash = await getHash(location);
       
       if (roomHash === oldRoomHash) {
@@ -296,7 +391,7 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
         new PutObjectCommand({
           Bucket: S3_BUCKET,
           Key: `room-${location}.json`,
-          Body: JSON.stringify(blob, null, 2),
+          Body: JSON.stringify(roomData, null, 2),
           ContentType: 'application/json',
         })
       );
@@ -307,7 +402,7 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
       metrics.addMetric('HashUpdates', MetricUnit.Count, 1);
 
       // Publish GraphQL update
-      await publishUpdate(location, sessions.map(s => s as SessionInput));
+      await publishUpdate(location, sessions);
       metrics.addMetric('Broadcasts', MetricUnit.Count, 1);
       
       roomsUpdated++;
@@ -317,7 +412,8 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
     logger.info('Agenda fetch process completed successfully', {
       totalRooms: allRooms.length,
       roomsUpdated,
-      roomsSkipped
+      roomsSkipped,
+      totalSessions: agendaData.sessions.length
     });
 
     metrics.addMetric('ProcessingSuccess', MetricUnit.Count, 1);
@@ -328,7 +424,8 @@ const baseHandler = async (_evt: any, _ctx: Context) => {
       status: 'ok',
       roomsProcessed: allRooms.length,
       roomsUpdated,
-      roomsSkipped
+      roomsSkipped,
+      totalSessions: agendaData.sessions.length
     };
 
   } catch (error) {

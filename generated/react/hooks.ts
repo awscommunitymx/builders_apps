@@ -59,6 +59,12 @@ export type Query = {
   __typename?: 'Query';
   getAgenda?: Maybe<AgendaData>;
   getMyProfile?: Maybe<User>;
+  getRoomAgenda?: Maybe<RoomAgendaData>;
+};
+
+
+export type QueryGetRoomAgendaArgs = {
+  location: Scalars['String']['input'];
 };
 
 export type RoomAgendaData = {

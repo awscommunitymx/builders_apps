@@ -20,6 +20,7 @@ type ProfileAccess {
 type Query {
   getMyProfile: User
   getAgenda: AgendaData
+  getRoomAgenda(location: String!): RoomAgendaData
 }
 
 input UpdateUserInput {
@@ -36,12 +37,14 @@ input AgendaDataInput {
 
 type AgendaData 
 @aws_api_key
+@aws_cognito_user_pools
 {
   sessions: [Session!]!
 }
 
 type RoomAgendaData 
 @aws_api_key
+@aws_cognito_user_pools
 {
   location: String!
   sessions: [Session!]!
@@ -70,6 +73,7 @@ input SessionInput {
 
 type Session 
 @aws_api_key
+@aws_cognito_user_pools
 {
   id: ID!
   name: String
@@ -101,7 +105,10 @@ input SpeakerInput {
   socialMedia: SocialMediaInput
 }
 
-type Speaker {
+type Speaker 
+@aws_api_key
+@aws_cognito_user_pools
+{
   id: ID
   name: String!
   avatarUrl: String
@@ -111,7 +118,10 @@ type Speaker {
   socialMedia: SocialMedia
 }
 
-type SocialMedia {
+type SocialMedia 
+@aws_api_key
+@aws_cognito_user_pools
+{
   twitter: String
   linkedin: String
   company: String

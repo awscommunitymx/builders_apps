@@ -13,23 +13,16 @@ interface AgendaFetcherProps {
   environmentName: string;
   table: dynamodb.Table;
   graphqlApi: appsync.GraphqlApi;
+  sessionsBucket: s3.Bucket;
 }
 
 export class AgendaFetcherStack extends Construct {
-  public readonly sessionsBucket: s3.Bucket;
   public readonly agendaFetcher: NodejsFunction;
   
   constructor(scope: Construct, id: string, props: AgendaFetcherProps) {
     super(scope, id);
     
     // 1) Create an S3 bucket for agenda JSON
-    this.sessionsBucket = new s3.Bucket(this, 'AgendaBucket', {
-      bucketName: `${props.environmentName.toLowerCase()}-agenda-json`,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,        // for dev/test
-      autoDeleteObjects: true,                        // for dev/test
-      encryption: s3.BucketEncryption.S3_MANAGED,
-    });
-    
     // 2) Create the AgendaFetcher
     this.agendaFetcher = new NodejsFunction(this, 'AgendaFetcher', {
       functionName: truncateLambdaName('AgendaFetcher', props.environmentName),
@@ -39,7 +32,7 @@ export class AgendaFetcherStack extends Construct {
       environment: {
         DYNAMODB_TABLE_NAME: props.table.tableName,
         ENVIRONMENT: props.environmentName,
-        S3_BUCKET: this.sessionsBucket.bucketName,
+        S3_BUCKET: props.sessionsBucket.bucketName,
         SESSIONIZE_API_URL: 'https://sessionize.com/api/v2/bdomhdlg/view/All',
         APPSYNC_ENDPOINT: props.graphqlApi.graphqlUrl,
         APPSYNC_API_KEY: props.graphqlApi.apiKey!,
@@ -92,7 +85,7 @@ export class AgendaFetcherStack extends Construct {
     props.table.grantReadWriteData(this.agendaFetcher);
     
     // Grant the Lambda function access to S3
-    this.sessionsBucket.grantReadWrite(this.agendaFetcher);
+    props.sessionsBucket.grantReadWrite(this.agendaFetcher);
     
     // **Grant AppSync permissions to the Lambda function**
     this.agendaFetcher.addToRolePolicy(

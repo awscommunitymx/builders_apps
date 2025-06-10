@@ -9,6 +9,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
 import * as rum from 'aws-cdk-lib/aws-rum';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as s3 from 'aws-cdk-lib/aws-s3'
 import { UserStepFunctionStack } from './stacks/user-step-function';
 
 export interface AppStackProps extends cdk.StackProps {
@@ -52,9 +53,17 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
     });
 
+    const sessionsBucket = new s3.Bucket(this, 'AgendaBucket', {
+      bucketName: `${props.environmentName.toLowerCase()}-agenda-json`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,        // for dev/test
+      autoDeleteObjects: true,                        // for dev/test
+      encryption: s3.BucketEncryption.S3_MANAGED,
+    });
+
     const lambdaStack = new LambdaStack(this, 'LambdaStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
+      sessionsBucket
     });
 
     // Create Cognito Stack for authentication
@@ -81,6 +90,7 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
       table: databaseStack.table,
       graphqlApi: apiStack.api,
+      sessionsBucket
     });
 
     // Add permissions for authenticated users to access API operations

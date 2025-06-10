@@ -7,10 +7,12 @@ import * as lambdaUrl from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { truncateLambdaName } from '../../utils/lambda';
+import * as s3 from 'aws-cdk-lib/aws-s3'
 
 interface LambdaStackProps {
   environmentName: string;
   table: dynamodb.Table;
+  sessionsBucket: s3.Bucket;
 }
 
 export class LambdaStack extends Construct {
@@ -28,6 +30,7 @@ export class LambdaStack extends Construct {
       entry: path.join(__dirname, '../../lambda/graphql-resolver/index.ts'),
       environment: {
         TABLE_NAME: props.table.tableName,
+        S3_BUCKET: props.sessionsBucket.bucketName,
         ENVIRONMENT: props.environmentName,
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         POWERTOOLS_SERVICE_NAME: 'graphql-resolver',
@@ -59,8 +62,9 @@ export class LambdaStack extends Construct {
       })
     );
 
-    // Grant the Lambda function access to DynamoDB
+    // Grant the Lambda function access to DynamoDB and S3
     props.table.grantReadWriteData(this.graphQLResolver);
+    props.sessionsBucket.grantRead(this.graphQLResolver);
 
     // Create the Lambda function for eventbriteWebhookHandler
     this.eventbriteWebhookHandler = new NodejsFunction(this, 'EventbriteWebhookHandler', {

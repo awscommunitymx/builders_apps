@@ -97,6 +97,16 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'viewProfile',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetAgenda', {
+      typeName: 'Query',
+      fieldName: 'getAgenda',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetRoomAgenda', {
+      typeName: 'Query',
+      fieldName: 'getRoomAgenda',
+    });
     
     lambdaDataSource.createResolver('GraphQLResolverUpdateUser', {
       typeName: 'Mutation',
