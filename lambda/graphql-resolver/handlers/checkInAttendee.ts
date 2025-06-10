@@ -185,15 +185,12 @@ export const handler = async (event: CheckInEvent): Promise<CheckInResponse> => 
     if (!bypass_phone && !user.cell_phone) {
       missingFields.push('phone');
     }
-    if (!user.company) {
-      missingFields.push('company');
-    }
-    if (!user.job_title) {
-      missingFields.push('job_title');
-    }
+
+    const phoneUpdate = phone || (missingFields.includes('phone') && bypass_phone);
+    const emailUpdate = email || (missingFields.includes('email') && bypass_email);
 
     // If we have updates and no missing fields (or bypasses), update the user
-    if ((email || phone) && (missingFields.length === 0 || (bypass_email && bypass_phone))) {
+    if (phoneUpdate || emailUpdate) {
       const updateExpressions: string[] = [];
       const expressionAttributeValues: Record<string, any> = {};
 
