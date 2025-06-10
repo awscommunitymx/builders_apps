@@ -68,6 +68,7 @@ export default function SessionLists() {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Extraer valores únicos para los filtros
   const uniqueLevels = Array.from(new Set(items.map((item) => item.level)));
@@ -90,22 +91,18 @@ export default function SessionLists() {
     level: string
   ): 'severity-medium' | 'severity-low' | 'grey' | 'severity-high' => {
     switch (level) {
-      case 'Básico':
-        return 'severity-low'; // Usar 'severity-high' para el nivel básico
-      case 'Intermedio':
-        return 'severity-medium'; // Usar 'severity-medium' para el nivel intermedio
-      case 'Avanzado':
-        return 'severity-high';
+      case 'L100':
+        return 'severity-low'; // Nivel principiante
+      case 'L200':
+        return 'severity-medium'; // Nivel intermedio
+      case 'L300':
+        return 'severity-high'; // Nivel avanzado
+      case 'L400':
+        return 'severity-high'; // Nivel experto
       default:
         return 'grey';
     }
   };
-
-  const handleSessionSelect = (sessionId: string) => {
-    setSelectedSessionId(sessionId);
-    navigate(`/${sessionId}`);
-  };
-
   // Cargar favoritos al iniciar el componente
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -240,97 +237,114 @@ export default function SessionLists() {
 
   return (
     <SpaceBetween size="l">
-      {/* Sección de filtros */}
-      <Container header={<Header variant="h2">Filtros</Header>}>
-        <SpaceBetween size="m">
-          {/* Filtro de Nivel */}
-          <div>
-            <Header variant="h3">Nivel</Header>
-            <Multiselect
-              selectedOptions={selectedLevels.map((level) => ({ label: level, value: level }))}
-              onChange={({ detail }) =>
-                setSelectedLevels(detail.selectedOptions.map((option) => option.value as string))
-              }
-              options={levelOptions}
-              placeholder="Seleccionar niveles"
-              filteringType="auto"
-            />
-          </div>
+      {/* Botón para mostrar/ocultar filtros */}
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          onClick={() => setShowFilters(!showFilters)}
+          iconName={showFilters ? 'angle-up' : 'angle-down'}
+          variant="primary"
+        >
+          {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+        </Button>
+      </div>
 
-          {/* Filtro de Ubicación */}
-          <div>
-            <Header variant="h3">Sala</Header>
-            <Multiselect
-              selectedOptions={selectedLocations.map((location) => ({
-                label: location,
-                value: location,
-              }))}
-              onChange={({ detail }) =>
-                setSelectedLocations(detail.selectedOptions.map((option) => option.value as string))
-              }
-              options={locationOptions}
-              placeholder="Seleccionar ubicaciones"
-              filteringType="auto"
-            />
-          </div>
+      {/* Sección de filtros - mostrar solo si showFilters es true */}
+      {showFilters && (
+        <Container header={<Header variant="h2">Filtros</Header>}>
+          <SpaceBetween size="m">
+            {/* Filtro de Nivel */}
+            <div>
+              <Header variant="h3">Nivel</Header>
+              <Multiselect
+                selectedOptions={selectedLevels.map((level) => ({ label: level, value: level }))}
+                onChange={({ detail }) =>
+                  setSelectedLevels(detail.selectedOptions.map((option) => option.value as string))
+                }
+                options={levelOptions}
+                placeholder="Seleccionar niveles"
+                filteringType="auto"
+              />
+            </div>
 
-          {/* Filtro de Categoría */}
-          <div>
-            <Header variant="h3">Categoría</Header>
-            <Multiselect
-              selectedOptions={selectedCategories.map((category) => ({
-                label: category,
-                value: category,
-              }))}
-              onChange={({ detail }) =>
-                setSelectedCategories(
-                  detail.selectedOptions.map((option) => option.value as string)
-                )
-              }
-              options={categoryOptions}
-              placeholder="Seleccionar categorías"
-              filteringType="auto"
-            />
-          </div>
+            {/* Filtro de Ubicación */}
+            <div>
+              <Header variant="h3">Sala</Header>
+              <Multiselect
+                selectedOptions={selectedLocations.map((location) => ({
+                  label: location,
+                  value: location,
+                }))}
+                onChange={({ detail }) =>
+                  setSelectedLocations(
+                    detail.selectedOptions.map((option) => option.value as string)
+                  )
+                }
+                options={locationOptions}
+                placeholder="Seleccionar ubicaciones"
+                filteringType="auto"
+              />
+            </div>
 
-          {/* Filtro de Idioma */}
-          <div>
-            <Header variant="h3">Idioma</Header>
-            <Multiselect
-              selectedOptions={selectedLanguages.map((language) => ({
-                label: language,
-                value: language,
-              }))}
-              onChange={({ detail }) =>
-                setSelectedLanguages(detail.selectedOptions.map((option) => option.value as string))
-              }
-              options={uniqueLanguages.map((language) => ({ label: language, value: language }))}
-              placeholder="Seleccionar idiomas"
-              filteringType="auto"
-            />
-          </div>
+            {/* Filtro de Categoría */}
+            <div>
+              <Header variant="h3">Categoría</Header>
+              <Multiselect
+                selectedOptions={selectedCategories.map((category) => ({
+                  label: category,
+                  value: category,
+                }))}
+                onChange={({ detail }) =>
+                  setSelectedCategories(
+                    detail.selectedOptions.map((option) => option.value as string)
+                  )
+                }
+                options={categoryOptions}
+                placeholder="Seleccionar categorías"
+                filteringType="auto"
+              />
+            </div>
 
-          {/* Información de filtros activos y botón de reset */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <StatusIndicator type="success">
-              {filteredItems.length} sesiones encontradas
-              {selectedLevels.length > 0 ||
+            {/* Filtro de Idioma */}
+            <div>
+              <Header variant="h3">Idioma</Header>
+              <Multiselect
+                selectedOptions={selectedLanguages.map((language) => ({
+                  label: language,
+                  value: language,
+                }))}
+                onChange={({ detail }) =>
+                  setSelectedLanguages(
+                    detail.selectedOptions.map((option) => option.value as string)
+                  )
+                }
+                options={uniqueLanguages.map((language) => ({ label: language, value: language }))}
+                placeholder="Seleccionar idiomas"
+                filteringType="auto"
+              />
+            </div>
+
+            {/* Información de filtros activos y botón de reset */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <StatusIndicator type="success">
+                {filteredItems.length} sesiones encontradas
+                {selectedLevels.length > 0 ||
+                  selectedLocations.length > 0 ||
+                  selectedCategories.length > 0 ||
+                  selectedLanguages.length > 0}
+              </StatusIndicator>
+
+              {(selectedLevels.length > 0 ||
                 selectedLocations.length > 0 ||
                 selectedCategories.length > 0 ||
-                selectedLanguages.length > 0}
-            </StatusIndicator>
-
-            {(selectedLevels.length > 0 ||
-              selectedLocations.length > 0 ||
-              selectedCategories.length > 0 ||
-              selectedLanguages.length > 0) && (
-              <Button onClick={resetFilters} iconName="refresh" variant="normal">
-                Limpiar filtros
-              </Button>
-            )}
-          </div>
-        </SpaceBetween>
-      </Container>
+                selectedLanguages.length > 0) && (
+                <Button onClick={resetFilters} iconName="refresh" variant="normal">
+                  Limpiar filtros
+                </Button>
+              )}
+            </div>
+          </SpaceBetween>
+        </Container>
+      )}
 
       {/* Sección de tarjetas */}
       <Cards
@@ -343,9 +357,7 @@ export default function SessionLists() {
         cardDefinition={{
           header: (item) => (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Link href="#" onFollow={() => handleSessionSelect(item.id)}>
-                {item.name}
-              </Link>
+              <Link href={`/${item.id}`}>{item.name}</Link>
               <Button
                 variant="icon"
                 iconName={favorites.includes(parseInt(item.id, 10)) ? 'heart-filled' : 'heart'}
