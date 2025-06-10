@@ -2,18 +2,15 @@ import { useState, useEffect } from 'react';
 import {
   Container,
   Cards,
-  Link,
-  Button,
-  Badge,
   StatusIndicator,
   Multiselect,
   SpaceBetween,
   Header,
+  Button
 } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router';
-import Avatar from '@cloudscape-design/chat-components/avatar';
 import sessionsData from '../data/sessions-transformed.json';
-import CountryFlag from './CountryFlag';
+import { getSessionCardDefinition } from './SessionCard';
 
 // Definición de la interfaz para los presentadores
 interface SpeakerType {
@@ -85,24 +82,6 @@ export default function SessionLists() {
   }));
 
   const navigate = useNavigate();
-
-  // Función para determinar el color según el nivel
-  const getLevelColor = (
-    level: string
-  ): 'severity-medium' | 'severity-low' | 'grey' | 'severity-high' => {
-    switch (level) {
-      case 'L100':
-        return 'severity-low'; // Nivel principiante
-      case 'L200':
-        return 'severity-medium'; // Nivel intermedio
-      case 'L300':
-        return 'severity-high'; // Nivel avanzado
-      case 'L400':
-        return 'severity-high'; // Nivel experto
-      default:
-        return 'grey';
-    }
-  };
   // Cargar favoritos al iniciar el componente
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -205,22 +184,6 @@ export default function SessionLists() {
         return [...prev, sessionId];
       }
     });
-  };
-
-  // Función para truncar texto
-  const truncateText = (text: string, maxLength: number = 100) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-
-  // Función para convertir saltos de línea a elementos <br>
-  const formatTextWithBreaks = (text: string) => {
-    return text.split(/\r\n|\r|\n/).map((line, index, array) => (
-      <span key={index}>
-        {line}
-        {index < array.length - 1 && <br />}
-      </span>
-    ));
   };
 
   // Función para resetear todos los filtros
@@ -364,116 +327,12 @@ export default function SessionLists() {
         ]}
         variant="container"
         items={filteredItems}
-        cardDefinition={{
-          header: (item) => (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Link href={`/${item.id}`}>{item.name}</Link>
-              <Button
-                variant="icon"
-                iconName={favorites.includes(parseInt(item.id, 10)) ? 'heart-filled' : 'heart'}
-                onClick={(e) => toggleFavorite(item.id, e)}
-                ariaLabel={
-                  favorites.includes(parseInt(item.id, 10))
-                    ? 'Quitar de favoritos'
-                    : 'Agregar a favoritos'
-                }
-              />
-            </div>
-          ),
-          sections: [
-            {
-              id: 'description',
-              header: 'Descripción',
-              content: (item) => (
-                <div>
-                  {expandedDescriptions.includes(item.id)
-                    ? formatTextWithBreaks(item.description)
-                    : formatTextWithBreaks(truncateText(item.description))}
-                  {item.description.length > 100 && (
-                    <div style={{ marginTop: '0px' }}>
-                      <Button
-                        variant="inline-link"
-                        onClick={(e) => toggleDescription(item.id, e)}
-                        ariaLabel={
-                          expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'
-                        }
-                      >
-                        {expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ),
-            },
-            {
-              id: 'details',
-              content: (item) => (
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontWeight: 'bold', fontSize: '13px' }}>Horario</div>
-                    <div>{item.time}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 'bold', fontSize: '13px' }}>Escenario</div>
-                    <div>{item.location}</div>
-                  </div>
-                </div>
-              ),
-            },
-            {
-              id: 'speaker',
-              header: 'Presentadores',
-              content: (item) => (
-                <div style={{ marginTop: '4px', marginBottom: '4px' }}>
-                  {item.speakers.map((speaker, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginBottom: index < item.speakers.length - 1 ? '10px' : '0',
-                        padding: '6px',
-                        borderRadius: '4px',
-                        backgroundColor: index % 2 === 0 ? '#f9f9f9' : 'transparent',
-                      }}
-                    >
-                      <Avatar ariaLabel={speaker.name} imgUrl={speaker.avatarUrl} width={36} />
-                      <div style={{ marginLeft: '12px', flex: 1 }}>
-                        <div
-                          style={{
-                            fontWeight: '600',
-                            fontSize: '14px',
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
-                        >
-                          {speaker.name}
-                          <CountryFlag nationality={speaker.nationality} />
-                        </div>
-                        {speaker.company && (
-                          <div style={{ fontSize: '12px', color: '#555' }}>{speaker.company}</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ),
-            },
-            {
-              id: 'level',
-              content: (item) => <Badge color={getLevelColor(item.level)}>{item.level}</Badge>,
-            },
-            {
-              id: 'category-language',
-              content: (item) => (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <Badge color={'severity-neutral'}>{item.catergory}</Badge>
-                  <Badge color={'blue'}>{item.language}</Badge>
-                </div>
-              ),
-            },
-          ],
-        }}
+        cardDefinition={getSessionCardDefinition({
+          favorites,
+          expandedDescriptions,
+          onToggleFavorite: toggleFavorite,
+          onToggleDescription: toggleDescription,
+        })}
       />
     </SpaceBetween>
   );
