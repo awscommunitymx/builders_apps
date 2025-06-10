@@ -101,14 +101,6 @@ const EXCLUDED_ROOM_KEYWORDS = ['virtual stage'];
 const EXCLUDED_TITLE_KEYWORDS = ['CAPITAL ONE'];
 const EXCLUDED_SESSION_IDS = ['935400'];
 
-// Level translation map
-const LEVEL_TRANSLATIONS: Record<string, string> = {
-  'L100 (Beginner)': 'Principiante',
-  'L200 (Intermediate)': 'Intermedio',
-  'L300 (Advanced)': 'Avanzado',
-  'L400 (Expert)': 'Experto',
-};
-
 // Room capacity estimates
 const ROOM_CAPACITY_MAP: Record<string, number> = {
   corona: 200,
@@ -190,8 +182,23 @@ function transformSpeaker(
         case 'Twitter':
           socialMedia.twitter = link.url;
           break;
+        case 'GitHub':
+          socialMedia.github = link.url;
+          break;
+        case 'Facebook':
+          socialMedia.facebook = link.url;
+          break;
+        case 'Instagram':
+          socialMedia.instagram = link.url;
+          break;
+        case 'Blog':
+          socialMedia.blog = link.url;
+          break;
         case 'Company_Website':
           socialMedia.company = link.url;
+          break;
+        case 'Other':
+          socialMedia.other = link.url;
           break;
       }
     });
@@ -234,15 +241,16 @@ function extractCategoryInfo(
   language: string;
   category: string;
 } {
-  let level = 'Intermedio'; // Default
+  let level = 'L200'; // Default changed to match JS version
   let language = 'Spanish'; // Default
   let category = 'Breakout Session'; // Default
 
   categoryItems.forEach(categoryId => {
     // Check for level
     if (categoryMap.level[categoryId]) {
-      const levelName = categoryMap.level[categoryId];
-      level = LEVEL_TRANSLATIONS[levelName] || levelName;
+      const fullLevel = categoryMap.level[categoryId];
+      // Extract only the level code (L100, L200, etc.) - matching the JS change
+      level = fullLevel.split(' ')[0];
     }
 
     // Check for format (category)
