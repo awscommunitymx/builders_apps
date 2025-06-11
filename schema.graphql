@@ -72,6 +72,13 @@ enum CheckInStatus {
   INCOMPLETE_PROFILE
 }
 
+type Subscription {
+  onAgendaUpdate: AgendaData
+    @aws_subscribe(mutations: ["updateAgenda"])
+  onRoomAgendaUpdate(location: String!): RoomAgendaData 
+    @aws_subscribe(mutations: ["updateRoomAgenda"])
+}
+
 type Mutation {
   viewProfile(id: String!, pin: String!): User
   @aws_auth(cognito_groups: ["Attendees"])
@@ -88,11 +95,16 @@ type Mutation {
     phone: String
   ): CheckInResponse!
   @aws_auth(cognito_groups: ["CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
+  updateAgenda(sessions: AgendaDataInput!): AgendaData 
+    @aws_api_key
+  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
+    @aws_api_key
 }
 
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
 
 type AgendaData {
@@ -143,4 +155,53 @@ enum SessionStatus {
   DRAFT
   PUBLISHED
   CANCELLED
+}
+
+type RoomAgendaData {
+  location: String!
+  sessions: [Session!]!
+}
+
+input AgendaDataInput {
+  sessions: [SessionInput!]!
+}
+
+input SessionInput {
+  id: ID!
+  title: String!
+  description: String!
+  startsAt: String!
+  endsAt: String!
+  isServiceSession: Boolean!
+  isPlenumSession: Boolean!
+  speakers: [SpeakerInput!]!
+  categories: [CategoryInput!]!
+  room: RoomInput!
+  liveUrl: String
+  recordingUrl: String
+  status: SessionStatus!
+  isInformed: Boolean!
+  isConfirmed: Boolean!
+}
+
+input SpeakerInput {
+  id: ID!
+  name: String!
+}
+
+input CategoryInput {
+  id: ID!
+  name: String!
+  categoryItems: [CategoryItemInput!]!
+  sort: Int!
+}
+
+input CategoryItemInput {
+  id: ID!
+  name: String!
+}
+
+input RoomInput {
+  id: ID!
+  name: String!
 }
