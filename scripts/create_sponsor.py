@@ -4,7 +4,7 @@ import boto3
 import uuid
 import argparse
 from datetime import datetime, UTC
-from typing import Optional
+from typing import Optional, Tuple
 
 def create_sponsor(
     dynamodb_client,
@@ -35,49 +35,86 @@ def create_sponsor(
     
     return sponsor_id, short_id
 
-def associate_user_with_sponsor(
+def get_user_by_short_id(
     dynamodb_client,
     table_name: str,
+    short_id: str
+) -> Tuple[str, str]:
+    """
+    Look up a user by their short_id in DynamoDB.
+    Returns a tuple of (user_id, cognito_sub).
+    """
+    query_params = {
+        'TableName': table_name,
+        'IndexName': 'short_id-index',
+        'KeyConditionExpression': 'short_id = :short_id',
+        'ExpressionAttributeValues': {
+            ':short_id': {'S': short_id}
+        },
+        'Limit': 1
+    }
+    
+    response = dynamodb_client.query(**query_params)
+    
+    if not response.get('Items'):
+        raise ValueError(f"No user found with short_id: {short_id}")
+    
+    user_item = response['Items'][0]
+    user_id = user_item['PK']['S'].split('#')[1]
+    cognito_sub = user_item.get('cognito_sub', {}).get('S')
+    
+    if not cognito_sub:
+        raise ValueError(f"User {user_id} has no cognito_sub attribute")
+    
+    return user_id, cognito_sub
+
+def associate_user_with_sponsor(
+    dynamodb_client,
+    cognito_client,
+    table_name: str,
+    user_pool_id: str,
     sponsor_id: str,
-    user_id: str,
+    short_id: str,
     message: Optional[str] = None
 ):
     """
-    Associate a user with a sponsor by creating the necessary DynamoDB items.
+    Associate a user with a sponsor by creating the necessary DynamoDB items
+    and adding them to the Sponsors group in Cognito.
     """
-    # Create the sponsor->user relationship
-    sponsor_user_item = {
-        'PK': f'SPONSOR#{sponsor_id}',
-        'SK': f'USER#{user_id}',
-        'type': 'SPONSOR_USER',
-        'lastVisit': datetime.now(UTC).isoformat(),
-        'createdAt': datetime.now(UTC).isoformat(),
-        'updatedAt': datetime.now(UTC).isoformat()
+    # First, look up the user by short_id
+    user_id, cognito_sub = get_user_by_short_id(dynamodb_client, table_name, short_id)
+    print(f"Found user with ID: {user_id} and cognito_sub: {cognito_sub}")
+
+    # Add user to Sponsors group in Cognito
+    try:
+        cognito_client.admin_add_user_to_group(
+            UserPoolId=user_pool_id,
+            Username=cognito_sub,
+            GroupName='Sponsors'
+        )
+        print(f"Added user {cognito_sub} to Sponsors group")
+    except cognito_client.exceptions.UserNotFoundException:
+        print(f"Warning: User {cognito_sub} not found in Cognito")
+    except cognito_client.exceptions.GroupNotFoundException:
+        print(f"Warning: Sponsors group not found in Cognito user pool")
+    except Exception as e:
+        print(f"Warning: Failed to add user to Sponsors group: {str(e)}")
+
+    # Create the user->sponsor relationship
+    user_sponsor_item = {
+        'PK': {'S': f'USER#{user_id}'},
+        'SK': {'S': f'SPONSOR#{sponsor_id}'},
+        'type': {'S': 'USER_SPONSOR'},
+        'createdAt': {'S': datetime.now(UTC).isoformat()},
+        'updatedAt': {'S': datetime.now(UTC).isoformat()}
     }
     
     if message:
-        sponsor_user_item['message'] = message
+        user_sponsor_item['message'] = {'S': message}
     
     dynamodb_client.put_item(
         TableName=table_name,
-        Item={k: {'S': v} if isinstance(v, str) else v for k, v in sponsor_user_item.items()}
-    )
-    
-    # Update the user's sponsorIds list
-    dynamodb_client.update_item(
-        TableName=table_name,
-        Key={
-            'PK': {'S': f'USER#{user_id}'},
-            'SK': {'S': f'USER#{user_id}'}
-        },
-        UpdateExpression='SET #sponsorIds = list_append(if_not_exists(#sponsorIds, :empty_list), :sponsorId)',
-        ExpressionAttributeNames={
-            '#sponsorIds': 'sponsorIds'
-        },
-        ExpressionAttributeValues={
-            ':empty_list': {'L': []},
-            ':sponsorId': {'L': [{'S': sponsor_id}]}
-        }
+        Item=user_sponsor_item
     )
 
 if __name__ == '__main__':
@@ -92,8 +129,9 @@ if __name__ == '__main__':
     # Associate user command
     associate_parser = subparsers.add_parser('associate', help='Associate a user with a sponsor')
     associate_parser.add_argument('--table-name', required=True, help='DynamoDB table name')
+    associate_parser.add_argument('--user-pool-id', required=True, help='Cognito User Pool ID')
     associate_parser.add_argument('--sponsor-id', required=True, help='Sponsor ID to associate with')
-    associate_parser.add_argument('--user-id', required=True, help='User ID to associate with the sponsor')
+    associate_parser.add_argument('--short-id', required=True, help='User short_id to look up')
     associate_parser.add_argument('--message', help='Optional message for the association')
     
     args = parser.parse_args()
@@ -109,13 +147,16 @@ if __name__ == '__main__':
         print(f"Short ID: {short_id}")
     elif args.command == 'associate':
         dynamodb = boto3.client('dynamodb')
+        cognito = boto3.client('cognito-idp')
         associate_user_with_sponsor(
             dynamodb,
+            cognito,
             args.table_name,
+            args.user_pool_id,
             args.sponsor_id,
-            args.user_id,
+            args.short_id,
             args.message
         )
-        print(f"Associated user {args.user_id} with sponsor {args.sponsor_id}")
+        print(f"Associated user with sponsor {args.sponsor_id}")
     else:
         parser.print_help() 
