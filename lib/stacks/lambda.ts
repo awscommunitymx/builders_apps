@@ -77,6 +77,7 @@ export class LambdaStack extends Construct {
           '@aws-lambda-powertools/logger',
           '@aws-lambda-powertools/metrics',
           'aws-xray-sdk',
+          '@aws-sdk/client-s3',
         ],
       },
     });
