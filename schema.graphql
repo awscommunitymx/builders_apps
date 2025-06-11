@@ -11,6 +11,7 @@ type User {
   initialized: Boolean
   short_id: String
   ticket_class_id: String
+  sponsor_visits: [String!]
 }
 
 type SponsorUser {

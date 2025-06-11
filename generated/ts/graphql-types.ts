@@ -183,6 +183,7 @@ export type User = {
   share_email?: Maybe<Scalars['Boolean']['output']>;
   share_phone?: Maybe<Scalars['Boolean']['output']>;
   short_id?: Maybe<Scalars['String']['output']>;
+  sponsor_visits?: Maybe<Array<Scalars['String']['output']>>;
   ticket_class_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };
@@ -413,6 +414,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   share_email?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   share_phone?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   short_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sponsor_visits?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   ticket_class_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

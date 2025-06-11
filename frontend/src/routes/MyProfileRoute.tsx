@@ -17,6 +17,7 @@ const GET_USER = gql`
       share_phone
       pin
       initialized
+      sponsor_visits
     }
   }
 `;

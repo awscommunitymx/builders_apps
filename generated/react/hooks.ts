@@ -182,6 +182,7 @@ export type User = {
   share_email?: Maybe<Scalars['Boolean']['output']>;
   share_phone?: Maybe<Scalars['Boolean']['output']>;
   short_id?: Maybe<Scalars['String']['output']>;
+  sponsor_visits?: Maybe<Array<Scalars['String']['output']>>;
   ticket_class_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };
