@@ -24,6 +24,36 @@ export type AgendaDataInput = {
   sessions: Array<SessionInput>;
 };
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  updateAgenda?: Maybe<AgendaData>;
+  updateRoomAgenda?: Maybe<RoomAgendaData>;
+  updateUser?: Maybe<User>;
+  viewProfile?: Maybe<User>;
+};
+
+
+export type MutationUpdateAgendaArgs = {
+  sessions: AgendaDataInput;
+};
+
+
+export type MutationUpdateRoomAgendaArgs = {
+  location: Scalars['String']['input'];
+  sessions: AgendaDataInput;
+};
+
+
+export type MutationUpdateUserArgs = {
+  input: UpdateUserInput;
+};
+
+
+export type MutationViewProfileArgs = {
+  id: Scalars['String']['input'];
+  pin: Scalars['String']['input'];
+};
+
 export type ProfileAccess = {
   __typename?: 'ProfileAccess';
   PK: Scalars['String']['output'];
@@ -158,6 +188,17 @@ export type SponsorUser = {
   name: Scalars['String']['output'];
   short_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  onAgendaUpdate?: Maybe<AgendaData>;
+  onRoomAgendaUpdate?: Maybe<RoomAgendaData>;
+};
+
+
+export type SubscriptionOnRoomAgendaUpdateArgs = {
+  location: Scalars['String']['input'];
 };
 
 export type UpdateUserInput = {

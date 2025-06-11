@@ -25,6 +25,36 @@ export type AgendaDataInput = {
   sessions: Array<SessionInput>;
 };
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  updateAgenda?: Maybe<AgendaData>;
+  updateRoomAgenda?: Maybe<RoomAgendaData>;
+  updateUser?: Maybe<User>;
+  viewProfile?: Maybe<User>;
+};
+
+
+export type MutationUpdateAgendaArgs = {
+  sessions: AgendaDataInput;
+};
+
+
+export type MutationUpdateRoomAgendaArgs = {
+  location: Scalars['String']['input'];
+  sessions: AgendaDataInput;
+};
+
+
+export type MutationUpdateUserArgs = {
+  input: UpdateUserInput;
+};
+
+
+export type MutationViewProfileArgs = {
+  id: Scalars['String']['input'];
+  pin: Scalars['String']['input'];
+};
+
 export type ProfileAccess = {
   __typename?: 'ProfileAccess';
   PK: Scalars['String']['output'];
@@ -161,6 +191,17 @@ export type SponsorUser = {
   user_id: Scalars['ID']['output'];
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  onAgendaUpdate?: Maybe<AgendaData>;
+  onRoomAgendaUpdate?: Maybe<RoomAgendaData>;
+};
+
+
+export type SubscriptionOnRoomAgendaUpdateArgs = {
+  location: Scalars['String']['input'];
+};
+
 export type UpdateUserInput = {
   company?: InputMaybe<Scalars['String']['input']>;
   pin?: InputMaybe<Scalars['Int']['input']>;
@@ -260,6 +301,7 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  Mutation: ResolverTypeWrapper<{}>;
   ProfileAccess: ResolverTypeWrapper<ProfileAccess>;
   Query: ResolverTypeWrapper<{}>;
   RoomAgendaData: ResolverTypeWrapper<RoomAgendaData>;
@@ -272,6 +314,7 @@ export type ResolversTypes = {
   SponsorDashboard: ResolverTypeWrapper<SponsorDashboard>;
   SponsorUser: ResolverTypeWrapper<SponsorUser>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  Subscription: ResolverTypeWrapper<{}>;
   UpdateUserInput: UpdateUserInput;
   User: ResolverTypeWrapper<User>;
 };
@@ -283,6 +326,7 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
+  Mutation: {};
   ProfileAccess: ProfileAccess;
   Query: {};
   RoomAgendaData: RoomAgendaData;
@@ -295,6 +339,7 @@ export type ResolversParentTypes = {
   SponsorDashboard: SponsorDashboard;
   SponsorUser: SponsorUser;
   String: Scalars['String']['output'];
+  Subscription: {};
   UpdateUserInput: UpdateUserInput;
   User: User;
 };
@@ -302,6 +347,13 @@ export type ResolversParentTypes = {
 export type AgendaDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgendaData'] = ResolversParentTypes['AgendaData']> = {
   sessions?: Resolver<Array<ResolversTypes['Session']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  updateAgenda?: Resolver<Maybe<ResolversTypes['AgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateAgendaArgs, 'sessions'>>;
+  updateRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateRoomAgendaArgs, 'location' | 'sessions'>>;
+  updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
+  viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'id' | 'pin'>>;
 };
 
 export type ProfileAccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProfileAccess'] = ResolversParentTypes['ProfileAccess']> = {
@@ -387,6 +439,11 @@ export type SponsorUserResolvers<ContextType = any, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
+  onAgendaUpdate?: SubscriptionResolver<Maybe<ResolversTypes['AgendaData']>, "onAgendaUpdate", ParentType, ContextType>;
+  onRoomAgendaUpdate?: SubscriptionResolver<Maybe<ResolversTypes['RoomAgendaData']>, "onRoomAgendaUpdate", ParentType, ContextType, RequireFields<SubscriptionOnRoomAgendaUpdateArgs, 'location'>>;
+};
+
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   cell_phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -404,6 +461,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 
 export type Resolvers<ContextType = any> = {
   AgendaData?: AgendaDataResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   ProfileAccess?: ProfileAccessResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RoomAgendaData?: RoomAgendaDataResolvers<ContextType>;
@@ -412,6 +470,7 @@ export type Resolvers<ContextType = any> = {
   Speaker?: SpeakerResolvers<ContextType>;
   SponsorDashboard?: SponsorDashboardResolvers<ContextType>;
   SponsorUser?: SponsorUserResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
 
