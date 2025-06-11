@@ -155,3 +155,25 @@ input SocialMediaInput {
   linkedin: String
   company: String
 }
+
+type Subscription {
+  onAgendaUpdate: AgendaData
+    @aws_subscribe(mutations: ["updateAgenda"])
+  onRoomAgendaUpdate(location: String!): RoomAgendaData 
+    @aws_subscribe(mutations: ["updateRoomAgenda"])
+}
+
+type Mutation {
+  viewProfile(id: String!, pin: String!): User
+  updateUser(input: UpdateUserInput!): User
+  updateAgenda(sessions: AgendaDataInput!): AgendaData 
+    @aws_api_key
+  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
+    @aws_api_key
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
