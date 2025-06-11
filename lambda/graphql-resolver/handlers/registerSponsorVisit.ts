@@ -114,22 +114,45 @@ export default async function handleRegisterSponsorVisit(
 
   await docClient.send(new UpdateCommand(updateParams));
 
-  // Update the user record to append the sponsor ID to their list
-  const userUpdateParams: UpdateCommandInput = {
+  // Update the user's sponsorIds list only if the sponsor ID is not already in the list
+  const userUpdateParams = {
     TableName: tableName,
-    Key: { PK: `USER#${updated.user_id}`, SK: `USER#${updated.user_id}` },
-    UpdateExpression:
-      'SET #sponsorIds = list_append(if_not_exists(#sponsorIds, :empty_list), :sponsorId)',
+    Key: { PK: `USER#${updated.user_id}`, SK: 'PROFILE' },
+    UpdateExpression: `
+      SET #sponsorIds = list_append(
+        if_not_exists(#sponsorIds, :empty_list),
+        :newSponsorIds
+      )
+    `,
+    // allow the first insert (when the attribute doesn't even exist),
+    // or insert only if the scalar is not already present
+    ConditionExpression: `
+      attribute_not_exists(#sponsorIds)
+      OR NOT contains(#sponsorIds, :sponsorIdScalar)
+    `,
     ExpressionAttributeNames: {
       '#sponsorIds': 'sponsorIds',
     },
     ExpressionAttributeValues: {
       ':empty_list': [],
-      ':sponsorId': [sponsorId],
+      ':newSponsorIds': [sponsorId], // for list_append
+      ':sponsorIdScalar': sponsorId, // for contains()
     },
   };
 
-  await docClient.send(new UpdateCommand(userUpdateParams));
+  try {
+    await docClient.send(new UpdateCommand(userUpdateParams));
+  } catch (error: any) {
+    // If the condition fails (sponsor ID already exists), we can ignore the error
+    if (error.name === 'ConditionalCheckFailedException') {
+      logger.info("Sponsor ID already exists in user's sponsorIds list", {
+        userId: updated.user_id,
+        sponsorId,
+      });
+    } else {
+      throw error;
+    }
+  }
 
   updated.message = updates.message || '';
 
