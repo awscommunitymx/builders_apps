@@ -114,6 +114,23 @@ export default async function handleRegisterSponsorVisit(
 
   await docClient.send(new UpdateCommand(updateParams));
 
+  // Update the user record to append the sponsor ID to their list
+  const userUpdateParams: UpdateCommandInput = {
+    TableName: tableName,
+    Key: { PK: `USER#${updated.user_id}`, SK: `USER#${updated.user_id}` },
+    UpdateExpression:
+      'SET #sponsorIds = list_append(if_not_exists(#sponsorIds, :empty_list), :sponsorId)',
+    ExpressionAttributeNames: {
+      '#sponsorIds': 'sponsorIds',
+    },
+    ExpressionAttributeValues: {
+      ':empty_list': [],
+      ':sponsorId': [sponsorId],
+    },
+  };
+
+  await docClient.send(new UpdateCommand(userUpdateParams));
+
   updated.message = updates.message || '';
 
   return updated;
