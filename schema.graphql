@@ -38,7 +38,10 @@ type SponsorDashboard {
   total_visits: Int!
 }
 
-type Query {
+type Query 
+  @aws_cognito_user_pools
+  @aws_api_key
+{
   getMyProfile: User
   @aws_auth(cognito_groups: ["Attendees"])
   getAgenda: AgendaData
