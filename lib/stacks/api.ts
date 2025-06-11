@@ -85,11 +85,10 @@ export class ApiStack extends Construct {
     dynamoDataSource: appsync.DynamoDbDataSource,
     lambdaDataSource: appsync.LambdaDataSource
   ): void {
-    dynamoDataSource.createResolver('GetMyProfileResolver', {
+    // Create resolver for getMyProfile
+    lambdaDataSource.createResolver('GraphQLResolverGetMyProfile', {
       typeName: 'Query',
       fieldName: 'getMyProfile',
-      requestMappingTemplate: appsync.MappingTemplate.fromFile('./vtl/getMyProfile/request.vtl'),
-      responseMappingTemplate: appsync.MappingTemplate.fromFile('./vtl/getMyProfile/response.vtl'),
     });
 
     // Create resolver for viewProfile

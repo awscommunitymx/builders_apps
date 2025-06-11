@@ -18,6 +18,7 @@ import handleRegisterSponsorVisit from './handlers/registerSponsorVisit';
 import handleViewSponsorVisit from './handlers/viewSponsorVisit';
 import getSponsorDashboard from './handlers/getSponsorDashboard';
 import { handler as handleCheckInAttendee } from './handlers/checkInAttendee';
+import getMyProfile from './handlers/getMyProfile';
 import { AppSyncResolverEvent } from 'aws-lambda';
 
 const SERVICE_NAME = 'graphql-resolver';
@@ -41,6 +42,10 @@ export const handler = middy((async (event) => {
     metrics.addMetric(`${event.info.fieldName}Attempt`, MetricUnit.Count, 1);
 
     const identity = event.identity as AppSyncIdentityCognito;
+
+    if (event.info.fieldName === 'getMyProfile') {
+      return getMyProfile(identity);
+    }
 
     if (event.info.fieldName === 'viewProfile') {
       const { id, pin } = event.arguments as MutationViewProfileArgs;
