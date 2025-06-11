@@ -56,7 +56,11 @@ export class AuthApiStack extends Construct {
         stageName: 'prod',
       },
       defaultCorsPreflightOptions: {
-        allowOrigins: ['https://agenda.awscommunity.mx', `https://${props.frontendDomain}`],
+        allowOrigins: [
+          'https://agenda.awscommunity.mx',
+          `https://${props.frontendDomain}`,
+          'https://galaticquiz-mx.caylent.dev',
+        ],
         allowMethods: Cors.ALL_METHODS,
         allowCredentials: true,
         allowHeaders: [
