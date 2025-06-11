@@ -33,10 +33,10 @@ export class LambdaStack extends Construct {
   public readonly eventbriteWebhookHandler: NodejsFunction;
   public readonly twilioMessageSender: PythonFunction;
   public readonly shortIdAuthFunction: NodejsFunction;
-  // Add session management functions
   public readonly sessionPostFunction: NodejsFunction;
   public readonly sessionDeleteFunction: NodejsFunction;
   public readonly sessionListFunction: NodejsFunction;
+  public readonly getUserByShortIdFunction: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id);
@@ -440,6 +440,48 @@ export class LambdaStack extends Construct {
 
     // Grant the Lambda function access to DynamoDB
     props.table.grantReadData(this.sessionListFunction);
+
+    // Create the Lambda function for getUserByShortId
+    this.getUserByShortIdFunction = new NodejsFunction(this, 'GetUserByShortIdFunction', {
+      functionName: truncateLambdaName('GetUserByShortId', props.environmentName),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../lambda/get-user-by-short-id/index.ts'),
+      environment: {
+        TABLE_NAME: props.table.tableName,
+        ENVIRONMENT: props.environmentName,
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        POWERTOOLS_SERVICE_NAME: 'get-user-by-short-id',
+        POWERTOOLS_METRICS_NAMESPACE: 'Authentication',
+        LOG_LEVEL: this.getLogLevel(props.environmentName),
+        POWERTOOLS_TRACER_CAPTURE_RESPONSE: 'true',
+        POWERTOOLS_TRACER_CAPTURE_ERROR: 'true',
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+      },
+      timeout: cdk.Duration.seconds(30),
+      tracing: lambda.Tracing.ACTIVE,
+      bundling: {
+        externalModules: ['aws-sdk'],
+        nodeModules: [
+          '@aws-lambda-powertools/tracer',
+          '@aws-lambda-powertools/logger',
+          '@aws-lambda-powertools/metrics',
+          'aws-xray-sdk',
+        ],
+      },
+    });
+
+    // Grant additional permissions for CloudWatch Metrics
+    this.getUserByShortIdFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['cloudwatch:PutMetricData'],
+        resources: ['*'],
+      })
+    );
+
+    // Grant the Lambda function access to DynamoDB
+    props.table.grantReadData(this.getUserByShortIdFunction);
   }
 
   private getLogLevel(environmentName: string): string {

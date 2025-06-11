@@ -116,6 +116,7 @@ export class BackendStack extends cdk.Stack {
       sessionPostFunction: lambdaStack.sessionPostFunction,
       sessionDeleteFunction: lambdaStack.sessionDeleteFunction,
       sessionListFunction: lambdaStack.sessionListFunction,
+      getUserByShortIdFunction: lambdaStack.getUserByShortIdFunction,
       userTable: databaseStack.table,
       userPool: cognitoStack.userPool,
       certificate: domainCert,

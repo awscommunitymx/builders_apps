@@ -21,6 +21,7 @@ interface AuthApiStackProps extends StackProps {
   sessionPostFunction: LambdaFunction;
   sessionDeleteFunction: LambdaFunction;
   sessionListFunction: LambdaFunction;
+  getUserByShortIdFunction: LambdaFunction;
   userTable: Table;
   userPool: UserPool;
   certificate?: ICertificate;
@@ -41,6 +42,7 @@ export class AuthApiStack extends Construct {
       sessionPostFunction,
       sessionDeleteFunction,
       sessionListFunction,
+      getUserByShortIdFunction,
       certificate,
       hostedZone,
       domainName,
@@ -114,6 +116,21 @@ export class AuthApiStack extends Construct {
     // Add session GET endpoint (list favorite sessions)
     sessionResource.addMethod('GET', sessionListIntegration, {
       operationName: 'ListFavoriteSessions',
+    });
+
+    // Create user info endpoint
+    const userResource = this.api.root.addResource('user');
+    const shortIdUserResource = userResource.addResource('{shortId}');
+
+    // Create Lambda integration for getting user by short ID
+    const getUserByShortIdIntegration = new LambdaIntegration(getUserByShortIdFunction, {
+      requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
+      timeout: Duration.seconds(29),
+    });
+
+    // Add GET endpoint for user info by short ID
+    shortIdUserResource.addMethod('GET', getUserByShortIdIntegration, {
+      operationName: 'GetUserByShortId',
     });
 
     // Configure custom domain if provided
