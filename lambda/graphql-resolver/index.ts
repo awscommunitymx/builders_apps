@@ -12,12 +12,21 @@ import {
   MutationUpdateRoomAgendaArgs,
   QueryGetRoomAgendaArgs,
   QueryGetRoomAgendaHashArgs,
+  User,
+  MutationRegisterSponsorVisitArgs,
+  QueryGetSponsorVisitArgs,
+  MutationCheckInAttendeeArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
 import { handleGetRoomAgenda } from './handlers/getRoomAgenda';
 import { handleGetAgenda } from './handlers/getAgenda';
 import { getHash } from './handlers/getHash';
+import handleRegisterSponsorVisit from './handlers/registerSponsorVisit';
+import handleViewSponsorVisit from './handlers/viewSponsorVisit';
+import getSponsorDashboard from './handlers/getSponsorDashboard';
+import { handler as handleCheckInAttendee } from './handlers/checkInAttendee';
+import getMyProfile from './handlers/getMyProfile';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -40,7 +49,16 @@ if (!TABLE_NAME) {
   throw new Error('Missing DYNAMODB_TABLE_NAME');
 }
 
-type HandlerArgs = MutationViewProfileArgs | MutationUpdateUserArgs | MutationUpdateAgendaArgs | MutationUpdateRoomAgendaArgs | QueryGetRoomAgendaArgs;
+type HandlerArgs =
+  | MutationViewProfileArgs
+  | MutationUpdateUserArgs
+  | MutationUpdateAgendaArgs
+  | MutationUpdateRoomAgendaArgs
+  | QueryGetRoomAgendaArgs
+  | QueryGetRoomAgendaHashArgs
+  | MutationRegisterSponsorVisitArgs
+  | QueryGetSponsorVisitArgs
+  | MutationCheckInAttendeeArgs;
 
 export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -121,6 +139,10 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
       throw new Error('Authentication required for this operation');
     }
 
+    if (event.info.fieldName === 'getMyProfile') {
+      return getMyProfile(identity);
+    }
+
     if (event.info.fieldName === 'viewProfile') {
       const { id, pin } = event.arguments as MutationViewProfileArgs;
       return handleViewProfile(id, identity.sub, pin);
@@ -129,6 +151,29 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
     if (event.info.fieldName === 'updateUser') {
       const { input } = event.arguments as MutationUpdateUserArgs;
       return handleUpdateUser(identity.sub, input);
+    }
+
+    if (event.info.fieldName === 'registerSponsorVisit') {
+      const { input } = event.arguments as MutationRegisterSponsorVisitArgs;
+      return handleRegisterSponsorVisit(identity, input);
+    }
+
+    if (event.info.fieldName === 'getSponsorVisit') {
+      const { short_id } = event.arguments as QueryGetSponsorVisitArgs;
+      return handleViewSponsorVisit(identity, short_id);
+    }
+
+    if (event.info.fieldName === 'getSponsorDashboard') {
+      return getSponsorDashboard(identity);
+    }
+
+    if (event.info.fieldName === 'checkInAttendee') {
+      const { barcode_id, user_id, bypass_email, bypass_phone, email, phone } =
+        event.arguments as MutationCheckInAttendeeArgs;
+      return handleCheckInAttendee({
+        arguments: { barcode_id, user_id, bypass_email, bypass_phone, email, phone },
+        identity,
+      });
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

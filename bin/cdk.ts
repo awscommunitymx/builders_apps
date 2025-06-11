@@ -19,11 +19,9 @@ for (const [key, value] of Object.entries(tags)) {
 }
 
 const certificateArn =
-  'arn:aws:acm:us-east-1:662722197286:certificate/ac873602-b70d-45c6-abe2-1b1357499c31';
-const prodApexCertificateArn =
-  'arn:aws:acm:us-east-1:662722197286:certificate/1f086f3c-c4cd-42f4-819d-97f9f5f3324e';
-const hostedZoneId = 'Z04372592S8OKUNJDGG8O';
-const hostedZoneName = 'app.awscommunity.mx';
+  'arn:aws:acm:us-east-1:662722197286:certificate/052de1f6-775c-4f54-86dd-d7775bd45cd7';
+const hostedZoneId = 'Z07406072VIH8HAEJ7AJX';
+const hostedZoneName = 'console.awscommunity.mx';
 const eventbriteApiKeySecretArn =
   'arn:aws:secretsmanager:us-east-1:662722197286:secret:eventbrite/api_key-U2D38z';
 const algoliaAppIdSecretArn =
@@ -32,7 +30,9 @@ const algoliaApiKeySecretArn =
   'arn:aws:secretsmanager:us-east-1:662722197286:secret:algolia/api_key-4ccgmn';
 
 const frontendDomain =
-  environmentName == 'production' ? hostedZoneName : `${environmentName}.${hostedZoneName}`;
+  environmentName == 'production'
+    ? `mx-central-1.${hostedZoneName}`
+    : `mx-central-1-${environmentName}.${hostedZoneName}`;
 
 const backendDomain =
   environmentName === 'production'
@@ -40,6 +40,11 @@ const backendDomain =
     : `api-${environmentName}.${hostedZoneName}`;
 
 const { authDomain } = generateAuthDomain(environmentName, hostedZoneName);
+
+const authApiDomain =
+  environmentName === 'production'
+    ? `auth-api.${hostedZoneName}`
+    : `auth-api-${environmentName}.${hostedZoneName}`;
 
 const webhookDomain =
   environmentName === 'production'
@@ -59,10 +64,12 @@ const backendStack = new BackendStack(app, `ProfilesStack-${environmentName}`, {
   domainName: backendDomain,
   appDomain: frontendDomain,
   authDomain: authDomain,
+  authApiDomain: authApiDomain,
   webhookDomain: webhookDomain,
   eventbriteApiKeySecretArn: eventbriteApiKeySecretArn,
   algoliaApiKeySecretArn: algoliaApiKeySecretArn,
   algoliaAppIdSecretArn: algoliaAppIdSecretArn,
+  frontendDomain: frontendDomain,
 });
 
 const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmentName}`, {
@@ -74,7 +81,6 @@ const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmen
     region: 'us-east-1',
   },
   certificateArn: certificateArn,
-  prodApexCertificateArn: environmentName === 'production' ? prodApexCertificateArn : undefined,
   hostedZoneId: hostedZoneId,
   hostedZoneName: hostedZoneName,
   domainName: frontendDomain,

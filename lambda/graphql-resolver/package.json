@@ -15,7 +15,8 @@
     "@aws-sdk/lib-dynamodb": "^3.445.0",
     "@awscommunity/generated-ts": "file:../../generated/ts",
     "@middy/core": "^6.1.5",
-    "aws-xray-sdk": "^3.10.3"
+    "aws-xray-sdk": "^3.10.3",
+    "twilio": "^4.22.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",

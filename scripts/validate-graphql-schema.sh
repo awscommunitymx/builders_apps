@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 
 # Run graphql-codegen and capture its exit status
-npx graphql-codegen --check
+# npx graphql-codegen --check
+grep -Ev '^\\s*@' schema.graphql > schema.no-directives.graphql && npx graphql-codegen --config codegen.yml --check && rm schema.no-directives.graphql
 CODEGEN_STATUS=$?
 
 # Check if the command failed (non-zero exit status)

@@ -4,13 +4,16 @@ import { DatabaseStack } from './stacks/database';
 import { ApiStack } from './stacks/api';
 import { LambdaStack } from './stacks/lambda';
 import { AgendaFetcherStack } from './stacks/agenda-fetcher';
+import { AuthApiStack } from './stacks/auth-api';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
 import * as rum from 'aws-cdk-lib/aws-rum';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as s3 from 'aws-cdk-lib/aws-s3'
+import * as kms from 'aws-cdk-lib/aws-kms';
 import { UserStepFunctionStack } from './stacks/user-step-function';
+import { CheckinQueues } from './stacks/checkin-queues';
 
 export interface AppStackProps extends cdk.StackProps {
   environmentName: string;
@@ -20,20 +23,24 @@ export interface AppStackProps extends cdk.StackProps {
   domainName: string;
   appDomain: string;
   authDomain: string;
+  authApiDomain: string;
   webhookDomain: string;
   eventbriteApiKeySecretArn: string;
   algoliaApiKeySecretArn: string;
   algoliaAppIdSecretArn: string;
+  frontendDomain: string;
 }
 
 export class BackendStack extends cdk.Stack {
   public readonly apiUrl: string;
   public readonly apiKey: string;
+  public readonly authApiUrl: string;
   public readonly userPoolId: string;
   public readonly userPoolClientId: string;
-  public readonly userPoolDomain: string;
   public readonly identityPoolId: string;
   public readonly userCreationQueue: sqs.Queue;
+  public readonly mainCheckinQueue: sqs.Queue;
+  public readonly secondaryCheckinQueue: sqs.Queue;
 
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
@@ -60,20 +67,47 @@ export class BackendStack extends cdk.Stack {
       encryption: s3.BucketEncryption.S3_MANAGED,
     });
 
-    const lambdaStack = new LambdaStack(this, 'LambdaStack', {
-      environmentName: props.environmentName,
-      table: databaseStack.table,
-      sessionsBucket
+    // Create KMS key for encryption
+    const encryptionKey = new kms.Key(this, 'EncryptionKey', {
+      description: `Encryption key for magic link tokens - ${props.environmentName}`,
+      enableKeyRotation: true,
     });
 
-    // Create Cognito Stack for authentication
+    // Create Cognito Stack for authentication first
     const cognitoStack = new CognitoStack(this, 'CognitoStack', {
       environmentName: props.environmentName,
       appDomain: props.appDomain,
       authDomain: props.authDomain,
       certificate: domainCert,
       hostedZone: hostedZone,
-      groups: ['Attendees', 'Sponsors'],
+      groups: [
+        'Attendees',
+        'Sponsors',
+        'CheckInVolunteerMain1',
+        'CheckInVolunteerMain2',
+        'CheckInVolunteerMain3',
+        'CheckInVolunteerMain4',
+        'CheckInVolunteerSecondary',
+      ],
+      table: databaseStack.table,
+      kmsKey: encryptionKey,
+    });
+
+    const checkinQueues = new CheckinQueues(this, 'CheckinQueues', {
+      environmentName: props.environmentName,
+    });
+
+    const lambdaStack = new LambdaStack(this, 'LambdaStack', {
+      environmentName: props.environmentName,
+      table: databaseStack.table,
+      sessionsBucket,
+      userPool: cognitoStack.userPool,
+      baseUrl: props.appDomain,
+      sesFromAddress: 'noreply@awscommunity.mx',
+      kmsKey: encryptionKey,
+      frontendDomain: props.frontendDomain,
+      labelPrinterQueue: checkinQueues.mainQueue,
+      secondaryQueue: checkinQueues.secondaryQueue,
     });
 
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -92,6 +126,27 @@ export class BackendStack extends cdk.Stack {
       graphqlApi: apiStack.api,
       sessionsBucket
     });
+
+    // Create Authentication API Stack
+    const authApiStack = new AuthApiStack(this, 'AuthApiStack', {
+      shortIdAuthFunction: lambdaStack.shortIdAuthFunction,
+      sessionPostFunction: lambdaStack.sessionPostFunction,
+      sessionDeleteFunction: lambdaStack.sessionDeleteFunction,
+      sessionListFunction: lambdaStack.sessionListFunction,
+      getUserByShortIdFunction: lambdaStack.getUserByShortIdFunction,
+      userTable: databaseStack.table,
+      userPool: cognitoStack.userPool,
+      certificate: domainCert,
+      hostedZone: hostedZone,
+      domainName: props.authApiDomain,
+      frontendDomain: props.frontendDomain,
+    });
+
+    this.authApiUrl =
+      props.authApiDomain && domainCert && hostedZone
+        ? `https://${props.authApiDomain}`
+        : authApiStack.api.url;
+
 
     // Add permissions for authenticated users to access API operations
     cognitoStack.authenticatedRole.addToPolicy(
@@ -156,22 +211,31 @@ export class BackendStack extends cdk.Stack {
       eventbriteApiKeySecretArn: props.eventbriteApiKeySecretArn,
       algoliaApiKeySecretArn: props.algoliaApiKeySecretArn,
       algoliaAppIdSecretArn: props.algoliaAppIdSecretArn,
+      twilioMessageSender: lambdaStack.twilioMessageSender,
     });
+
+    this.mainCheckinQueue = checkinQueues.mainQueue;
+    this.secondaryCheckinQueue = checkinQueues.secondaryQueue;
 
     // Expose API URL and Key
     this.apiUrl = apiStack.api.graphqlUrl;
     this.apiKey = apiStack.api.apiKey || '';
+    // this.authApiUrl = authApiStack.api.url;
 
     // Expose Cognito information
     this.userPoolId = cognitoStack.userPool.userPoolId;
     this.userPoolClientId = cognitoStack.userPoolClient.userPoolClientId;
-    this.userPoolDomain = cognitoStack.userPoolDomain.domainName;
     this.identityPoolId = cognitoStack.identityPool.ref;
 
     // Output values
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: this.apiUrl,
       description: 'GraphQL API URL',
+    });
+
+    new cdk.CfnOutput(this, 'AuthApiUrl', {
+      value: this.authApiUrl,
+      description: 'Authentication REST API URL',
     });
 
     new cdk.CfnOutput(this, 'UserPoolId', {
@@ -182,11 +246,6 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: this.userPoolClientId,
       description: 'Cognito User Pool Client ID',
-    });
-
-    new cdk.CfnOutput(this, 'UserPoolDomain', {
-      value: this.userPoolDomain,
-      description: 'Cognito User Pool Domain',
     });
 
     new cdk.CfnOutput(this, 'IdentityPoolId', {
@@ -212,6 +271,16 @@ export class BackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserCreationQueueUrl', {
       value: this.userCreationQueue.queueUrl,
       description: 'URL of the User Creation SQS Queue',
+    });
+
+    new cdk.CfnOutput(this, 'MainCheckinQueueUrl', {
+      value: this.mainCheckinQueue.queueUrl,
+      description: 'URL of the Main Check-in FIFO Queue',
+    });
+
+    new cdk.CfnOutput(this, 'SecondaryCheckinQueueUrl', {
+      value: this.secondaryCheckinQueue.queueUrl,
+      description: 'URL of the Secondary Check-in FIFO Queue',
     });
   }
 }

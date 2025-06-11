@@ -9,6 +9,21 @@ type User {
   share_email: Boolean
   pin: Int
   initialized: Boolean
+  short_id: String
+  ticket_class_id: String
+  sponsor_visits: [String!]
+}
+
+type SponsorUser {
+  user_id: ID!
+  name: String!
+  company: String
+  job_title: String
+  cell_phone: String
+  email: String
+  short_id: String
+  message: String
+  last_visit: String
 }
 
 type ProfileAccess {
@@ -17,12 +32,23 @@ type ProfileAccess {
   timestamp: String!
 }
 
+type SponsorDashboard {
+  sponsor_name: String!
+  visits: [SponsorUser!]!
+  total_visits: Int!
+}
+
 type Query {
   getMyProfile: User
+  @aws_auth(cognito_groups: ["Attendees"])
   getAgenda: AgendaData
   getRoomAgenda(location: String!): RoomAgendaData
   getAgendaHash: String!
   getRoomAgendaHash(location: String!): String!
+  getSponsorVisit(short_id: ID!): SponsorUser
+  @aws_auth(cognito_groups: ["Sponsors"])
+  getSponsorDashboard: SponsorDashboard!
+  @aws_auth(cognito_groups: ["Sponsors"])
 }
 
 input UpdateUserInput {
@@ -135,6 +161,23 @@ input SocialMediaInput {
   company: String
 }
 
+input RegisterSponsorVisitInput {
+  short_id: ID!
+  message: String
+}
+
+type CheckInResponse {
+  status: CheckInStatus!
+  message: String
+  missingFields: [String]
+  user: User
+}
+
+enum CheckInStatus {
+  SUCCESS
+  INCOMPLETE_PROFILE
+}
+
 type Subscription {
   onAgendaUpdate: AgendaData
     @aws_subscribe(mutations: ["updateAgenda"])
@@ -144,11 +187,24 @@ type Subscription {
 
 type Mutation {
   viewProfile(id: String!, pin: String!): User
+  @aws_auth(cognito_groups: ["Attendees"])
   updateUser(input: UpdateUserInput!): User
+  @aws_auth(cognito_groups: ["Attendees"])
   updateAgenda(sessions: AgendaDataInput!): AgendaData 
     @aws_api_key
   updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
     @aws_api_key
+  registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
+  @aws_auth(cognito_groups: ["Attendees"])
+  checkInAttendee(
+    barcode_id: ID
+    user_id: ID
+    bypass_email: Boolean
+    bypass_phone: Boolean
+    email: String
+    phone: String
+  ): CheckInResponse!
+  @aws_auth(cognito_groups: ["CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
 }
 
 schema {

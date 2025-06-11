@@ -3,6 +3,7 @@ import { gql, useQuery } from '@apollo/client';
 import { UserProfile } from '../components/UserProfile';
 import { AppLayoutToolbar, BreadcrumbGroup, Button } from '@cloudscape-design/components';
 import { EditUserProfile } from '../components/EditProfile';
+import { SponsorLogos } from '../components/SponsorLogos';
 
 const GET_USER = gql`
   query getMyProfile {
@@ -17,6 +18,7 @@ const GET_USER = gql`
       share_phone
       pin
       initialized
+      sponsor_visits
     }
   }
 `;
@@ -81,7 +83,9 @@ export function MyProfileRoute() {
             user={user}
             actionButton={actionButton}
             isMyProfile={true}
-          />
+          >
+            <SponsorLogos visitedSponsorIds={user?.sponsor_visits || []} />
+          </UserProfile>
         )
       }
     ></AppLayoutToolbar>

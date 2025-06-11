@@ -85,11 +85,10 @@ export class ApiStack extends Construct {
     dynamoDataSource: appsync.DynamoDbDataSource,
     lambdaDataSource: appsync.LambdaDataSource
   ): void {
-    dynamoDataSource.createResolver('GetMyProfileResolver', {
+    // Create resolver for getMyProfile
+    lambdaDataSource.createResolver('GraphQLResolverGetMyProfile', {
       typeName: 'Query',
       fieldName: 'getMyProfile',
-      requestMappingTemplate: appsync.MappingTemplate.fromFile('./vtl/getMyProfile/request.vtl'),
-      responseMappingTemplate: appsync.MappingTemplate.fromFile('./vtl/getMyProfile/response.vtl'),
     });
     
     // Create resolver for viewProfile
@@ -127,6 +126,27 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'updateAgenda',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverRegisterSponsorVisit', {
+      typeName: 'Mutation',
+      fieldName: 'registerSponsorVisit',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSponsorVisit', {
+      typeName: 'Query',
+      fieldName: 'getSponsorVisit',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSponsorDashboard', {
+      typeName: 'Query',
+      fieldName: 'getSponsorDashboard',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverCheckInAttendee', {
+      typeName: 'Mutation',
+      fieldName: 'checkInAttendee',
+    });
+  }
 
     lambdaDataSource.createResolver('GraphQLResolverUpdateRoomAgenda', {
       typeName: 'Mutation',

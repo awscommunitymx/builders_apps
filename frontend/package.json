@@ -12,9 +12,15 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.19.2",
+    "@algolia/autocomplete-theme-classic": "^1.19.2",
     "@cloudscape-design/board-components": "^3.0.101",
     "@cloudscape-design/components": "^3.0.923",
     "@cloudscape-design/global-styles": "^1.0.38",
+    "@yudiel/react-qr-scanner": "^2.3.1",
+    "algoliasearch": "^4.24.0",
+    "amazon-cognito-identity-js": "^6.3.15",
+    "aws-amplify": "^5.0.18",
     "aws-rum-web": "^1.22.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -31,6 +37,7 @@
     "@storybook/test": "^8.6.12",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
