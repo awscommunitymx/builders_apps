@@ -60,7 +60,7 @@ export default async function handleViewProfile(
     if (!user.initialized) {
       logger.info('User not initialized', { id });
       metrics.addMetric('UserNotInitialized', MetricUnit.Count, 1);
-      throw new Error('Usuario no inicializado');
+      throw new Error('Este usuario no ha completado su perfil.');
     }
 
     if (user.pin?.toString() !== pin) {
