@@ -166,25 +166,6 @@ export function UserProfile({
                       },
                     ]
                   : []),
-                ...(isMyProfile && user && user.sponsor_visits && user.sponsor_visits.length > 0
-                  ? [
-                      {
-                        label: 'Visitas de patrocinadores',
-                        value: loading ? (
-                          <Spinner />
-                        ) : (
-                          <SpaceBetween direction="vertical" size="xs">
-                            {user.sponsor_visits!.map((sponsorId, index) => (
-                              <div key={sponsorId}>
-                                {sponsorId}
-                                {index < user.sponsor_visits!.length - 1 && ', '}
-                              </div>
-                            ))}
-                          </SpaceBetween>
-                        ),
-                      },
-                    ]
-                  : []),
               ]}
             />
           </Container>
