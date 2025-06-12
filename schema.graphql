@@ -41,6 +41,10 @@ type SponsorDashboard {
 type Query {
   getMyProfile: User
   @aws_auth(cognito_groups: ["Attendees"])
+  getAgenda: AgendaData
+  getRoomAgenda(location: String!): RoomAgendaData
+  getAgendaHash: String!
+  getRoomAgendaHash(location: String!): String!
   getSponsorVisit(short_id: ID!): SponsorUser
   @aws_auth(cognito_groups: ["Sponsors"])
   getSponsorDashboard: SponsorDashboard!
@@ -53,6 +57,108 @@ input UpdateUserInput {
   pin: Int
   share_email: Boolean
   share_phone: Boolean
+}
+
+input AgendaDataInput {
+  sessions: [SessionInput!]!
+}
+
+type AgendaData 
+@aws_api_key
+@aws_cognito_user_pools
+{
+  sessions: [Session!]!
+}
+
+type RoomAgendaData 
+@aws_api_key
+@aws_cognito_user_pools
+{
+  location: String!
+  sessions: [Session!]!
+}
+
+input SessionInput {
+  id: ID!
+  name: String
+  description: String
+  extendedDescription: String
+  speakers: [SpeakerInput]
+  time: String!
+  dateStart: String!
+  dateEnd: String!
+  duration: Int
+  location: String
+  nationality: String
+  level: String
+  language: String
+  category: String
+  capacity: Int
+  status: String
+  liveUrl: String
+  recordingUrl: String
+}
+
+type Session 
+@aws_api_key
+@aws_cognito_user_pools
+{
+  id: ID!
+  name: String
+  description: String
+  extendedDescription: String
+  speakers: [Speaker]
+  time: String!
+  dateStart: String!
+  dateEnd: String!
+  duration: Int
+  location: String
+  nationality: String
+  level: String
+  language: String
+  category: String
+  capacity: Int
+  status: String
+  liveUrl: String
+  recordingUrl: String
+}
+
+input SpeakerInput {
+  id: ID
+  name: String!
+  avatarUrl: String
+  company: String
+  bio: String
+  nationality: String
+  socialMedia: SocialMediaInput
+}
+
+type Speaker 
+@aws_api_key
+@aws_cognito_user_pools
+{
+  id: ID
+  name: String!
+  avatarUrl: String
+  company: String
+  bio: String
+  nationality: String
+  socialMedia: SocialMedia
+}
+
+type SocialMedia 
+@aws_api_key
+@aws_cognito_user_pools
+{
+  twitter: String
+  linkedin: String
+  company: String
+}
+
+input SocialMediaInput {
+  twitter: String
+  linkedin: String
+  company: String
 }
 
 input RegisterSponsorVisitInput {
@@ -72,11 +178,22 @@ enum CheckInStatus {
   INCOMPLETE_PROFILE
 }
 
+type Subscription {
+  onAgendaUpdate: AgendaData
+    @aws_subscribe(mutations: ["updateAgenda"])
+  onRoomAgendaUpdate(location: String!): RoomAgendaData 
+    @aws_subscribe(mutations: ["updateRoomAgenda"])
+}
+
 type Mutation {
   viewProfile(id: String!, pin: String!): User
   @aws_auth(cognito_groups: ["Attendees"])
   updateUser(input: UpdateUserInput!): User
   @aws_auth(cognito_groups: ["Attendees"])
+  updateAgenda(sessions: AgendaDataInput!): AgendaData 
+    @aws_api_key
+  updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
+    @aws_api_key
   registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
   @aws_auth(cognito_groups: ["Attendees"])
   checkInAttendee(
@@ -93,54 +210,5 @@ type Mutation {
 schema {
   query: Query
   mutation: Mutation
-}
-
-type AgendaData {
-  sessions: [Session!]!
-}
-
-type Session {
-  id: ID!
-  title: String!
-  description: String!
-  startsAt: String!
-  endsAt: String!
-  isServiceSession: Boolean!
-  isPlenumSession: Boolean!
-  speakers: [Speaker!]!
-  categories: [Category!]!
-  room: Room!
-  liveUrl: String
-  recordingUrl: String
-  status: SessionStatus!
-  isInformed: Boolean!
-  isConfirmed: Boolean!
-}
-
-type Speaker {
-  id: ID!
-  name: String!
-}
-
-type Category {
-  id: ID!
-  name: String!
-  categoryItems: [CategoryItem!]!
-  sort: Int!
-}
-
-type CategoryItem {
-  id: ID!
-  name: String!
-}
-
-type Room {
-  id: ID!
-  name: String!
-}
-
-enum SessionStatus {
-  DRAFT
-  PUBLISHED
-  CANCELLED
+  subscription: Subscription
 }

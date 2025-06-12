@@ -12,6 +12,7 @@ import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { truncateLambdaName } from '../../utils/lambda';
+import * as s3 from 'aws-cdk-lib/aws-s3'
 
 const TWILIO_MESSAGING_SERVICE_SID = 'MGdfbfa02e47fe0e9a0eb32e5a59b48c90';
 const TWILIO_CONTENT_SID = 'HX04e190778b8ae34d3bfea52d2aea1d0a';
@@ -19,6 +20,7 @@ const TWILIO_CONTENT_SID = 'HX04e190778b8ae34d3bfea52d2aea1d0a';
 interface LambdaStackProps {
   environmentName: string;
   table: dynamodb.Table;
+  sessionsBucket: s3.Bucket;
   userPool?: cognito.UserPool;
   baseUrl?: string;
   sesFromAddress?: string;
@@ -49,6 +51,7 @@ export class LambdaStack extends Construct {
       entry: path.join(__dirname, '../../lambda/graphql-resolver/index.ts'),
       environment: {
         TABLE_NAME: props.table.tableName,
+        S3_BUCKET: props.sessionsBucket.bucketName,
         ENVIRONMENT: props.environmentName,
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
         POWERTOOLS_SERVICE_NAME: 'graphql-resolver',
@@ -74,6 +77,7 @@ export class LambdaStack extends Construct {
           '@aws-lambda-powertools/logger',
           '@aws-lambda-powertools/metrics',
           'aws-xray-sdk',
+          '@aws-sdk/client-s3',
         ],
       },
     });
@@ -95,8 +99,9 @@ export class LambdaStack extends Construct {
       })
     );
 
-    // Grant the Lambda function access to DynamoDB
+    // Grant the Lambda function access to DynamoDB and S3
     props.table.grantReadWriteData(this.graphQLResolver);
+    props.sessionsBucket.grantRead(this.graphQLResolver);
 
     // Grant Secrets Manager permissions for Twilio credentials
     this.graphQLResolver.addToRolePolicy(

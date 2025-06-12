@@ -20,18 +20,8 @@ export type AgendaData = {
   sessions: Array<Session>;
 };
 
-export type Category = {
-  __typename?: 'Category';
-  categoryItems: Array<CategoryItem>;
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  sort: Scalars['Int']['output'];
-};
-
-export type CategoryItem = {
-  __typename?: 'CategoryItem';
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
+export type AgendaDataInput = {
+  sessions: Array<SessionInput>;
 };
 
 export type CheckInResponse = {
@@ -51,6 +41,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
+  updateAgenda?: Maybe<AgendaData>;
+  updateRoomAgenda?: Maybe<RoomAgendaData>;
   updateUser?: Maybe<User>;
   viewProfile?: Maybe<User>;
 };
@@ -68,6 +60,17 @@ export type MutationCheckInAttendeeArgs = {
 
 export type MutationRegisterSponsorVisitArgs = {
   input: RegisterSponsorVisitInput;
+};
+
+
+export type MutationUpdateAgendaArgs = {
+  sessions: AgendaDataInput;
+};
+
+
+export type MutationUpdateRoomAgendaArgs = {
+  location: Scalars['String']['input'];
+  sessions: AgendaDataInput;
 };
 
 
@@ -90,9 +93,23 @@ export type ProfileAccess = {
 
 export type Query = {
   __typename?: 'Query';
+  getAgenda?: Maybe<AgendaData>;
+  getAgendaHash: Scalars['String']['output'];
   getMyProfile?: Maybe<User>;
+  getRoomAgenda?: Maybe<RoomAgendaData>;
+  getRoomAgendaHash: Scalars['String']['output'];
   getSponsorDashboard: SponsorDashboard;
   getSponsorVisit?: Maybe<SponsorUser>;
+};
+
+
+export type QueryGetRoomAgendaArgs = {
+  location: Scalars['String']['input'];
+};
+
+
+export type QueryGetRoomAgendaHashArgs = {
+  location: Scalars['String']['input'];
 };
 
 
@@ -105,41 +122,87 @@ export type RegisterSponsorVisitInput = {
   short_id: Scalars['ID']['input'];
 };
 
-export type Room = {
-  __typename?: 'Room';
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
+export type RoomAgendaData = {
+  __typename?: 'RoomAgendaData';
+  location: Scalars['String']['output'];
+  sessions: Array<Session>;
 };
 
 export type Session = {
   __typename?: 'Session';
-  categories: Array<Category>;
-  description: Scalars['String']['output'];
-  endsAt: Scalars['String']['output'];
+  capacity?: Maybe<Scalars['Int']['output']>;
+  category?: Maybe<Scalars['String']['output']>;
+  dateEnd: Scalars['String']['output'];
+  dateStart: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  duration?: Maybe<Scalars['Int']['output']>;
+  extendedDescription?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  isConfirmed: Scalars['Boolean']['output'];
-  isInformed: Scalars['Boolean']['output'];
-  isPlenumSession: Scalars['Boolean']['output'];
-  isServiceSession: Scalars['Boolean']['output'];
+  language?: Maybe<Scalars['String']['output']>;
+  level?: Maybe<Scalars['String']['output']>;
   liveUrl?: Maybe<Scalars['String']['output']>;
+  location?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  nationality?: Maybe<Scalars['String']['output']>;
   recordingUrl?: Maybe<Scalars['String']['output']>;
-  room: Room;
-  speakers: Array<Speaker>;
-  startsAt: Scalars['String']['output'];
-  status: SessionStatus;
-  title: Scalars['String']['output'];
+  speakers?: Maybe<Array<Maybe<Speaker>>>;
+  status?: Maybe<Scalars['String']['output']>;
+  time: Scalars['String']['output'];
 };
 
-export enum SessionStatus {
-  Cancelled = 'CANCELLED',
-  Draft = 'DRAFT',
-  Published = 'PUBLISHED'
-}
+export type SessionInput = {
+  capacity?: InputMaybe<Scalars['Int']['input']>;
+  category?: InputMaybe<Scalars['String']['input']>;
+  dateEnd: Scalars['String']['input'];
+  dateStart: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<Scalars['Int']['input']>;
+  extendedDescription?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  language?: InputMaybe<Scalars['String']['input']>;
+  level?: InputMaybe<Scalars['String']['input']>;
+  liveUrl?: InputMaybe<Scalars['String']['input']>;
+  location?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  nationality?: InputMaybe<Scalars['String']['input']>;
+  recordingUrl?: InputMaybe<Scalars['String']['input']>;
+  speakers?: InputMaybe<Array<InputMaybe<SpeakerInput>>>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  time: Scalars['String']['input'];
+};
+
+export type SocialMedia = {
+  __typename?: 'SocialMedia';
+  company?: Maybe<Scalars['String']['output']>;
+  linkedin?: Maybe<Scalars['String']['output']>;
+  twitter?: Maybe<Scalars['String']['output']>;
+};
+
+export type SocialMediaInput = {
+  company?: InputMaybe<Scalars['String']['input']>;
+  linkedin?: InputMaybe<Scalars['String']['input']>;
+  twitter?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type Speaker = {
   __typename?: 'Speaker';
-  id: Scalars['ID']['output'];
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  bio?: Maybe<Scalars['String']['output']>;
+  company?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
   name: Scalars['String']['output'];
+  nationality?: Maybe<Scalars['String']['output']>;
+  socialMedia?: Maybe<SocialMedia>;
+};
+
+export type SpeakerInput = {
+  avatarUrl?: InputMaybe<Scalars['String']['input']>;
+  bio?: InputMaybe<Scalars['String']['input']>;
+  company?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+  nationality?: InputMaybe<Scalars['String']['input']>;
+  socialMedia?: InputMaybe<SocialMediaInput>;
 };
 
 export type SponsorDashboard = {
@@ -160,6 +223,17 @@ export type SponsorUser = {
   name: Scalars['String']['output'];
   short_id?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  onAgendaUpdate?: Maybe<AgendaData>;
+  onRoomAgendaUpdate?: Maybe<RoomAgendaData>;
+};
+
+
+export type SubscriptionOnRoomAgendaUpdateArgs = {
+  location: Scalars['String']['input'];
 };
 
 export type UpdateUserInput = {

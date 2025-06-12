@@ -3,12 +3,14 @@ import { Construct } from 'constructs';
 import { DatabaseStack } from './stacks/database';
 import { ApiStack } from './stacks/api';
 import { LambdaStack } from './stacks/lambda';
+import { AgendaFetcherStack } from './stacks/agenda-fetcher';
 import { AuthApiStack } from './stacks/auth-api';
 import * as certificatemanager from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import { CognitoStack } from './stacks/cognito';
 import * as rum from 'aws-cdk-lib/aws-rum';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as s3 from 'aws-cdk-lib/aws-s3'
 import * as kms from 'aws-cdk-lib/aws-kms';
 import { UserStepFunctionStack } from './stacks/user-step-function';
 import { CheckinQueues } from './stacks/checkin-queues';
@@ -58,6 +60,13 @@ export class BackendStack extends cdk.Stack {
       environmentName: props.environmentName,
     });
 
+    const sessionsBucket = new s3.Bucket(this, 'AgendaBucket', {
+      bucketName: `${props.environmentName.toLowerCase()}-agenda-json`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,        // for dev/test
+      autoDeleteObjects: true,                        // for dev/test
+      encryption: s3.BucketEncryption.S3_MANAGED,
+    });
+
     // Create KMS key for encryption
     const encryptionKey = new kms.Key(this, 'EncryptionKey', {
       description: `Encryption key for magic link tokens - ${props.environmentName}`,
@@ -91,6 +100,7 @@ export class BackendStack extends cdk.Stack {
     const lambdaStack = new LambdaStack(this, 'LambdaStack', {
       environmentName: props.environmentName,
       table: databaseStack.table,
+      sessionsBucket,
       userPool: cognitoStack.userPool,
       baseUrl: props.appDomain,
       sesFromAddress: 'noreply@awscommunity.mx',
@@ -108,6 +118,13 @@ export class BackendStack extends cdk.Stack {
       hostedZone: hostedZone,
       domainName: props.domainName,
       userPool: cognitoStack.userPool,
+    });
+
+    new AgendaFetcherStack(this, 'AgendaFetcherStack', {
+      environmentName: props.environmentName,
+      table: databaseStack.table,
+      graphqlApi: apiStack.api,
+      sessionsBucket
     });
 
     // Create Authentication API Stack
@@ -130,12 +147,13 @@ export class BackendStack extends cdk.Stack {
         ? `https://${props.authApiDomain}`
         : authApiStack.api.url;
 
+
     // Add permissions for authenticated users to access API operations
     cognitoStack.authenticatedRole.addToPolicy(
       new cdk.aws_iam.PolicyStatement({
         effect: cdk.aws_iam.Effect.ALLOW,
         actions: ['appsync:GraphQL'],
-        resources: [`${apiStack.api.arn}/types/Query/*`, `${apiStack.api.arn}/types/Mutation/*`],
+        resources: [`${apiStack.api.arn}/types/Query/*`, `${apiStack.api.arn}/types/Mutation/*`, `${apiStack.api.arn}/types/Subscription/*`],
       })
     );
 
