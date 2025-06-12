@@ -1,118 +1,16 @@
 {
   "sessions": [
     {
-      "id": "915715",
-      "title": "Del caos al K8s‑Zen: presentando el Kubernetes Maturity Model",
-      "description": "El Kubernetes Maturity Model (KMM) condensa, en una sola planilla, el camino evolutivo que sigue todo equipo que adopta contenedores: desde los quick wins iniciales hasta la operación cloud‑native optimizada. El marco organiza 7 dominios —Arquitectura, Seguridad, Excelencia Operativa, Confiabilidad, Rendimiento, Optimización de Costos y Sustentabilidad— y 4 niveles de madurez: Inicial / Quick Wins, Establecido, Avanzado y Experto.\r\n\r\nEn esta charla explicaremos cómo se construyó el modelo y cómo usarlo para:\r\n\r\nAuto‑evaluarte en 15 minutos con 64 preguntas de múltiple selección.\r\n\r\nPriorizar inversiones comparando el “calor” entre dominios.\r\n\r\nTraducir hallazgos técnicos en historias de negocio (ROI, riesgo y sostenibilidad).\r\n\r\nTrazar un roadmap trimestral medible y alineado con FinOps y SRE.",
+      "id": "924440",
+      "title": "Beyond the Code: Como Mejore como Dev Haciendo Comunidad",
+      "description": "Ser mejor dev no siempre significa escribir más líneas de código. En esta charla te cuento cómo salir de la burbuja, conectar con otras personas y ser parte activa de la comunidad tech cambió mi forma de aprender, crecer y disfrutar mi carrera. No necesitas ser experto ni tener todas las respuestas: a veces, solo necesitas estar ahí, compartir, escuchar y construir junto con otros. Porque crecer en comunidad también es crecer como persona.",
       "startsAt": "2025-06-13T11:00:00",
       "endsAt": "2025-06-13T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "f925cc20-94ee-403b-ac4e-a69e609c5aff"
-      ],
-      "categoryItems": [
-        363105,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": true
-    },
-    {
-      "id": "917177",
-      "title": "Back to the network: AWS DeLorean at 88 MPH",
-      "description": "AWS doesn't have a Flux Capacitor per se, but it relies on a key concept that, without it, we wouldn't be able to use its services at all: the network.\r\nSometimes, I think we just grant it this and forget that it is the base, and when we give a peak to the available network services, the number of them can be overwhelming.\r\nSome of them run in the background of other trendy services like Bedrock or are the base of core ones like EC2. That's why I want to share some lessons I wish I had known when I started working in AWS 12 years ago.\r\nJoin me in this session, where we will see a use case that required a hybrid connection between AWS and our On-Premises System, the challenges we had during the setup and debugging of our environment, and check some tips while using services like Site-to-Site and Client VPN, AWS Global Accelerator, Route 53 Resolver, PrivateLink and Redshift, Glue, Lambda VPC integration, to get our environment beyond 88 MPH.",
-      "startsAt": "2025-06-13T11:40:00",
-      "endsAt": "2025-06-13T12:10:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "479ab58d-ec9d-4840-887e-4bf351cb94c4"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": false
-    },
-    {
-      "id": "924440",
-      "title": "Beyond the Code: Como Mejore como Dev Haciendo Comunidad",
-      "description": "Ser mejor dev no siempre significa escribir más líneas de código. En esta charla te cuento cómo salir de la burbuja, conectar con otras personas y ser parte activa de la comunidad tech cambió mi forma de aprender, crecer y disfrutar mi carrera. No necesitas ser experto ni tener todas las respuestas: a veces, solo necesitas estar ahí, compartir, escuchar y construir junto con otros. Porque crecer en comunidad también es crecer como persona.",
-      "startsAt": "2025-06-13T12:20:00",
-      "endsAt": "2025-06-13T12:50:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "8eca1f18-2b6a-4d57-a22e-138243eb9aac"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": true
-    },
-    {
-      "id": "917517",
-      "title": "CDK + Amplify: El dúo perfecto para arquitecturas serverless avanzadas",
-      "description": "AWS Amplify acelera el desarrollo de aplicaciones serverless, pero a medida que los proyectos crecen, surgen necesidades que van más allá de sus capacidades predeterminadas. En esta charla, aprenderás cómo extender tus soluciones usando AWS CDK sin perder la agilidad que ofrece Amplify",
-      "startsAt": "2025-06-13T13:00:00",
-      "endsAt": "2025-06-13T13:30:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "c45b6741-eb09-474f-a669-f0144194e376"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": true
-    },
-    {
-      "id": "915480",
-      "title": "Enhancing S3 Security with GuardDuty Malware Protection: A Real-World Production Use Case",
-      "description": "In this talk, I'll introduce GuardDuty Malware Protection for S3, a powerful solution designed to boost the security of your S3 buckets. We'll dive into the key features of this new innovative service, which offers a simple, scalable, and event-driven malware detection solution in the cloud.\r\nThe focus will be on a real-life scenario where a customer required an automated solution to scan incoming files to S3 (via SFTP) and manage file movements based on GuardDuty malware scan results. We'll explore the architecture, solution file flow, and the various AWS services involved, such as DynamoDB, EventBridge, SQS, and Lambda. I'll also share some tips and tricks to avoid common pitfalls when setting up the service and discuss the problems it solves.\r\nThis session is ideal for those looking to improve their cloud security posture and gain insights into best practices for implementing malware protection in AWS.",
-      "startsAt": "2025-06-13T13:40:00",
-      "endsAt": "2025-06-13T14:10:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "0ecdf6e8-4186-48f2-aac8-2a0086290a33"
-      ],
-      "categoryItems": [
-        363103,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["8eca1f18-2b6a-4d57-a22e-138243eb9aac"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 67752,
       "liveUrl": null,
       "recordingUrl": null,
@@ -124,139 +22,31 @@
       "id": "925094",
       "title": "Estudios para la Certificación Cloud Practitioner - Materiales desconectados como recurso pedagógico",
       "description": "El camino para lograr la Certificación para el Examen de Certificación Coud Practitioner consiste en simulaciones, grupos de estudio, laboratorios prácticos y muchas notas manuales e ilustradas para aquellos aficionados a los estudios que precedieron a la disponibilidad de recursos digitales masivos. En esta dirección, como recurso propio para complementar la asimilación de contenidos, utilicé los recursos pedagógicos de Educación Infantil en actividades desenchufadas.\r\nUn material que vale la pena compartir para que podamos aumentar el número de personas que decidan seguir el camino de las Soluciones Cloud, una de las cualificaciones para la Industria 4.0 del presente y del futuro.",
-      "startsAt": "2025-06-13T14:20:00",
-      "endsAt": "2025-06-13T14:50:00",
+      "startsAt": "2025-06-13T11:45:00",
+      "endsAt": "2025-06-13T12:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "8710658a-aadc-4654-a28e-a677c4e01c4e"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["8710658a-aadc-4654-a28e-a677c4e01c4e"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 67752,
       "liveUrl": null,
       "recordingUrl": null,
       "status": "Accepted",
       "isInformed": true,
       "isConfirmed": true
-    },
-    {
-      "id": "908725",
-      "title": "Modern SOC Without Breaking the Bank: Secure Your Infrastructure and Move Your Security to the Cloud",
-      "description": "In this session, I'll share real-world insights from my experience running a modern SOC, and show you how to protect your infrastructure effectively without overspending. We’ll discuss how to streamline security operations, prioritize alerts, and integrate both on-premises and cloud solutions. I'll also cover how you can bring these practices to the cloud with AWS services, helping you build a cost-effective, scalable SOC that meets today’s security challenges.",
-      "startsAt": "2025-06-13T15:00:00",
-      "endsAt": "2025-06-13T15:30:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "e82ec216-a0cc-428c-8394-d0b715fa225c"
-      ],
-      "categoryItems": [
-        363103,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": true
-    },
-    {
-      "id": "907595",
-      "title": "Policy as Code in the context of AWS",
-      "description": "Policy as Code is increasingly significant, particularly with the growing complexity of cloud environments. It acts as a valuable mechanism for FinOps, offering a way to automate governance and ensure robust security while driving down costs for organizations utilizing AWS.\r\n\r\nImplementing Policy as Code in AWS heavily relies on tools like AWS CloudFormation Guard and cfn_nag. \r\nGuard 2.0 plays a crucial role in validating configuration data, while cfn_nag is instrumental in identifying common errors within templates. \r\n\r\nFurthermore, integrating Policy as Code into Continuous Integration/Continuous Delivery pipelines enables the continuous validation of infrastructure configurations.\r\n\r\nIn addition to these AWS-specific tools, we will briefly cover how to integrate Open Policy Agent (OPA), a tool that stands out as a versatile policy engine that allows organizations to enforce policies consistently across their applications and infrastructure.\r\n\r\nAt the end of my talk, the audience will have enough resources to keep the conversation going and use relevant tools to implement or improve the PaC practice in current or near-future projects. ",
-      "startsAt": "2025-06-13T15:40:00",
-      "endsAt": "2025-06-13T16:10:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "eda906bc-afed-4714-a8ae-12ad3dfd041c"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": false
     },
     {
       "id": "915089",
       "title": "Push. Pull. Deploy. The GitOps Revolution in DevOps",
       "description": "GitOps is a modern way of doing DevOps, With the help of GitOps we can automate our deployment and release process (CI-CD). This is indirectly helping the IT company to deliver there features much more faster and with security. In my session, I will be giving a demo on how GitOps can be incorporated into a development workflow. I’ll show how an application can be deployed automatically using GitOps tools, and how changes can be monitored, tracked, and reverted with ease. The demo will highlight how GitOps helps maintain a consistent deployment state, reduces manual interventions, and brings visibility and control to everyone involved in the release process. Also I will show how different deployment strategies like blue-green, canary can be done in my demo.",
-      "startsAt": "2025-06-13T16:20:00",
-      "endsAt": "2025-06-13T16:50:00",
+      "startsAt": "2025-06-13T12:30:00",
+      "endsAt": "2025-06-13T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "19023357-da5a-41fd-9760-d2c6d558a426"
-      ],
-      "categoryItems": [
-        363103,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": true
-    },
-    {
-      "id": "909828",
-      "title": "TBD",
-      "description": "TBD",
-      "startsAt": "2025-06-13T17:00:00",
-      "endsAt": "2025-06-13T17:30:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "76d4dd06-6a53-4b8d-9990-d67d7ba556db"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
-      "roomId": 67752,
-      "liveUrl": null,
-      "recordingUrl": null,
-      "status": "Accepted",
-      "isInformed": true,
-      "isConfirmed": false
-    },
-    {
-      "id": "947312",
-      "title": "Gerardo Castro Placeholder",
-      "description": "TBD",
-      "startsAt": "2025-06-13T17:40:00",
-      "endsAt": "2025-06-13T18:10:00",
-      "isServiceSession": false,
-      "isPlenumSession": false,
-      "speakers": [
-        "24c47f6e-f5af-4d5a-94e3-d4ac8444942f"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["19023357-da5a-41fd-9760-d2c6d558a426"],
+      "categoryItems": [363103, 350079, 363099],
+      "questionAnswers": [],
       "roomId": 67752,
       "liveUrl": null,
       "recordingUrl": null,
@@ -272,9 +62,9 @@
       "endsAt": "2025-06-14T09:00:00",
       "isServiceSession": true,
       "isPlenumSession": true,
-      "speakers": [      ],
-      "categoryItems": [      ],
-      "questionAnswers": [      ],
+      "speakers": [],
+      "categoryItems": [],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -290,9 +80,9 @@
       "endsAt": "2025-06-14T10:00:00",
       "isServiceSession": true,
       "isPlenumSession": true,
-      "speakers": [      ],
-      "categoryItems": [      ],
-      "questionAnswers": [      ],
+      "speakers": [],
+      "categoryItems": [],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -308,15 +98,9 @@
       "endsAt": "2025-06-14T10:30:00",
       "isServiceSession": false,
       "isPlenumSession": true,
-      "speakers": [
-        "564ccb5b-f3bb-47fe-af67-7c41d857cf93"
-      ],
-      "categoryItems": [
-        363102,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["564ccb5b-f3bb-47fe-af67-7c41d857cf93"],
+      "categoryItems": [363102, 350079, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -332,9 +116,9 @@
       "endsAt": "2025-06-14T11:00:00",
       "isServiceSession": true,
       "isPlenumSession": true,
-      "speakers": [      ],
-      "categoryItems": [      ],
-      "questionAnswers": [      ],
+      "speakers": [],
+      "categoryItems": [],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -350,15 +134,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "e9fa97d0-8aba-484c-9fe4-77fd5924bd10"
-      ],
-      "categoryItems": [
-        363102,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["e9fa97d0-8aba-484c-9fe4-77fd5924bd10"],
+      "categoryItems": [363102, 350079, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -374,13 +152,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "da82c8e0-6ec3-4966-bfa5-654497472b49"
-      ],
-      "categoryItems": [
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["da82c8e0-6ec3-4966-bfa5-654497472b49"],
+      "categoryItems": [363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -396,14 +170,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "e28345fd-7f22-410a-b5fa-2483ac2f0a3a"
-      ],
-      "categoryItems": [
-        363103,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["e28345fd-7f22-410a-b5fa-2483ac2f0a3a"],
+      "categoryItems": [363103, 363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -419,15 +188,9 @@
       "endsAt": "2025-06-14T11:50:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "38b21f21-7c7c-4dce-bcf6-fccbe024322c"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["38b21f21-7c7c-4dce-bcf6-fccbe024322c"],
+      "categoryItems": [363104, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -443,16 +206,9 @@
       "endsAt": "2025-06-14T11:50:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "2da23945-2664-4052-a823-d589acc67306",
-        "d41944d9-7f1c-451f-af03-81e1babf0ffe"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["2da23945-2664-4052-a823-d589acc67306", "d41944d9-7f1c-451f-af03-81e1babf0ffe"],
+      "categoryItems": [363103, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -468,15 +224,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "090667ee-847a-4332-a8c5-e8e45cbb5ff0"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["090667ee-847a-4332-a8c5-e8e45cbb5ff0"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -492,15 +242,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "9a4cfb37-8853-4b6c-85b9-fb4614d4920d"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["9a4cfb37-8853-4b6c-85b9-fb4614d4920d"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -516,15 +260,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "a66df690-1299-40cc-89ce-70f4d4386875"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["a66df690-1299-40cc-89ce-70f4d4386875"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -540,15 +278,9 @@
       "endsAt": "2025-06-14T11:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "f0ef1d72-d587-44f2-9499-ee1022d8d9b7"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["f0ef1d72-d587-44f2-9499-ee1022d8d9b7"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -564,14 +296,9 @@
       "endsAt": "2025-06-14T12:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "b00f34ec-82fa-4537-804e-b3c5e249dd54"
-      ],
-      "categoryItems": [
-        363103,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["b00f34ec-82fa-4537-804e-b3c5e249dd54"],
+      "categoryItems": [363103, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -581,22 +308,34 @@
     },
     {
       "id": "926625",
-      "title": "Managing Intelligence: What It Really Takes to Build AI-First Applications",
-      "description": "There's a growing difference between using AI and engineering AI-first systems—systems that can reason, retrieve, act, and improve over time. Behind every polished AI experience lies a coordinated architecture of models, memory, orchestration, and evaluation that requires a fundamentally different approach to system design.\r\n\r\nIn this talk, you'll explore a practical and scalable architecture for building intelligent systems—one that has proven effective across domains like sales assistants, content generators, and development copilots. We'll break down four core principles every AI-first builder must master: orchestration layers that coordinate models and tools, vector search systems that serve as memory, prompt design as intelligent delegation, and evaluation models that monitor and refine outcomes.\r\n\r\nYou'll also learn how to use AI to help build AI-first applications. From AI-assisted coding to automated documentation and intelligent testing, we'll explore how modern builders are leveraging AI not just as a product feature, but as a collaborator in the development process.\r\n\r\nPerfect for AWS developers, architects, and engineering leads ready to go beyond simple integrations. You'll leave with actionable frameworks, common pitfalls to avoid, and strategies for managing intelligence as a core system resource.",
+      "title": "Gestionando Inteligencia: Lo Que Realmente Se Necesita Para Construir Aplicaciones AI-First",
+      "description": "Sistemas capaces de razonar, recuperar información, actuar y mejorar con el tiempo. Detrás de cada experiencia de IA exitosa hay una arquitectura coordinada de modelos, memoria y orquestación que exige un enfoque distinto de diseño.\r\n\r\nEn esta charla, explorarás una arquitectura práctica y escalable para construir sistemas inteligentes—una que ha demostrado ser eficaz en asistentes de ventas, generadores de contenido y copilotos de desarrollo. Verás cómo las capas de orquestación permiten coordinar modelos y herramientas, cómo los sistemas de búsqueda vectorial actúan como memoria y cómo el diseño de prompts funciona como una forma de delegación inteligente.\r\n\r\nTambién descubrirás cómo la IA puede ayudarte a construir aplicaciones centradas en IA. Desde programación asistida hasta documentación automatizada y pruebas inteligentes, exploraremos cómo los desarrolladores modernos usan la IA no solo como una función del producto, sino como colaborador en el proceso de desarrollo.\r\n\r\nIdeal para desarrolladores, arquitectos y líderes de ingeniería en AWS que buscan ir más allá de las integraciones básicas. Saldrás con marcos accionables, errores comunes a evitar y estrategias para gestionar la inteligencia como un recurso clave del sistema.",
       "startsAt": "2025-06-14T11:45:00",
       "endsAt": "2025-06-14T12:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "d9a692e9-8e8a-429c-b8bf-8f496933fc69"
-      ],
-      "categoryItems": [
-        363103,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["3a016616-29df-4bec-87d1-8323c6fef54b"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
+      "liveUrl": null,
+      "recordingUrl": null,
+      "status": "Accepted",
+      "isInformed": true,
+      "isConfirmed": true
+    },
+    {
+      "id": "950740",
+      "title": "Embajadoras en la Nube: El Poder de la Comunidad Femenina en AWS",
+      "description": "En esta charla compartiremos cómo la comunidad AWS Embajadoras Cloud ha sido un espacio de transformación profesional y personal para mujeres apasionadas por la tecnologia de la nube. Exploraremos cómo la representación, el acompañamiento y el liderazgo femenino en tecnología pueden cambiar vidas, abrir oportunidades y romper estereotipos.\r\n\r\nA través de historias reales mostraremos cómo el hacer comunidad crea una red de apoyo y un espacio donde cada una se puede crear sus propias oportunidades para crecer profesionalmente.",
+      "startsAt": "2025-06-14T11:45:00",
+      "endsAt": "2025-06-14T12:15:00",
+      "isServiceSession": false,
+      "isPlenumSession": false,
+      "speakers": ["a95b5b59-1aad-4054-b266-56d1862e136f"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
+      "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
       "status": "Accepted",
@@ -611,15 +350,9 @@
       "endsAt": "2025-06-14T12:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "4481ad61-d745-43fc-bf78-5d0a92d066eb"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["4481ad61-d745-43fc-bf78-5d0a92d066eb"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -635,15 +368,9 @@
       "endsAt": "2025-06-14T12:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "531ab5a7-2ff7-45ba-96a6-fa61a1faf647"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["531ab5a7-2ff7-45ba-96a6-fa61a1faf647"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -659,15 +386,9 @@
       "endsAt": "2025-06-14T12:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "973c097d-d2ce-4c5b-9628-489f882adb15"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["973c097d-d2ce-4c5b-9628-489f882adb15"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -683,15 +404,9 @@
       "endsAt": "2025-06-14T12:35:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "d49d3054-cfd0-4953-824f-9dd08bf124a1"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["d49d3054-cfd0-4953-824f-9dd08bf124a1"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -707,15 +422,9 @@
       "endsAt": "2025-06-14T12:35:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "61d8486b-5a2d-45b8-ab3a-a8a12e8351ce"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["61d8486b-5a2d-45b8-ab3a-a8a12e8351ce"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -731,15 +440,9 @@
       "endsAt": "2025-06-14T12:55:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "5e0d77c7-e4a1-405d-8bdb-19dffca96f82"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["5e0d77c7-e4a1-405d-8bdb-19dffca96f82"],
+      "categoryItems": [363104, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -755,15 +458,9 @@
       "endsAt": "2025-06-14T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "24d5a6c2-62a2-48c0-abd5-02c7e44bd67b"
-      ],
-      "categoryItems": [
-        363103,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["7d336413-0b48-4699-9375-0ba4718822f3"],
+      "categoryItems": [363103, 350079, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -779,15 +476,9 @@
       "endsAt": "2025-06-14T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "ec2db5b6-09a1-4235-90aa-6fc3b237a2cb"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["ec2db5b6-09a1-4235-90aa-6fc3b237a2cb"],
+      "categoryItems": [363104, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -803,15 +494,9 @@
       "endsAt": "2025-06-14T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "8353fa09-a8e8-4eab-956a-c40f8599a7b2"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["8353fa09-a8e8-4eab-956a-c40f8599a7b2"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -827,15 +512,9 @@
       "endsAt": "2025-06-14T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "0d0510f5-2fe3-46f3-8618-e857c43bdf1d"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["0d0510f5-2fe3-46f3-8618-e857c43bdf1d"],
+      "categoryItems": [363104, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -851,15 +530,9 @@
       "endsAt": "2025-06-14T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "19c51e87-6fd3-426c-8337-fba6d48b14a9"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["19c51e87-6fd3-426c-8337-fba6d48b14a9"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -875,15 +548,9 @@
       "endsAt": "2025-06-14T13:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "ebc8e578-869b-417d-8670-119525fb3f35"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["ebc8e578-869b-417d-8670-119525fb3f35"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -892,23 +559,16 @@
       "isConfirmed": true
     },
     {
-      "id": "925276",
-      "title": "Revolucionando los proyectos: de documentos a control y de ideas a historias de usuario con Bedrock",
-      "description": "¿Te imaginas automatizar algunas de las tareas más críticas y demandantes en la gestión de proyectos utilizando inteligencia artificial generativa? En esta sesión exploraremos cómo Amazon Bedrock puede transformar dos momentos clave del ciclo de vida de un proyecto:\r\nLa generación de historias de usuario a partir de descripciones breves y mockups.\r\nEl seguimiento y control del proyecto mediante la extracción automatizada de tareas, acuerdos y reportes a partir de montañas de minutas y documentos.\r\n\r\nCon base en casos reales y dos demostraciones en vivo, mostraremos cómo seleccionar el modelo adecuado en Amazon Bedrock, identificar los casos de uso con mayor potencial, y avanzar desde pruebas de concepto hacia MVPs con un enfoque Lean. Esta charla está dirigida a líderes de proyecto, analistas y equipos técnicos que buscan optimizar sus tiempos, mejorar la trazabilidad y acelerar la entrega de valor con ayuda de la IA generativa.",
+      "id": "918324",
+      "title": "¿Construyendo con LLMs? Estrategias de prevención de vulnerabilidades",
+      "description": "En esta sesión describiremos las principales vulnerabilidadades y amenazas al momento de crear aplicaciones que utilizan Inteligencia Artificail Generativa, así como técnicas y servicios de AWS que ayudan a mitigar estos riesgos y así crear aplicaciones seguras.",
       "startsAt": "2025-06-14T12:50:00",
       "endsAt": "2025-06-14T13:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "5d801d3d-c170-4650-ac0c-a88d598812da",
-        "d59ad2e9-3d41-4dee-933d-f40e3a0e60c4"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["11fcd76a-014c-410f-a450-117e9d78500c"],
+      "categoryItems": [363103, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -924,15 +584,9 @@
       "endsAt": "2025-06-14T13:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "7cb6475f-1ebf-43df-8b37-125d01eb12bf"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["7cb6475f-1ebf-43df-8b37-125d01eb12bf"],
+      "categoryItems": [363104, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -948,15 +602,9 @@
       "endsAt": "2025-06-14T13:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "279479c1-f533-463b-a511-f0517bcc463f"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["279479c1-f533-463b-a511-f0517bcc463f"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -972,15 +620,9 @@
       "endsAt": "2025-06-14T13:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "4b8600d5-7868-4eab-a678-d7c891c5bbcc"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["4b8600d5-7868-4eab-a678-d7c891c5bbcc"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -996,15 +638,9 @@
       "endsAt": "2025-06-14T13:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "8f10c7b1-624d-4063-9a8a-39c8cb092959"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["8f10c7b1-624d-4063-9a8a-39c8cb092959"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1020,15 +656,9 @@
       "endsAt": "2025-06-14T13:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "e6584c5a-0d1a-48c4-99f8-4fde07871d91"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["e6584c5a-0d1a-48c4-99f8-4fde07871d91"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1044,15 +674,9 @@
       "endsAt": "2025-06-14T13:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "d64e778d-169e-4558-b41d-622e52e25b1a"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["d64e778d-169e-4558-b41d-622e52e25b1a"],
+      "categoryItems": [363104, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1068,15 +692,9 @@
       "endsAt": "2025-06-14T13:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "e542dfb6-a545-4012-b2f0-5891b1dbea46"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["e542dfb6-a545-4012-b2f0-5891b1dbea46"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1092,15 +710,9 @@
       "endsAt": "2025-06-14T13:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "c2ab6971-4c1a-48ff-bebe-cf16935534ec"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["c2ab6971-4c1a-48ff-bebe-cf16935534ec"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1116,15 +728,9 @@
       "endsAt": "2025-06-14T15:20:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "8a07cfa0-3880-41d3-a7e1-a54609733c2b"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363101
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["8a07cfa0-3880-41d3-a7e1-a54609733c2b"],
+      "categoryItems": [363102, 350080, 363101],
+      "questionAnswers": [],
       "roomId": 66236,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1140,9 +746,9 @@
       "endsAt": "2025-06-14T14:10:00",
       "isServiceSession": true,
       "isPlenumSession": true,
-      "speakers": [      ],
-      "categoryItems": [      ],
-      "questionAnswers": [      ],
+      "speakers": [],
+      "categoryItems": [],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1158,16 +764,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "77fb5d36-66e5-4ac8-9657-91efc1229bc7",
-        "2082dcfb-ceff-409b-822f-3a932e33f055"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["77fb5d36-66e5-4ac8-9657-91efc1229bc7", "2082dcfb-ceff-409b-822f-3a932e33f055"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1183,16 +782,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "4a82c1f8-e4d8-4988-9e97-bb1b22df7421",
-        "1d727098-e64e-41c9-9a1a-b5b82521b8c3"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["4a82c1f8-e4d8-4988-9e97-bb1b22df7421", "e39a330a-eaa6-41a5-a3eb-df3ea7bd1894"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1208,15 +800,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "6b8fff7a-88cc-4baa-8c78-069070719d0d"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["6b8fff7a-88cc-4baa-8c78-069070719d0d"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1232,15 +818,9 @@
       "endsAt": "2025-06-14T15:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "0deda930-5460-4a29-b7fe-216690abd9db"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["0deda930-5460-4a29-b7fe-216690abd9db"],
+      "categoryItems": [363104, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1256,15 +836,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "7930601e-102c-4696-bab1-d7ad6e189543"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["7930601e-102c-4696-bab1-d7ad6e189543"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1280,16 +854,9 @@
       "endsAt": "2025-06-14T14:50:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "9df75ceb-e056-429c-8ac1-9a57131ee780",
-        "d872ef7d-5792-44aa-8f33-f107fe8e00d3"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["9df75ceb-e056-429c-8ac1-9a57131ee780", "d872ef7d-5792-44aa-8f33-f107fe8e00d3"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1305,15 +872,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "62ddc543-16b6-4c70-8c4d-4e8aa4c5823f"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["62ddc543-16b6-4c70-8c4d-4e8aa4c5823f"],
+      "categoryItems": [363104, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1329,15 +890,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "62b372e8-2c01-4626-afe5-fcd417a73bcd"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["62b372e8-2c01-4626-afe5-fcd417a73bcd"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1353,15 +908,9 @@
       "endsAt": "2025-06-14T14:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "73bdbe68-0573-478a-bb65-383e05536f95"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["73bdbe68-0573-478a-bb65-383e05536f95"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1377,16 +926,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "cafb20bf-e61d-4044-8d7b-07165e653d2d",
-        "b6affd41-8928-46bb-b7d1-de831c4edbc0"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["cafb20bf-e61d-4044-8d7b-07165e653d2d", "b6affd41-8928-46bb-b7d1-de831c4edbc0"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1402,15 +944,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "89247dcf-3db8-46e5-9e8f-f9c3451a0459"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["89247dcf-3db8-46e5-9e8f-f9c3451a0459"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1426,15 +962,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "09fe3759-0db5-4766-93eb-dadb90ae1808"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["09fe3759-0db5-4766-93eb-dadb90ae1808"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1450,15 +980,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "d6b2fa5e-f52b-4286-9ed8-94d0bbb187b6"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["d6b2fa5e-f52b-4286-9ed8-94d0bbb187b6"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1474,15 +998,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "aa88080e-554a-4dc8-ad02-7b38706d34b4"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["aa88080e-554a-4dc8-ad02-7b38706d34b4"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1498,15 +1016,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "c94a614e-fea6-42cb-9093-d3e3a155496e"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["c94a614e-fea6-42cb-9093-d3e3a155496e"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1522,15 +1034,9 @@
       "endsAt": "2025-06-14T15:25:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "77a7eabb-5e0a-4c48-b684-e74705440d6c"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["77a7eabb-5e0a-4c48-b684-e74705440d6c"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1546,16 +1052,9 @@
       "endsAt": "2025-06-14T15:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "2fe0fed8-d6a0-47bc-b880-2bb9718b53b7",
-        "d31a9f79-c895-44f4-83cb-b9d8e2ab8db4"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["2fe0fed8-d6a0-47bc-b880-2bb9718b53b7", "d31a9f79-c895-44f4-83cb-b9d8e2ab8db4"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1571,15 +1070,9 @@
       "endsAt": "2025-06-14T15:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "d0607b6a-9e76-49b6-a6ee-d9cac02ccae2"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["d0607b6a-9e76-49b6-a6ee-d9cac02ccae2"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1595,15 +1088,9 @@
       "endsAt": "2025-06-14T16:10:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "658843f1-b35e-43e3-8b6d-7ff1b9918f2f"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["658843f1-b35e-43e3-8b6d-7ff1b9918f2f"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1619,16 +1106,9 @@
       "endsAt": "2025-06-14T16:10:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "8777a7bf-2ee6-4a63-bcad-307bd8df88b1",
-        "37ef7865-2e9f-4ac6-91d9-6a776166f1e3"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["8777a7bf-2ee6-4a63-bcad-307bd8df88b1", "37ef7865-2e9f-4ac6-91d9-6a776166f1e3"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1644,13 +1124,9 @@
       "endsAt": "2025-06-14T16:10:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "19824590-f027-4f58-a1a4-b5796e4583c6"
-      ],
-      "categoryItems": [
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["19824590-f027-4f58-a1a4-b5796e4583c6"],
+      "categoryItems": [363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1666,16 +1142,9 @@
       "endsAt": "2025-06-14T16:00:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "680406bb-fc79-4d62-b404-31b486ff4668",
-        "11038257-6f74-4ac2-bf82-9fe75a085ec6"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363098
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["680406bb-fc79-4d62-b404-31b486ff4668", "11038257-6f74-4ac2-bf82-9fe75a085ec6"],
+      "categoryItems": [363102, 350080, 363098],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1691,16 +1160,9 @@
       "endsAt": "2025-06-14T16:10:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "f071a0b6-546d-4357-b2bb-63d8cd5bb336",
-        "fec43184-af5b-4ad8-8659-088a8daec3c1"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["f071a0b6-546d-4357-b2bb-63d8cd5bb336", "fec43184-af5b-4ad8-8659-088a8daec3c1"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1716,15 +1178,9 @@
       "endsAt": "2025-06-14T16:10:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "3210ba41-822e-41f1-b9cd-8ec15734fb81"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["3210ba41-822e-41f1-b9cd-8ec15734fb81"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1740,15 +1196,9 @@
       "endsAt": "2025-06-14T16:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "b5a815e5-2e06-4acd-9e45-16b7875ab4e2"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["b5a815e5-2e06-4acd-9e45-16b7875ab4e2"],
+      "categoryItems": [363104, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1764,15 +1214,9 @@
       "endsAt": "2025-06-14T17:40:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "64acbe87-68fb-4f9a-97d5-f7729f08bb9c"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363101
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["64acbe87-68fb-4f9a-97d5-f7729f08bb9c"],
+      "categoryItems": [363103, 350080, 363101],
+      "questionAnswers": [],
       "roomId": 66236,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1788,15 +1232,9 @@
       "endsAt": "2025-06-14T16:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "34544c28-4476-4e7c-a210-ae9b26761caa"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["34544c28-4476-4e7c-a210-ae9b26761caa"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1812,15 +1250,9 @@
       "endsAt": "2025-06-14T16:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "4c0f7763-9f64-496b-bcd1-86b37294c8b9"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["4c0f7763-9f64-496b-bcd1-86b37294c8b9"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1836,15 +1268,9 @@
       "endsAt": "2025-06-14T16:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "fce74a45-0e99-4380-9836-7b3e4ee8d5df"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["fce74a45-0e99-4380-9836-7b3e4ee8d5df"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1860,15 +1286,9 @@
       "endsAt": "2025-06-14T16:55:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "c44239e3-37a4-47bb-b353-0831356643a4"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["c44239e3-37a4-47bb-b353-0831356643a4"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61768,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1886,17 +1306,13 @@
       "isPlenumSession": false,
       "speakers": [
         "e97ed01d-10f4-484b-9568-8996ad55a4c4",
+        "e17e17a0-24d8-4604-90ca-551216900a22",
+        "ea392f17-1ca1-4a5f-b038-de30c9b05bdf",
         "b6affd41-8928-46bb-b7d1-de831c4edbc0",
-        "fb6d2f0f-3276-4c82-9f1a-7b3de5dfa656",
-        "dcb839a5-35c1-45cd-ac0f-d6660fbf66f4",
         "83d4bff9-72a0-494e-b209-d55f7f8ed04f"
       ],
-      "categoryItems": [
-        363102,
-        350079,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "categoryItems": [363102, 350079, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1912,15 +1328,9 @@
       "endsAt": "2025-06-14T16:55:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "ccb19d95-07a0-49e5-bd7a-a580e39efcdf"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["ccb19d95-07a0-49e5-bd7a-a580e39efcdf"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66231,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1936,15 +1346,9 @@
       "endsAt": "2025-06-14T16:45:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "2fe0fed8-d6a0-47bc-b880-2bb9718b53b7"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363098
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["2fe0fed8-d6a0-47bc-b880-2bb9718b53b7"],
+      "categoryItems": [363102, 350080, 363098],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1955,20 +1359,14 @@
     {
       "id": "925302",
       "title": "Transformando datos y realidades: tu primera experiencia con AWS Glue",
-      "description": "Con el propósito de inspirar a mujeres y personas que se inician en el mundo de los datos, se presentará una charla técnica sobre cómo construir tu primer pipeline ETL utilizando AWS Glue y visualizar los resultados en Amazon QuickSight. La sesión abordará el procesamiento de una base de datos que informa indicadores relevantes para comprender la brecha de género y la situación de las mujeres en el ámbito STEM, desde una perspectiva social y humanística. Al finalizar, se compartirán recursos gratuitos que ofrece AWS para profundizar en estos servicios e iniciarse en sus primeras prácticas.",
+      "description": "Con el propósito de inspirar a mujeres y personas que se inician en el mundo de los datos, se presentará una charla técnica sobre cómo construir tu primer pipeline ETL utilizando AWS Glue y visualizar los resultados en Amazon QuickSight. La sesión abordará el procesamiento de una base de datos que informa indicadores relevantes para comprender la brecha de género y la situación de las mujeres en el ámbito STEM, desde una perspectiva social y humanística. ",
       "startsAt": "2025-06-14T16:25:00",
       "endsAt": "2025-06-14T16:55:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "95373137-479c-4cc7-b472-2e2c41de20a6"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["95373137-479c-4cc7-b472-2e2c41de20a6"],
+      "categoryItems": [363102, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -1977,22 +1375,16 @@
       "isConfirmed": true
     },
     {
-      "id": "918324",
-      "title": "¿Construyendo con LLMs? Estrategias de prevención de vulnerabilidades",
-      "description": "En esta sesión describiremos las principales vulnerabilidadades y amenazas al momento de crear aplicaciones que utilizan Inteligencia Artificail Generativa, así como técnicas y servicios de AWS que ayudan a mitigar estos riesgos y así crear aplicaciones seguras.",
+      "id": "922168",
+      "title": "Privacy-First Generative AI, establishing guardrails for compliance",
+      "description": "As generative AI becomes more integrated into business workflows, protecting personal data is not just a best practice; it’s a necessity. We’ll explore how to design privacy-first GenAI applications on AWS by implementing guardrails and data protection mechanisms aligned with regulations such as GDPR and data protection frameworks. You’ll see a demo of Amazon Macie to classify and secure sensitive information. We’ll also demonstrate how to configure Amazon Bedrock Guardrails to prevent the exposure of PII, medical, or financial records. We’ll wrap up by reflecting on how to build responsible AI applications that innovate without compromising user privacy.\r\n\r\nThis session focuses on enabling governance and reducing risk in generative AI by demonstrating how to embed compliance-first thinking into AI application design. \r\nAttendees will learn how AWS services can be orchestrated to classify sensitive data, enforce privacy safeguards, and comply with regulatory frameworks like GDPR. \r\nThis is directly relevant to organizations looking to manage the risk of data exposure and apply strong governance over AI-driven systems.\r\n\r\nTarget Audience\r\n\r\n* CISO\r\n* Security Engineers\r\n* Solutions Architects\r\n* Compliance Officers\r\n* Risk Managers\r\n* Data Engineers\r\n* Developers and ML Engineers\r\n\r\nDesired outcomes\r\n\r\nAttendees will leave with a clear understanding of architecting generative AI applications, prioritizing personal data protection, and complying with regulatory requirements.\r\nThey will gain practical knowledge on leveraging AWS services, such as Amazon Macie and Bedrock Guardrails, to classify sensitive data, enforce privacy boundaries, and meet standards like GDPR.\r\nBeyond technical know-how, the session aims to inspire the audience to embrace ethical and responsible AI development practices.\r\nIt will show that innovation and compliance are not mutually exclusive but can—and should—go hand in hand.\r\nParticipants will leave with a practical roadmap to build GenAI solutions that are secure and aligned with governance frameworks.\r\n\r\n",
       "startsAt": "2025-06-14T16:45:00",
-      "endsAt": "2025-06-14T17:35:00",
+      "endsAt": "2025-06-14T17:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "11fcd76a-014c-410f-a450-117e9d78500c"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["ec0ff5de-a4a3-46a8-bf52-0c761362c2b7"],
+      "categoryItems": [363104, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61770,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2008,15 +1400,9 @@
       "endsAt": "2025-06-14T17:35:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "fdd6c79d-7deb-4465-b177-edd8a864c441"
-      ],
-      "categoryItems": [
-        363104,
-        350080,
-        363100
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["fdd6c79d-7deb-4465-b177-edd8a864c441"],
+      "categoryItems": [363104, 350080, 363100],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2032,15 +1418,9 @@
       "endsAt": "2025-06-14T17:15:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "697e4bca-b182-4376-b40d-5146223538d4"
-      ],
-      "categoryItems": [
-        363102,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["697e4bca-b182-4376-b40d-5146223538d4"],
+      "categoryItems": [363102, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66235,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2056,15 +1436,9 @@
       "endsAt": "2025-06-14T17:05:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "42e80cb3-3250-4a13-b595-3851b808d54b"
-      ],
-      "categoryItems": [
-        363102,
-        350079,
-        363098
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["42e80cb3-3250-4a13-b595-3851b808d54b"],
+      "categoryItems": [363102, 350079, 363098],
+      "questionAnswers": [],
       "roomId": 66234,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2080,15 +1454,9 @@
       "endsAt": "2025-06-14T17:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "ec0928b4-bbbb-44b8-99cc-10834b959e88"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["ec0928b4-bbbb-44b8-99cc-10834b959e88"],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 66233,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2109,12 +1477,8 @@
         "7ba571cb-b0e3-493b-8f71-f0033e554b19",
         "ff3b45f9-9b09-474f-87eb-8f0f3aca5c72"
       ],
-      "categoryItems": [
-        363103,
-        350080,
-        363099
-      ],
-      "questionAnswers": [      ],
+      "categoryItems": [363103, 350080, 363099],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2130,15 +1494,9 @@
       "endsAt": "2025-06-14T17:30:00",
       "isServiceSession": false,
       "isPlenumSession": false,
-      "speakers": [
-        "34544c28-4476-4e7c-a210-ae9b26761caa"
-      ],
-      "categoryItems": [
-        363103,
-        350080,
-        363098
-      ],
-      "questionAnswers": [      ],
+      "speakers": ["34544c28-4476-4e7c-a210-ae9b26761caa"],
+      "categoryItems": [363103, 350080, 363098],
+      "questionAnswers": [],
       "roomId": 66285,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2154,9 +1512,9 @@
       "endsAt": "2025-06-14T18:00:00",
       "isServiceSession": true,
       "isPlenumSession": true,
-      "speakers": [      ],
-      "categoryItems": [      ],
-      "questionAnswers": [      ],
+      "speakers": [],
+      "categoryItems": [],
+      "questionAnswers": [],
       "roomId": 66232,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2172,9 +1530,9 @@
       "endsAt": "2025-06-14T19:00:00",
       "isServiceSession": true,
       "isPlenumSession": true,
-      "speakers": [      ],
-      "categoryItems": [      ],
-      "questionAnswers": [      ],
+      "speakers": [],
+      "categoryItems": [],
+      "questionAnswers": [],
       "roomId": 61769,
       "liveUrl": null,
       "recordingUrl": null,
@@ -2204,11 +1562,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        925172
-      ],
+      "sessions": [925172],
       "fullName": "Adolfo Cabrera",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2231,11 +1587,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        922148
-      ],
+      "sessions": [922148],
       "fullName": "Agustin Villarreal",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2278,12 +1632,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        922975,
-        924303
-      ],
+      "sessions": [922975, 924303],
       "fullName": "Aleja Henao Espitia",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2292,93 +1643,23 @@
       ]
     },
     {
-      "id": "dcb839a5-35c1-45cd-ac0f-d6660fbf66f4",
+      "id": "ea392f17-1ca1-4a5f-b038-de30c9b05bdf",
       "firstName": "Alejandra",
       "lastName": "Bricio",
-      "bio": null,
-      "tagLine": null,
-      "profilePicture": null,
-      "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        935400
-      ],
-      "fullName": "Alejandra Bricio",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
-    },
-    {
-      "id": "c45b6741-eb09-474f-a669-f0144194e376",
-      "firstName": "Alejandro",
-      "lastName": "Lopez",
-      "bio": "AWS Amplify acelera el desarrollo de aplicaciones serverless, pero a medida que los proyectos crecen, surgen necesidades que van más allá de sus capacidades predeterminadas. En esta charla, aprenderás cómo extender tus soluciones usando AWS CDK sin perder la agilidad que ofrece Amplify",
-      "tagLine": "Software Engineer At Pacto",
-      "profilePicture": "https://sessionize.com/image/54f7-400o400o1-K3jMTLcDMLuhuHp7MiyeK.jpg",
+      "bio": "Alejandra Bricio is a Senior Site Reliability Engineer at PayPal who keeps systems running by day and builds thriving AWS communities by night. As AWS User Group Leader and Community Day organizer, she's turned tech meetups into celebrations that span cities and reach thousands of developers who actually show up (and have fun). When she's not speaking at AWS Summit or debugging production issues, she's probably planning the next big community event or teaching someone why the cloud is cooler than they think.",
+      "tagLine": "Site Reliability Engineer at PayPal",
+      "profilePicture": "https://sessionize.com/image/6de1-400o400o1-wZE3J99YABonuQZDY8FZJG.png",
       "isTopSpeaker": false,
       "links": [
-        {
-          "title": "X (Twitter)",
-          "url": "https://x.com/ZayneBit",
-          "linkType": "Twitter"
-        },
-        {
-          "title": "Blog",
-          "url": "https://dev.to/al3xlp",
-          "linkType": "Blog"
-        },
-        {
-          "title": "Company Website",
-          "url": "https://www.pacto.co/",
-          "linkType": "Company_Website"
-        }
-      ],
-      "sessions": [
-        917517
-      ],
-      "fullName": "Alejandro Lopez",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "Mexican"
-        }
-      ]
-    },
-    {
-      "id": "eda906bc-afed-4714-a8ae-12ad3dfd041c",
-      "firstName": "Alejandro",
-      "lastName": "Mercado",
-      "bio": "Alex is the CTO of KMMX, an IT Training and Certification company located in Mexico City.\r\n\r\nWeb & Mobile Developer with over 15 years of experience and 10 years of adding DevOps tools under my belt.\r\n\r\nAWS Community Builder, Technical Writer, and International Speaker. \r\n\r\nI am a proud member of the following programs: GitHub Campus Advisor, GitKraken Ambassador, Progress NativeScript Developer Experts, Auth0 Ambassador, and GitLab Hero.",
-      "tagLine": "DevOps Lead  | K8s | Technical Writer | Dad",
-      "profilePicture": "https://sessionize.com/image/71e4-400o400o1-bc-afed-4714-a8ae-12ad3dfd041c.36263b09-86a5-4f72-9fbd-ad60ee3b111f.jpg",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "X (Twitter)",
-          "url": "https://twitter.com/alexmarket",
-          "linkType": "Twitter"
-        },
         {
           "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/alexmarket/",
+          "url": "https://www.linkedin.com/in/alejandrabricio/",
           "linkType": "LinkedIn"
-        },
-        {
-          "title": "Blog",
-          "url": "https://alexmarket.medium.com",
-          "linkType": "Blog"
-        },
-        {
-          "title": "Company Website",
-          "url": "http://www.kmmx.mx",
-          "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907595
-      ],
-      "fullName": "Alejandro Mercado",
-      "categoryItems": [      ],
+      "sessions": [935400],
+      "fullName": "Alejandra Bricio",
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2411,11 +1692,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        923828
-      ],
+      "sessions": [923828],
       "fullName": "Alex Callejas",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2458,11 +1737,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907398
-      ],
+      "sessions": [907398],
       "fullName": "Alex Parra",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2485,43 +1762,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        910235
-      ],
+      "sessions": [910235],
       "fullName": "Alexis Velásquez Quintero",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "Colombia"
-        }
-      ]
-    },
-    {
-      "id": "76d4dd06-6a53-4b8d-9990-d67d7ba556db",
-      "firstName": "Ana",
-      "lastName": "Barragán",
-      "bio": "Ingeneria de sistemas con Maestría en Ingeniería de Software, experiencia en diseño e implementación de Arqutiecturas orientadas a eventos, microservicios y devops. Actualmente soy Solutions Architect en AWS, hago  parte del AWS Technical Field Community de Serverless. \r\nCofundadora y líder de la comunidad AWS Women Colombia. \r\n\r\n",
-      "tagLine": "Solutions Architect at AWS",
-      "profilePicture": "https://sessionize.com/image/b833-400o400o1-ShpnXADvugnqysgQA9CdPj.jpg",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/ana-milena-barragan-charry/",
-          "linkType": "LinkedIn"
-        },
-        {
-          "title": "Instagram",
-          "url": "https://www.instagram.com/cronopi_ana/",
-          "linkType": "Instagram"
-        }
-      ],
-      "sessions": [
-        909828
-      ],
-      "fullName": "Ana Barragán",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2544,11 +1787,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        921331
-      ],
+      "sessions": [921331],
       "fullName": "Ana Cifuentes",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2591,11 +1832,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        925268
-      ],
+      "sessions": [925268],
       "fullName": "Ana Cunha",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2628,11 +1867,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        922788
-      ],
+      "sessions": [922788],
       "fullName": "Andres Moreno",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2660,11 +1897,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        907393
-      ],
+      "sessions": [907393],
       "fullName": "Angelica Ortega",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2692,11 +1927,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924695
-      ],
+      "sessions": [924695],
       "fullName": "Armando Herra",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2705,30 +1938,28 @@
       ]
     },
     {
-      "id": "d9a692e9-8e8a-429c-b8bf-8f496933fc69",
+      "id": "3a016616-29df-4bec-87d1-8323c6fef54b",
       "firstName": "Arri",
       "lastName": "Rucker",
       "bio": "Arri Rucker es Director de Servicios al Cliente, Américas en DoiT International, donde lidera la entrega de soluciones de ingeniería cloud y FinOps en Norte y Sudamérica. Con más de 20 años de experiencia en tecnología, desempeña un papel clave en definir la estrategia técnica de DoiT y alinear sus capacidades con las prioridades de sus socios y las necesidades emergentes de los clientes.",
-      "tagLine": "Regional Director, Client Services, AMER @ DoiT",
-      "profilePicture": null,
+      "tagLine": "Director de Servicios al Cliente, Américas @ DoiT",
+      "profilePicture": "https://sessionize.com/image/b675-400o400o1-GWpGj8yyTckzveqTSrdmHy.jpg",
       "isTopSpeaker": false,
       "links": [
         {
           "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/enyeto/",
+          "url": "https://linkedin.com/in/enyeto",
           "linkType": "LinkedIn"
         },
         {
           "title": "Company Website",
-          "url": "https://www.doit.com/",
+          "url": "https://www.doit.com",
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        926625
-      ],
+      "sessions": [926625],
       "fullName": "Arri Rucker",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2756,11 +1987,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        926103
-      ],
+      "sessions": [926103],
       "fullName": "Arturo Gallart",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2788,47 +2017,13 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        914327
-      ],
+      "sessions": [914327],
       "fullName": "Asinu Krinis",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
           "answerValue": "Mexico"
-        }
-      ]
-    },
-    {
-      "id": "0ecdf6e8-4186-48f2-aac8-2a0086290a33",
-      "firstName": "Ayhan",
-      "lastName": "Setirekli",
-      "bio": "Hello. My name's Ayhan, and I'm a dedicated Lead DevOps Engineer with over 8 years of experience in the IT / Cloud Computing industry. My career is not just a job; it's my passion, purpose, and lifelong commitment.\r\n\r\nI believe in continuous learning and staying ahead in this dynamic/ever-changing field. I stay current with the latest cloud trends, best practices, and emerging technologies to deliver cutting-edge solutions.\r\n\r\nMy journey in the cloud industry began in 2018 when I joined Inawisdom with zero cloud experience. Through determination, dedication, and a thirst for knowledge, I transformed from a newcomer to a highly skilled individual in AWS, cloud architecture, and more.\r\n\r\nI actively share my knowledge by publishing articles, presenting talks, and participating in public cloud events. Recently, I was honoured to be accepted as an AWS Community Builder, which allows me to learn from others and receive valuable feedback.",
-      "tagLine": "Lead DevOps Engineer (AWS) @ Cognizant | AWS Community Builder | Speaker",
-      "profilePicture": "https://sessionize.com/image/a4eb-400o400o1-JVWSLukPufTFo7jbyJ3qjT.png",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/ayhansetirekli",
-          "linkType": "LinkedIn"
-        },
-        {
-          "title": "Blog",
-          "url": "https://dev.to/ayhansetirekli",
-          "linkType": "Blog"
-        }
-      ],
-      "sessions": [
-        915480
-      ],
-      "fullName": "Ayhan Setirekli",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "English"
         }
       ]
     },
@@ -2847,11 +2042,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        926084
-      ],
+      "sessions": [926084],
       "fullName": "Betsy Mendoza Gomez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2879,12 +2072,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        912887,
-        921931
-      ],
+      "sessions": [912887, 921931],
       "fullName": "Carlos Cano",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2912,11 +2102,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        925378
-      ],
+      "sessions": [925378],
       "fullName": "Carlos Andres Zambrano Barrera",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -2944,15 +2132,48 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        926103
-      ],
+      "sessions": [926103],
       "fullName": "César Ulises Martínez García",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
           "answerValue": "México"
+        }
+      ]
+    },
+    {
+      "id": "ec0ff5de-a4a3-46a8-bf52-0c761362c2b7",
+      "firstName": "Damian Antonio",
+      "lastName": "Gitto Olguin",
+      "bio": "la voy a actualizar luego",
+      "tagLine": "CTO & Co-founder Teracloud , AWS Community HERO, AWS Community Leader",
+      "profilePicture": "https://sessionize.com/image/7490-400o400o1-Jw6KNeqqrWgjCTwhdHRiX7.jpg",
+      "isTopSpeaker": false,
+      "links": [
+        {
+          "title": "X (Twitter)",
+          "url": "https://twitter.com/enlink",
+          "linkType": "Twitter"
+        },
+        {
+          "title": "LinkedIn",
+          "url": "https://www.linkedin.com/in/damianolguin/",
+          "linkType": "LinkedIn"
+        },
+        {
+          "title": "Company Website",
+          "url": "https://www.teracloud.io/",
+          "linkType": "Company_Website"
+        }
+      ],
+      "sessions": [922168],
+      "fullName": "Damian Antonio Gitto Olguin",
+      "categoryItems": [],
+      "questionAnswers": [
+        {
+          "questionId": 100798,
+          "answerValue": "Argentino"
         }
       ]
     },
@@ -2986,11 +2207,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924440
-      ],
+      "sessions": [924440],
       "fullName": "Daniel Paredes",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3006,12 +2225,10 @@
       "tagLine": "Solutions Architect @ AWS",
       "profilePicture": "https://sessionize.com/image/454a-400o400o1-fLRr2af64YT3wuPRBHzins.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        908647
-      ],
+      "links": [],
+      "sessions": [908647],
       "fullName": "David Sanchez Almanza",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3027,13 +2244,11 @@
       "tagLine": null,
       "profilePicture": null,
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        935400
-      ],
+      "links": [],
+      "sessions": [935400],
       "fullName": "David Victoria",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
+      "categoryItems": [],
+      "questionAnswers": []
     },
     {
       "id": "64acbe87-68fb-4f9a-97d5-f7729f08bb9c",
@@ -3060,11 +2275,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        921930
-      ],
+      "sessions": [921930],
       "fullName": "David Jonathan Sol Llaven",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3073,45 +2286,27 @@
       ]
     },
     {
-      "id": "1d727098-e64e-41c9-9a1a-b5b82521b8c3",
+      "id": "e39a330a-eaa6-41a5-a3eb-df3ea7bd1894",
       "firstName": "Dennys",
-      "lastName": "Christian Mallqui",
-      "bio": null,
-      "tagLine": null,
-      "profilePicture": null,
-      "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        938317
-      ],
-      "fullName": "Dennys Christian Mallqui",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
-    },
-    {
-      "id": "5d801d3d-c170-4650-ac0c-a88d598812da",
-      "firstName": "Diana",
-      "lastName": "Castro",
-      "bio": "Actualmente CTO de Innovative by Novacomp, con mas de 20 años de experiencia en la industria de la tecnología, en los últimos 4 años muy enfocada en soluciones basadas en la nube de AWS.  Con una participación activa en la comunidad tecnológica, destacando el rol como AWS Community Builder y líder del AWS User Group San José Costa Rica, donde he impulsado el intercambio de conocimientos y mejores prácticas en la nube.\r\nMis principales áreas de interés incluyen:\r\n•\tOptimización de costos en la nube: Implementando estrategias para maximizar la eficiencia y reducir gastos innecesarios.\r\n•\tAseguramiento de cargas de trabajo: Garantizando la seguridad, escalabilidad y disponibilidad de las aplicaciones en entornos cloud.\r\n•\tPotenciar el uso de IA generativa: Aprovechando herramientas de inteligencia artificial para mejorar la eficiencia operativa y fortalecer la seguridad en los procesos tecnológicos.\r\nParticipé en AWSome Women Perú como expositora y cómo Líder de la Sala CertifiHer",
-      "tagLine": "CTO innovative by Novacomp,   AWS User Group Leader y AWS CB",
-      "profilePicture": "https://sessionize.com/image/7b9b-400o400o1-h1ENs4Ees1BmtYu9tki5gC.jpg",
+      "lastName": "Mallqui",
+      "bio": "As a seasoned professional with an extensive career in financial services and telecommunications, I have excelled as a manager and technology advisor, leading the management of complex IT systems, creation of strategic roadmaps, and evolution of application landscapes. Renowned for my ability to pinpoint and integrate optimal software solutions, I've consistently delivered high-ROI initiatives across Latin America.\r\nCurrently, leveraging the transformative potential of Artificial Intelligence (AI), particularly AI Agents and Large Language Models (LLMs)",
+      "tagLine": "IBM Consulting, Practice Leader Data & AI Transformation",
+      "profilePicture": "https://sessionize.com/image/4853-400o400o1-MHPXRVaSk8Xm52gvrXiYuU.png",
       "isTopSpeaker": false,
       "links": [
         {
           "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/diana-castro-54167755/",
+          "url": "https://www.linkedin.com/in/dennys-mallqui/",
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        925276
-      ],
-      "fullName": "Diana Castro",
-      "categoryItems": [      ],
+      "sessions": [938317],
+      "fullName": "Dennys Mallqui",
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
-          "answerValue": "Costarricense"
+          "answerValue": "Peru"
         }
       ]
     },
@@ -3135,11 +2330,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907565
-      ],
+      "sessions": [907565],
       "fullName": "Diego Herrera",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3162,11 +2355,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        927117
-      ],
+      "sessions": [927117],
       "fullName": "Diego Lopez Ruelas",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3189,11 +2380,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        910729
-      ],
+      "sessions": [910729],
       "fullName": "Diego Miguel Sandoval Fernández",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3209,12 +2398,10 @@
       "tagLine": "Systems Architect I @ EPAM Systems",
       "profilePicture": "https://sessionize.com/image/a444-400o400o1-XZe7r9KiVsXsyQjToraswp.png",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925335
-      ],
+      "links": [],
+      "sessions": [925335],
       "fullName": "Eduardo Camacho",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3242,11 +2429,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        914107
-      ],
+      "sessions": [914107],
       "fullName": "Eduardo García",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3279,57 +2464,13 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        926626
-      ],
+      "sessions": [926626],
       "fullName": "Eduardo Mota",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
           "answerValue": "Mexico/Canada"
-        }
-      ]
-    },
-    {
-      "id": "f925cc20-94ee-403b-ac4e-a69e609c5aff",
-      "firstName": "Eduardo",
-      "lastName": "Spotti",
-      "bio": "I'm a passionate professional about business, entrepreneurship, technology, continue improving of human and technical skills to me and teams that I worked.\r\nI'm acquired experience and knowledge in differents roles and practices that I like share and still learning from others. I was fortunate to work in the largest companies in our region and the globe. Argentine Telecom, Globant, Mercadolibre, Amazon Web Services\r\nMy mainly skill topics are SaaS, Platform engineering, SRE, Dev(Sec)Ops, Agile, Lean and Cloud Architecture.\r\nI'm a football fan, animal lover, MMA practitioner and father of two beautiful childs.",
-      "tagLine": "Founder & CEO @Crubyt - Ambassador @CNCF @DevOpsInstitute - Leader @KCDArgentina @AWSSec UG",
-      "profilePicture": "https://sessionize.com/image/15a8-400o400o1-LLzfJ4Jz9X8QucgwhewHgy.jpg",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "X (Twitter)",
-          "url": "https://twitter.com/espotti",
-          "linkType": "Twitter"
-        },
-        {
-          "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/eduardo-spotti",
-          "linkType": "LinkedIn"
-        },
-        {
-          "title": "Instagram",
-          "url": "https://instagram.com/eduspotti",
-          "linkType": "Instagram"
-        },
-        {
-          "title": "Company Website",
-          "url": "https://www.crubyt.com",
-          "linkType": "Company_Website"
-        }
-      ],
-      "sessions": [
-        915715
-      ],
-      "fullName": "Eduardo Spotti",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "Argentino"
         }
       ]
     },
@@ -3368,11 +2509,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        923934
-      ],
+      "sessions": [923934],
       "fullName": "Edwin Moedano",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3395,11 +2534,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        924613
-      ],
+      "sessions": [924613],
       "fullName": "Elisa Zamarrón",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3415,12 +2552,10 @@
       "tagLine": "DevOps Engineer @ Globant",
       "profilePicture": "https://sessionize.com/image/6582-400o400o1-KiXf4684T931BwXeycXziT.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        926683
-      ],
+      "links": [],
+      "sessions": [926683],
       "fullName": "Emily Martinez Monroy",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3443,11 +2578,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        913671
-      ],
+      "sessions": [913671],
       "fullName": "Esau Reyes",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3475,11 +2608,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        927117
-      ],
+      "sessions": [927117],
       "fullName": "Ethan Patricio Rivera Saldivar",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3495,12 +2626,10 @@
       "tagLine": "Uala, DevOps Manager",
       "profilePicture": "https://sessionize.com/image/ec51-400o400o1-Jau7ABgZBaaVstqofs7cKX.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        926779
-      ],
+      "links": [],
+      "sessions": [926779],
       "fullName": "Felipe Mendoza",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3516,12 +2645,10 @@
       "tagLine": "Staff Software Engineer @ Nu",
       "profilePicture": "https://sessionize.com/image/b9a2-400o400o1-TXAjbkC13vt2U59Sgv3Loi.png",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        926084
-      ],
+      "links": [],
+      "sessions": [926084],
       "fullName": "Fortino Gutierrez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3530,20 +2657,23 @@
       ]
     },
     {
-      "id": "fb6d2f0f-3276-4c82-9f1a-7b3de5dfa656",
+      "id": "e17e17a0-24d8-4604-90ca-551216900a22",
       "firstName": "Franchesco",
       "lastName": "Romero",
-      "bio": null,
-      "tagLine": null,
-      "profilePicture": null,
+      "bio": "Passionate technologist with two decades of hands-on experience building cloud infrastructure and security solutions. I thrive on solving complex DevOps challenges and know how to make enterprise systems more secure and efficient. I am currently focused on building scalable security and access management platforms. AWS Community Builder and a frequent speaker at cloud technology events.",
+      "tagLine": "Staff Platform Engineer",
+      "profilePicture": "https://sessionize.com/image/127e-400o400o1-nuoJUE9rfEQyRDWboyidKf.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        935400
-      ],
+      "links": [],
+      "sessions": [935400],
       "fullName": "Franchesco Romero",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
+      "categoryItems": [],
+      "questionAnswers": [
+        {
+          "questionId": 100798,
+          "answerValue": "Mexico"
+        }
+      ]
     },
     {
       "id": "d49d3054-cfd0-4953-824f-9dd08bf124a1",
@@ -3580,70 +2710,15 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907372
-      ],
+      "sessions": [907372],
       "fullName": "Gabriel Torres",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
           "answerValue": "Ecuador"
         }
       ]
-    },
-    {
-      "id": "d59ad2e9-3d41-4dee-933d-f40e3a0e60c4",
-      "firstName": "Gerardo",
-      "lastName": "Arroyo",
-      "bio": "Gerardo Arroyo es Cloud Director en Novacomp, con más de 25 años de experiencia en el sector tecnológico como desarrollador, consultor y empresario. Su misión es diseñar, implementar y gestionar la arquitectura cloud de clientes, optimizando rendimiento, seguridad y escalabilidad. \r\nApasionado por AWS y la Inteligencia Artificial Generativa, Gerardo cuenta con 9 certificaciones AWS y es reconocido como AWS Community Builder y líder de grupo de usuarios. A través de su blog personal comparte experiencias reales con AWS, desde arquitecturas cloud hasta implementaciones prácticas de IA Generativa. \r\nSu expertise técnico se centra en Amazon Bedrock,  arquitecturas de nube avanzadas y soluciones de IA Generativa para empresas. Gerardo ha liderado transformaciones tecnológicas significativas, como la modernización de aplicaciones Java utilizando Amazon Q Developer.\r\n",
-      "tagLine": "Arquitecto Cloud | AWS Community Builder | AWS User Gorup Leader | Evangelista de IA Generativa | 9x AWS Certificado | Orador Internacional",
-      "profilePicture": "https://sessionize.com/image/7761-400o400o1-RXg3NystqMaDymAsG86ku1.jpg",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "X (Twitter)",
-          "url": "https://x.com/codewarrior506",
-          "linkType": "Twitter"
-        },
-        {
-          "title": "LinkedIn",
-          "url": "https://linkedin.com/in/codewarriorcr",
-          "linkType": "LinkedIn"
-        },
-        {
-          "title": "Blog",
-          "url": "https://gerardo.dev",
-          "linkType": "Blog"
-        }
-      ],
-      "sessions": [
-        925276
-      ],
-      "fullName": "Gerardo Arroyo",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "Costa Rica"
-        }
-      ]
-    },
-    {
-      "id": "24c47f6e-f5af-4d5a-94e3-d4ac8444942f",
-      "firstName": "Gerardo",
-      "lastName": "Castro",
-      "bio": null,
-      "tagLine": null,
-      "profilePicture": null,
-      "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        947312
-      ],
-      "fullName": "Gerardo Castro",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
     },
     {
       "id": "11fcd76a-014c-410f-a450-117e9d78500c",
@@ -3660,11 +2735,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        918324
-      ],
+      "sessions": [918324],
       "fullName": "Gilberto Canales",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3680,12 +2753,10 @@
       "tagLine": "Head of  Cloud & SRE Practice en Wizeline",
       "profilePicture": "https://sessionize.com/image/a345-400o400o1-BLAesJAyU9uMvDmmgJMjD6.png",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925346
-      ],
+      "links": [],
+      "sessions": [925346],
       "fullName": "Girish Dudhwal",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3701,12 +2772,10 @@
       "tagLine": "Solution Architect at RedHat",
       "profilePicture": "https://sessionize.com/image/825a-400o400o1-VCrUVVpXQYSaox4PN2fp4F.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        912887
-      ],
+      "links": [],
+      "sessions": [912887],
       "fullName": "Gloria Palma",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3722,12 +2791,10 @@
       "tagLine": "Cloud DevOps Engineer @ SoftServe",
       "profilePicture": "https://sessionize.com/image/265a-400o400o1-peLjF5tjAGgeCYM24NGi1j.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        926104
-      ],
+      "links": [],
+      "sessions": [926104],
       "fullName": "Guillermo Manuel Galvan Soltero",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3760,11 +2827,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        913843
-      ],
+      "sessions": [913843],
       "fullName": "Hazel Saenz",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3792,11 +2857,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        925309
-      ],
+      "sessions": [925309],
       "fullName": "Hector Zelaya",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3834,11 +2897,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907436
-      ],
+      "sessions": [907436],
       "fullName": "Héctor Iván Castañeda Nazario",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3852,7 +2913,7 @@
       "lastName": "Monola",
       "bio": "Soy ingeniero mecatrónico con sólida experiencia como arquitecto de soluciones en la nube, especializado en servicios de inteligencia artificial, data y seguridad sobre AWS. A lo largo de mi carrera he combinado habilidades con una fuerte orientación al negocio, liderando iniciativas que integran servicios como Amazon Bedrock, Amazon Personalize y Amazon OpenSearch Serverless, Amazon Q entre otras, para resolver desafíos reales de los clientes.\r\n\r\nLlevo más de 8 años dentro TD SYNNEX y una de mis pasiones es compartir conocimiento y rodearme de personas que comparten mis mismas pasiones.",
       "tagLine": "TD SYNNEX, Arquitecto de Soluciones",
-      "profilePicture": "https://sessionize.com/image/302e-400o400o1-QVWdByFqDeTSJHtbEKAQJr.jpg",
+      "profilePicture": "https://sessionize.com/image/5db2-400o400o1-9Xhi7BUqh8n8xLjLDnfxnu.jpg",
       "isTopSpeaker": false,
       "links": [
         {
@@ -3866,11 +2927,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907521
-      ],
+      "sessions": [907521],
       "fullName": "Ivan Monola",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3908,11 +2967,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924904
-      ],
+      "sessions": [924904],
       "fullName": "Jaime Rios",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3945,11 +3002,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        925462
-      ],
+      "sessions": [925462],
       "fullName": "Jeff Barr",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -3982,11 +3037,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        914112
-      ],
+      "sessions": [914112],
       "fullName": "Jesus Raul Jimenez Perez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4014,11 +3067,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        925304
-      ],
+      "sessions": [925304],
       "fullName": "Joice Chavez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4031,7 +3082,7 @@
       "firstName": "Jorge",
       "lastName": "Moran",
       "bio": "24 years of experience as an IT Specialist, IT Architect and IT Consultant. I gained experience in the full project lifecycle from people management, project management, team leader, business analysis, design and implementation, build through to implementation. The last eight years I had been working for the Client Innovation Center on worldwide technology modernization projects working on\r\nCloud, Analytics, Mobile and Security. I'm proficient in Cloud architecture and technologies, modernization and migration approaches. I’m AWS Certified\r\nSolutions Architect - Professional and Subject Matter Expert in the methodology and tools of IBM Application Cloud Modernization that are differentiators in the market and core in the IBM Cloud Modernization offerings.",
-      "tagLine": "IBM, Practice Leader",
+      "tagLine": "IBM Consulting, AWS Migration & Modernization Practice Leader",
       "profilePicture": "https://sessionize.com/image/2438-400o400o1-sxi1NBC1qc9ffsRC2E5Z9L.jpg",
       "isTopSpeaker": false,
       "links": [
@@ -4046,11 +3097,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        938317
-      ],
+      "sessions": [938317],
       "fullName": "Jorge Moran",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4078,11 +3127,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        907396
-      ],
+      "sessions": [907396],
       "fullName": "Joryer Jesus Jimenez Lopez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4115,57 +3162,13 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924863
-      ],
+      "sessions": [924863],
       "fullName": "Jose Verbel Tous",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
           "answerValue": "Colombia"
-        }
-      ]
-    },
-    {
-      "id": "e82ec216-a0cc-428c-8394-d0b715fa225c",
-      "firstName": "Jose Carlos",
-      "lastName": "Cabrera Rodríguez",
-      "bio": "Jose Carlos Cabrera Rodriguez is a 22-year-old professional with a degree in Financial Management and currently pursuing a degree in Software Engineering. With a strong passion for cybersecurity, data protection, the stock market, and finance, he has developed a unique multidisciplinary perspective that bridges technology and strategy. He currently works as a Security Analyst at a 24/7 (SOC), where he focuses on monitoring, detecting, and responding to cybersecurity incidents in real time. His work has given him a deep understanding of the importance of safeguarding digital assets and the practical ways in which cybersecurity directly impacts. He believes that cybersecurity is no longer a niche topic it’s a vital part of financial strategy and risk management that everyone should be familiar with. Whether you’re a business owner, investor, or simply someone, understanding how to protect sensitive information is key in today’s digital world.A passionate learner and natural communicator.",
-      "tagLine": "Converge",
-      "profilePicture": "https://sessionize.com/image/d179-400o400o1-JoLiEMusQWVkZxEc3FfJnp.jpg",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "X (Twitter)",
-          "url": "https://x.com/joscarloscab1?s=21",
-          "linkType": "Twitter"
-        },
-        {
-          "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/jose-carlos-cabrera-rodriguez-6469b1238?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
-          "linkType": "LinkedIn"
-        },
-        {
-          "title": "Instagram",
-          "url": "https://www.instagram.com/josecabrod?igsh=MWduZzdlZGJobjBuMA%3D%3D&utm_source=qr",
-          "linkType": "Instagram"
-        },
-        {
-          "title": "Company Website",
-          "url": "https://convergetp.com",
-          "linkType": "Company_Website"
-        }
-      ],
-      "sessions": [
-        908725
-      ],
-      "fullName": "Jose Carlos Cabrera Rodríguez",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "Mexico"
         }
       ]
     },
@@ -4189,11 +3192,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        923881
-      ],
+      "sessions": [923881],
       "fullName": "Juan Mejia",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4202,30 +3203,23 @@
       ]
     },
     {
-      "id": "24d5a6c2-62a2-48c0-abd5-02c7e44bd67b",
+      "id": "7d336413-0b48-4699-9375-0ba4718822f3",
       "firstName": "Kanwar",
       "lastName": "Kohli",
       "bio": "Kanwar Kohli is the Director of Platform Engineering at Collectors, where he leads the team behind the cloud and platform transformation fueling the future of collecting. With a track record across Fortune 500s and startups, Kanwar brings bold technical vision and inspiring leadership—enabling teams to scale infrastructure, move fast, and build the foundation for breakthrough product innovation across the collectibles ecosystem.",
       "tagLine": "Director of Platform Engineering @ Collectors",
-      "profilePicture": "https://sessionize.com/image/0222-400o400o1-Pyj7xhLUhXmgkdGsjVKcgF.jpg",
+      "profilePicture": "https://sessionize.com/image/69be-400o400o1-pDkTBQqAWiZthNKTJkMZwb.jpg",
       "isTopSpeaker": false,
       "links": [
         {
           "title": "LinkedIn",
           "url": "https://www.linkedin.com/in/kanwar-kohli",
           "linkType": "LinkedIn"
-        },
-        {
-          "title": "Company Website",
-          "url": "https://collectors.com",
-          "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        926087
-      ],
+      "sessions": [926087],
       "fullName": "Kanwar Kohli",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4248,11 +3242,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        919784
-      ],
+      "sessions": [919784],
       "fullName": "Kelvin Alvarado",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4295,11 +3287,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907315
-      ],
+      "sessions": [907315],
       "fullName": "Leonardo Covarrubias García",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4337,11 +3327,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        906143
-      ],
+      "sessions": [906143],
       "fullName": "Luis Guirigay",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4357,13 +3345,11 @@
       "tagLine": null,
       "profilePicture": "https://sessionize.com/image/9577-400o400o1-T2BBBJH9Goz1jfi4YMyzLg.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        948609
-      ],
+      "links": [],
+      "sessions": [948609],
       "fullName": "Luis Ortiz",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
+      "categoryItems": [],
+      "questionAnswers": []
     },
     {
       "id": "62b372e8-2c01-4626-afe5-fcd417a73bcd",
@@ -4380,11 +3366,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        919291
-      ],
+      "sessions": [919291],
       "fullName": "M Camila Castano",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4417,11 +3401,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        921305
-      ],
+      "sessions": [921305],
       "fullName": "Manuel Perez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4459,11 +3441,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        907878
-      ],
+      "sessions": [907878],
       "fullName": "Manuel Vidaurre",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4491,11 +3471,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        925345
-      ],
+      "sessions": [925345],
       "fullName": "Marco Antonio Mendoza Ramos",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4518,11 +3496,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        921281
-      ],
+      "sessions": [921281],
       "fullName": "Mario Meza",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4538,12 +3514,10 @@
       "tagLine": "Director, ETS - Cloud Platforms @ AstraZeneca",
       "profilePicture": "https://sessionize.com/image/b09b-400o400o1-RH4MpKgqUXvJcKote4Hg9e.png",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925340
-      ],
+      "links": [],
+      "sessions": [925340],
       "fullName": "Mauricio Barrera",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4581,11 +3555,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        915089
-      ],
+      "sessions": [915089],
       "fullName": "Megha Kadur",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4618,11 +3590,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        907396
-      ],
+      "sessions": [907396],
       "fullName": "Miguel Zamudio Olsin",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4645,11 +3615,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        921298
-      ],
+      "sessions": [921298],
       "fullName": "Natalia Reyes",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4682,11 +3650,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924484
-      ],
+      "sessions": [924484],
       "fullName": "Nataliya Ershova",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4714,12 +3680,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        925268,
-        935400
-      ],
+      "sessions": [925268, 935400],
       "fullName": "Nelly Andrade",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4747,11 +3710,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        924907
-      ],
+      "sessions": [924907],
       "fullName": "Patricio Maya",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4767,13 +3728,11 @@
       "tagLine": null,
       "profilePicture": null,
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925332
-      ],
+      "links": [],
+      "sessions": [925332],
       "fullName": "PD PD",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
+      "categoryItems": [],
+      "questionAnswers": []
     },
     {
       "id": "19824590-f027-4f58-a1a4-b5796e4583c6",
@@ -4783,13 +3742,11 @@
       "tagLine": null,
       "profilePicture": null,
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925334
-      ],
+      "links": [],
+      "sessions": [925334],
       "fullName": "PD PD",
-      "categoryItems": [      ],
-      "questionAnswers": [      ]
+      "categoryItems": [],
+      "questionAnswers": []
     },
     {
       "id": "0d0510f5-2fe3-46f3-8618-e857c43bdf1d",
@@ -4811,11 +3768,9 @@
           "linkType": "Blog"
         }
       ],
-      "sessions": [
-        925324
-      ],
+      "sessions": [925324],
       "fullName": "Ramon Esparza",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4848,11 +3803,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924907
-      ],
+      "sessions": [924907],
       "fullName": "Ramsés Mata",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4880,11 +3833,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        910841
-      ],
+      "sessions": [910841],
       "fullName": "Ricardo Vasquez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4900,12 +3851,10 @@
       "tagLine": "Global Head of Cloud & Infrastructure",
       "profilePicture": "https://sessionize.com/image/5f4d-400o400o1-KJL3APxfuQz3C9mSrx34yL.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925338
-      ],
+      "links": [],
+      "sessions": [925338],
       "fullName": "Robert Wenier",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4933,6 +3882,11 @@
           "linkType": "LinkedIn"
         },
         {
+          "title": "Facebook",
+          "url": "https://www.facebook.com/romeniaishiyama",
+          "linkType": "Facebook"
+        },
+        {
           "title": "Instagram",
           "url": "https://www.instagram.com/roma_vegan/",
           "linkType": "Instagram"
@@ -4948,11 +3902,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        925094
-      ],
+      "sessions": [925094],
       "fullName": "Romenia Ishiyama",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -4980,11 +3932,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        935400
-      ],
+      "sessions": [935400],
       "fullName": "Ross Barich",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5027,11 +3977,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        929100
-      ],
+      "sessions": [929100],
       "fullName": "Rossana Suarez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5064,11 +4012,9 @@
           "linkType": "Company_Website"
         }
       ],
-      "sessions": [
-        924907
-      ],
+      "sessions": [924907],
       "fullName": "Sebastian Marines",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5091,48 +4037,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        907393
-      ],
+      "sessions": [907393],
       "fullName": "Sherley Medina",
-      "categoryItems": [      ],
-      "questionAnswers": [
-        {
-          "questionId": 100798,
-          "answerValue": "Mexico"
-        }
-      ]
-    },
-    {
-      "id": "479ab58d-ec9d-4840-887e-4bf351cb94c4",
-      "firstName": "Socrates",
-      "lastName": "Ruiz",
-      "bio": "I'm a computer engineer and a developer at my core, so I would rather work on hands-on tasks in the projects than making Power Point presentations. I have worked in Mexico, Spain and now Germany in Data Insights for several industries and I'm also part of the AWS Community Builders program, so I want to share the experience I have had in the cloud and data fields.",
-      "tagLine": "Principal Cloud Architect at Data Insights ",
-      "profilePicture": "https://sessionize.com/image/ad94-400o400o1-JDiKRxyMUuG5VsjRuUbqLN.jpg",
-      "isTopSpeaker": false,
-      "links": [
-        {
-          "title": "LinkedIn",
-          "url": "https://www.linkedin.com/in/socrates-ruiz-s",
-          "linkType": "LinkedIn"
-        },
-        {
-          "title": "Blog",
-          "url": "https://dev.to/socratesruiz",
-          "linkType": "Blog"
-        },
-        {
-          "title": "Company Website",
-          "url": "https://datainsights.de/",
-          "linkType": "Company_Website"
-        }
-      ],
-      "sessions": [
-        917177
-      ],
-      "fullName": "Socrates Ruiz",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5160,11 +4067,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        921331
-      ],
+      "sessions": [921331],
       "fullName": "Sofy Romero",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5187,11 +4092,39 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        922876
-      ],
+      "sessions": [922876],
       "fullName": "Stephani Villanueva",
-      "categoryItems": [      ],
+      "categoryItems": [],
+      "questionAnswers": [
+        {
+          "questionId": 100798,
+          "answerValue": "Mexico"
+        }
+      ]
+    },
+    {
+      "id": "a95b5b59-1aad-4054-b266-56d1862e136f",
+      "firstName": "Verónica",
+      "lastName": "Rivera",
+      "bio": "AWS Community Builder y Community Leader en México. Acreedora de la beca All Builders Welcome Grant de AWS 2023. Cloud developer mexicana con +10 años de experiencia trabajando en desarrollo backend y 5 años en la nube. Me gusta combinar lo técnico con lo humano en cada proyecto, me encanta impulsar la participación femenina en tecnología de la nube y compartir conocimiento",
+      "tagLine": "Community Leader, Cloud Developer",
+      "profilePicture": "https://sessionize.com/image/30be-400o400o1-VQD1TSLth8depwVqDX1MZs.jpg",
+      "isTopSpeaker": false,
+      "links": [
+        {
+          "title": "LinkedIn",
+          "url": "https://linkedin.com/feed/riverave",
+          "linkType": "LinkedIn"
+        },
+        {
+          "title": "Instagram",
+          "url": "https://www.instagram.com/veroniica.tech",
+          "linkType": "Instagram"
+        }
+      ],
+      "sessions": [950740],
+      "fullName": "Verónica Rivera",
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5207,12 +4140,10 @@
       "tagLine": "Solutions Engineering Leader LATAM @ Grafana Labs",
       "profilePicture": "https://sessionize.com/image/e6eb-400o400o1-MKrj5Cxc1fmfbSiHpoW3UN.jpg",
       "isTopSpeaker": false,
-      "links": [      ],
-      "sessions": [
-        925341
-      ],
+      "links": [],
+      "sessions": [925341],
       "fullName": "Victor Ramirez",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5235,11 +4166,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        907902
-      ],
+      "sessions": [907902],
       "fullName": "Vinicius Silva",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5272,11 +4201,9 @@
           "linkType": "Instagram"
         }
       ],
-      "sessions": [
-        912002
-      ],
+      "sessions": [912002],
       "fullName": "Yslen González",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,
@@ -5299,11 +4226,9 @@
           "linkType": "LinkedIn"
         }
       ],
-      "sessions": [
-        925302
-      ],
+      "sessions": [925302],
       "fullName": "Zaira Chavarín",
-      "categoryItems": [      ],
+      "categoryItems": [],
       "questionAnswers": [
         {
           "questionId": 100798,

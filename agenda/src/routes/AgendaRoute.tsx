@@ -9,10 +9,29 @@ import {
   SpaceBetween,
   Header,
   Button,
+  Box,
 } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router';
 import sessionsData from '../data/sessions-transformed.json';
 import { getSessionCardDefinition } from '../components/SessionCard';
+
+// Importar logos de sponsors
+// @ts-ignore
+import astraZenecaLogo from '../assets/sponsors/AZ_RGB_H_COL.PNG';
+import awsLogo from '../assets/sponsors/AWS_Logo_color.png';
+import capitalOneLogo from '../assets/sponsors/_Web-C1_Core_K.png';
+import doitLogo from '../assets/sponsors/DoiT_Logo_Ink_Spark.png';
+import caylentLogo from '../assets/sponsors/Caylent Logo Black.png';
+import nuLogo from '../assets/sponsors/01_nulogo_the-purple.png';
+import ibmLogo from '../assets/sponsors/IBM_logo®_pos_blue60_RGB.png';
+import epamLogo from '../assets/sponsors/EPAM_LOGO_Black.png';
+import softServeLogo from '../assets/sponsors/SoftServe logo.png';
+import collectorsLogo from '../assets/sponsors/Collectors_Logo_Black_RGB.png';
+import ualaLogo from '../assets/sponsors/Uala_Logo_Lockup_Horizontal_FondoBlanco.png';
+import wizelineLogo from '../assets/sponsors/Main_Logo_digital (1).png';
+import globantLogo from '../assets/sponsors/1-Original.png'; // Usando el mismo por ahora
+import zillowLogo from '../assets/sponsors/Zillow Logo_Primary.png';
+import grafanaLogo from '../assets/sponsors/Grafana_Logo_Stacked_FullColor_dark (1).png';
 
 // Definición de la interfaz para los presentadores
 interface SpeakerType {
@@ -36,6 +55,157 @@ interface SessionType {
   Nationality?: string; // Campo para la nacionalidad (mantenemos por compatibilidad)
 }
 
+// Definición de la interfaz para los sponsors
+interface SponsorType {
+  id: string;
+  name: string;
+  tier: 'Diamante' | 'Oro' | 'Plata' | 'Bronce';
+  logoUrl: string;
+  websiteUrl: string;
+  type: 'sponsor';
+}
+
+// Definición de la unión de tipos para items que pueden ser sesiones o sponsors
+type ItemType = SessionType | SponsorType;
+
+// Definición de los sponsors por tier
+const SPONSORS_DATA = {
+  Diamante: [
+    {
+      id: 'sponsor-astrazeneca',
+      name: 'AstraZeneca',
+      logoUrl: astraZenecaLogo,
+      websiteUrl: 'https://www.astrazeneca.com',
+    },
+    { id: 'sponsor-aws', name: 'AWS', logoUrl: awsLogo, websiteUrl: 'https://aws.amazon.com' },
+    {
+      id: 'sponsor-capitalone',
+      name: 'CapitalOne',
+      logoUrl: capitalOneLogo,
+      websiteUrl: 'https://www.capitalone.com',
+    },
+    {
+      id: 'sponsor-doit',
+      name: 'DoIt',
+      logoUrl: doitLogo,
+      websiteUrl: 'https://www.doit-intl.com',
+    },
+    {
+      id: 'sponsor-caylent',
+      name: 'Caylent',
+      logoUrl: caylentLogo,
+      websiteUrl: 'https://caylent.com',
+    },
+  ],
+  Oro: [
+    { id: 'sponsor-nu', name: 'Nu', logoUrl: nuLogo, websiteUrl: 'https://nu.com' },
+    { id: 'sponsor-ibm', name: 'IBM', logoUrl: ibmLogo, websiteUrl: 'https://www.ibm.com' },
+    { id: 'sponsor-epam', name: 'EPAM', logoUrl: epamLogo, websiteUrl: 'https://www.epam.com' },
+    {
+      id: 'sponsor-softserve',
+      name: 'SoftServe',
+      logoUrl: softServeLogo,
+      websiteUrl: 'https://www.softserveinc.com',
+    },
+    {
+      id: 'sponsor-collectors',
+      name: 'Collectors',
+      logoUrl: collectorsLogo,
+      websiteUrl: 'https://www.collectors.com',
+    },
+  ],
+  Plata: [
+    { id: 'sponsor-uala', name: 'Ualá', logoUrl: ualaLogo, websiteUrl: 'https://www.uala.com.ar' },
+    {
+      id: 'sponsor-wizeline',
+      name: 'Wizeline',
+      logoUrl: wizelineLogo,
+      websiteUrl: 'https://www.wizeline.com',
+    },
+    {
+      id: 'sponsor-globant',
+      name: 'Globant',
+      logoUrl: globantLogo,
+      websiteUrl: 'https://www.globant.com',
+    },
+  ],
+  Bronce: [
+    {
+      id: 'sponsor-zillow',
+      name: 'Zillow',
+      logoUrl: zillowLogo,
+      websiteUrl: 'https://www.zillow.com',
+    },
+    {
+      id: 'sponsor-grafana',
+      name: 'Grafana',
+      logoUrl: grafanaLogo,
+      websiteUrl: 'https://grafana.com',
+    },
+  ],
+};
+
+// Función para barajar un array
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Función para crear sponsors aleatorios respetando la jerarquía
+const createRandomSponsors = (): SponsorType[] => {
+  const sponsors: SponsorType[] = [];
+
+  // Agregar sponsors de cada tier en orden de jerarquía
+  const tiers: Array<keyof typeof SPONSORS_DATA> = ['Diamante', 'Oro', 'Plata', 'Bronce'];
+
+  tiers.forEach((tier) => {
+    const shuffledSponsors = shuffleArray(SPONSORS_DATA[tier]);
+    shuffledSponsors.forEach((sponsor) => {
+      sponsors.push({
+        ...sponsor,
+        tier,
+        type: 'sponsor',
+      });
+    });
+  });
+
+  return sponsors;
+};
+
+// Función para insertar sponsors cada 5 sesiones
+const createMixedItems = (sessions: SessionType[]): ItemType[] => {
+  const mixedItems: ItemType[] = [];
+  const sponsors = createRandomSponsors();
+  let sponsorIndex = 0;
+
+  sessions.forEach((session, index) => {
+    mixedItems.push(session);
+
+    // Insertar sponsor cada 5 sesiones (índices 4, 9, 14, etc.)
+    if ((index + 1) % 5 === 0 && sponsorIndex < sponsors.length) {
+      mixedItems.push(sponsors[sponsorIndex]);
+      sponsorIndex++;
+    }
+  });
+
+  // Agregar cualquier sponsor restante al final
+  while (sponsorIndex < sponsors.length) {
+    mixedItems.push(sponsors[sponsorIndex]);
+    sponsorIndex++;
+  }
+
+  return mixedItems;
+};
+
+// Función para verificar si un item es un sponsor
+const isSponsor = (item: ItemType): item is SponsorType => {
+  return 'type' in item && item.type === 'sponsor';
+};
+
 // Función para ordenar sesiones por hora
 const sortSessionsByTime = (sessions: SessionType[]): SessionType[] => {
   return [...sessions].sort((a, b) => {
@@ -55,12 +225,18 @@ const sortSessionsByTime = (sessions: SessionType[]): SessionType[] => {
 };
 
 // Extraer los datos del JSON y ordenarlos por hora
-const items: SessionType[] = sortSessionsByTime(sessionsData.sessions);
+const sessions: SessionType[] = sortSessionsByTime(sessionsData.sessions);
 
 export function AgendaRoute() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
+  const [mixedItems, setMixedItems] = useState<ItemType[]>([]);
+
+  // Crear items mezclados con sponsors al cargar el componente
+  useEffect(() => {
+    setMixedItems(createMixedItems(sessions));
+  }, []);
 
   // Estados para los filtros
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
@@ -68,12 +244,13 @@ export function AgendaRoute() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
 
-  // Extraer valores únicos para los filtros
-  const uniqueLevels = Array.from(new Set(items.map((item) => item.level)));
-  const uniqueLocations = Array.from(new Set(items.map((item) => item.location)));
-  const uniqueCategories = Array.from(new Set(items.map((item) => item.catergory)));
-  const uniqueLanguages = Array.from(new Set(items.map((item) => item.language)));
+  // Extraer valores únicos para los filtros (solo de sesiones, no sponsors)
+  const uniqueLevels = Array.from(new Set(sessions.map((session) => session.level)));
+  const uniqueLocations = Array.from(new Set(sessions.map((session) => session.location)));
+  const uniqueCategories = Array.from(new Set(sessions.map((session) => session.catergory)));
+  const uniqueLanguages = Array.from(new Set(sessions.map((session) => session.language)));
 
   // Opciones para los multiselect
   const levelOptions = uniqueLevels.map((level) => ({ label: level, value: level }));
@@ -189,27 +366,159 @@ export function AgendaRoute() {
     });
   };
 
+  // Función para crear la definición de tarjetas mezcladas
+  const getMixedCardDefinition = () => {
+    const sessionCardDef = getSessionCardDefinition({
+      favorites,
+      expandedDescriptions,
+      onToggleFavorite: toggleFavorite,
+      onToggleDescription: toggleDescription,
+    });
+
+    return {
+      header: (item: ItemType) => {
+        if (isSponsor(item)) {
+          return (
+            <Box textAlign="center" padding="m">
+              <Header variant="h3" description={`Sponsor ${item.tier}`}>
+                {item.name}
+              </Header>
+            </Box>
+          );
+        } else {
+          return sessionCardDef.header(item as SessionType);
+        }
+      },
+      sections: [
+        {
+          id: 'dynamic-content',
+          content: (item: ItemType) => {
+            if (isSponsor(item)) {
+              return (
+                <Box textAlign="center" padding="l">
+                  <a
+                    href={item.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      textDecoration: 'none',
+                      display: 'block',
+                      transition: 'transform 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    <div
+                      style={{
+                        borderRadius: '8px',
+                        padding: '20px',
+                        minHeight: '180px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'transparent',
+                      }}
+                    >
+                      <img
+                        src={item.logoUrl}
+                        alt={`${item.name} logo`}
+                        style={{
+                          maxWidth: '250px',
+                          maxHeight: '150px',
+                          objectFit: 'contain',
+                          cursor: 'pointer',
+                        }}
+                        onError={(e) => {
+                          // Fallback si la imagen no se carga
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.parentElement!.innerHTML = `
+                            <div style="
+                              padding: 20px; 
+                              color: #666; 
+                              font-size: 18px; 
+                              font-weight: bold;
+                              text-align: center;
+                            ">
+                              ${item.name}
+                            </div>
+                          `;
+                        }}
+                      />
+                    </div>
+                  </a>
+                </Box>
+              );
+            } else {
+              // Para sesiones, retornamos un div que contiene todas las secciones
+              const session = item as SessionType;
+              return (
+                <div>
+                  {sessionCardDef.sections.map((section) => (
+                    <div key={section.id} style={{ marginBottom: '1rem' }}>
+                      {section.header && (
+                        <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                          {section.header}
+                        </div>
+                      )}
+                      {section.content(session)}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+          },
+        },
+      ],
+    };
+  };
+
   // Función para resetear todos los filtros
   const resetFilters = () => {
     setSelectedLevels([]);
     setSelectedLocations([]);
     setSelectedCategories([]);
     setSelectedLanguages([]);
+    setShowOnlyFavorites(false);
   };
 
   // Filtrar los items según las selecciones
-  const filteredItems = items.filter((item) => {
-    // Si no hay filtros seleccionados, mostrar todos los items
-    const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(item.level);
-    const locationMatch =
-      selectedLocations.length === 0 || selectedLocations.includes(item.location);
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.catergory);
-    const languageMatch =
-      selectedLanguages.length === 0 || selectedLanguages.includes(item.language);
+  const filteredItems = mixedItems.filter((item) => {
+    // Verificar si hay algún filtro activo
+    const hasActiveFilters =
+      selectedLevels.length > 0 ||
+      selectedLocations.length > 0 ||
+      selectedCategories.length > 0 ||
+      selectedLanguages.length > 0 ||
+      showOnlyFavorites;
 
-    return levelMatch && locationMatch && categoryMatch && languageMatch;
+    // Si es un sponsor y hay filtros activos, no incluirlo
+    if (isSponsor(item)) {
+      return !hasActiveFilters;
+    }
+
+    // Si es una sesión, aplicar filtros
+    const session = item as SessionType;
+    const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(session.level);
+    const locationMatch =
+      selectedLocations.length === 0 || selectedLocations.includes(session.location);
+    const categoryMatch =
+      selectedCategories.length === 0 || selectedCategories.includes(session.catergory);
+    const languageMatch =
+      selectedLanguages.length === 0 || selectedLanguages.includes(session.language);
+
+    // Filtro de favoritos
+    const favoriteMatch = !showOnlyFavorites || favorites.includes(parseInt(session.id, 10));
+
+    return levelMatch && locationMatch && categoryMatch && languageMatch && favoriteMatch;
   });
+
+  // Contar solo las sesiones filtradas para el indicador
+  const filteredSessionsCount = filteredItems.filter((item) => !isSponsor(item)).length;
 
   return (
     <AppLayoutToolbar
@@ -225,14 +534,21 @@ export function AgendaRoute() {
       }
       content={
         <SpaceBetween size="l">
-          {/* Botón para mostrar/ocultar filtros */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          {/* Botones superiores */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <Button
               onClick={() => setShowFilters(!showFilters)}
               iconName={showFilters ? 'angle-up' : 'angle-down'}
               variant="primary"
             >
               {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            </Button>
+            <Button
+              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+              variant={showOnlyFavorites ? 'primary' : 'normal'}
+              iconName={showOnlyFavorites ? 'heart-filled' : 'heart'}
+            >
+              {showOnlyFavorites ? 'Mostrando solo favoritos' : 'Mostrar solo mis favoritos'}
             </Button>
           </div>
 
@@ -244,9 +560,14 @@ export function AgendaRoute() {
                 <div>
                   <Header variant="h3">Nivel</Header>
                   <Multiselect
-                    selectedOptions={selectedLevels.map((level) => ({ label: level, value: level }))}
+                    selectedOptions={selectedLevels.map((level) => ({
+                      label: level,
+                      value: level,
+                    }))}
                     onChange={({ detail }) =>
-                      setSelectedLevels(detail.selectedOptions.map((option) => option.value as string))
+                      setSelectedLevels(
+                        detail.selectedOptions.map((option) => option.value as string)
+                      )
                     }
                     options={levelOptions}
                     placeholder="Seleccionar niveles"
@@ -305,26 +626,33 @@ export function AgendaRoute() {
                         detail.selectedOptions.map((option) => option.value as string)
                       )
                     }
-                    options={uniqueLanguages.map((language) => ({ label: language, value: language }))}
+                    options={uniqueLanguages.map((language) => ({
+                      label: language,
+                      value: language,
+                    }))}
                     placeholder="Seleccionar idiomas"
                     filteringType="auto"
                   />
                 </div>
 
                 {/* Información de filtros activos y botón de reset */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
                   <StatusIndicator type="success">
-                    {filteredItems.length} sesiones encontradas
+                    {filteredSessionsCount} sesiones encontradas
                     {selectedLevels.length > 0 ||
                       selectedLocations.length > 0 ||
                       selectedCategories.length > 0 ||
-                      selectedLanguages.length > 0}
+                      selectedLanguages.length > 0 ||
+                      showOnlyFavorites}
                   </StatusIndicator>
 
                   {(selectedLevels.length > 0 ||
                     selectedLocations.length > 0 ||
                     selectedCategories.length > 0 ||
-                    selectedLanguages.length > 0) && (
+                    selectedLanguages.length > 0 ||
+                    showOnlyFavorites) && (
                     <Button onClick={resetFilters} iconName="refresh" variant="normal">
                       Limpiar filtros
                     </Button>
@@ -342,12 +670,7 @@ export function AgendaRoute() {
             ]}
             variant="container"
             items={filteredItems}
-            cardDefinition={getSessionCardDefinition({
-              favorites,
-              expandedDescriptions,
-              onToggleFavorite: toggleFavorite,
-              onToggleDescription: toggleDescription,
-            })}
+            cardDefinition={getMixedCardDefinition()}
           />
         </SpaceBetween>
       }
