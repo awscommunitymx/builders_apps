@@ -42,6 +42,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
+  submitSessionCSAT: SessionCsatResponse;
   updateAgenda?: Maybe<AgendaData>;
   updateRoomAgenda?: Maybe<RoomAgendaData>;
   updateUser?: Maybe<User>;
@@ -61,6 +62,11 @@ export type MutationCheckInAttendeeArgs = {
 
 export type MutationRegisterSponsorVisitArgs = {
   input: RegisterSponsorVisitInput;
+};
+
+
+export type MutationSubmitSessionCsatArgs = {
+  input: SessionCsatInput;
 };
 
 
@@ -149,6 +155,18 @@ export type Session = {
   speakers?: Maybe<Array<Maybe<Speaker>>>;
   status?: Maybe<Scalars['String']['output']>;
   time: Scalars['String']['output'];
+};
+
+export type SessionCsatInput = {
+  feedback?: InputMaybe<Scalars['String']['input']>;
+  rating: Scalars['Int']['input'];
+  sessionId: Scalars['ID']['input'];
+};
+
+export type SessionCsatResponse = {
+  __typename?: 'SessionCSATResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
 };
 
 export type SessionInput = {
@@ -346,6 +364,8 @@ export type ResolversTypes = {
   RegisterSponsorVisitInput: RegisterSponsorVisitInput;
   RoomAgendaData: ResolverTypeWrapper<RoomAgendaData>;
   Session: ResolverTypeWrapper<Session>;
+  SessionCSATInput: SessionCsatInput;
+  SessionCSATResponse: ResolverTypeWrapper<SessionCsatResponse>;
   SessionInput: SessionInput;
   SocialMedia: ResolverTypeWrapper<SocialMedia>;
   SocialMediaInput: SocialMediaInput;
@@ -373,6 +393,8 @@ export type ResolversParentTypes = {
   RegisterSponsorVisitInput: RegisterSponsorVisitInput;
   RoomAgendaData: RoomAgendaData;
   Session: Session;
+  SessionCSATInput: SessionCsatInput;
+  SessionCSATResponse: SessionCsatResponse;
   SessionInput: SessionInput;
   SocialMedia: SocialMedia;
   SocialMediaInput: SocialMediaInput;
@@ -402,6 +424,7 @@ export type CheckInResponseResolvers<ContextType = any, ParentType extends Resol
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   checkInAttendee?: Resolver<ResolversTypes['CheckInResponse'], ParentType, ContextType, Partial<MutationCheckInAttendeeArgs>>;
   registerSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<MutationRegisterSponsorVisitArgs, 'input'>>;
+  submitSessionCSAT?: Resolver<ResolversTypes['SessionCSATResponse'], ParentType, ContextType, RequireFields<MutationSubmitSessionCsatArgs, 'input'>>;
   updateAgenda?: Resolver<Maybe<ResolversTypes['AgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateAgendaArgs, 'sessions'>>;
   updateRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateRoomAgendaArgs, 'location' | 'sessions'>>;
   updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
@@ -450,6 +473,12 @@ export type SessionResolvers<ContextType = any, ParentType extends ResolversPare
   speakers?: Resolver<Maybe<Array<Maybe<ResolversTypes['Speaker']>>>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   time?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SessionCsatResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['SessionCSATResponse'] = ResolversParentTypes['SessionCSATResponse']> = {
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -521,6 +550,7 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   RoomAgendaData?: RoomAgendaDataResolvers<ContextType>;
   Session?: SessionResolvers<ContextType>;
+  SessionCSATResponse?: SessionCsatResponseResolvers<ContextType>;
   SocialMedia?: SocialMediaResolvers<ContextType>;
   Speaker?: SpeakerResolvers<ContextType>;
   SponsorDashboard?: SponsorDashboardResolvers<ContextType>;

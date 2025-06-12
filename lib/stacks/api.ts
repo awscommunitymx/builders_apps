@@ -151,6 +151,11 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'updateRoomAgenda',
     });
+
+    lambdaDataSource.createResolver('GraphQLResolverSubmitSessionCSAT', {
+      typeName: 'Mutation',
+      fieldName: 'submitSessionCSAT',
+    });
   }
   
   private createOutputs(environmentName: string): void {

@@ -16,6 +16,7 @@ import {
   MutationRegisterSponsorVisitArgs,
   QueryGetSponsorVisitArgs,
   MutationCheckInAttendeeArgs,
+  MutationSubmitSessionCsatArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
@@ -27,6 +28,7 @@ import handleViewSponsorVisit from './handlers/viewSponsorVisit';
 import getSponsorDashboard from './handlers/getSponsorDashboard';
 import { handler as handleCheckInAttendee } from './handlers/checkInAttendee';
 import getMyProfile from './handlers/getMyProfile';
+import handleSubmitSessionCSAT from './handlers/submitSessionCSAT';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -58,7 +60,8 @@ type HandlerArgs =
   | QueryGetRoomAgendaHashArgs
   | MutationRegisterSponsorVisitArgs
   | QueryGetSponsorVisitArgs
-  | MutationCheckInAttendeeArgs;
+  | MutationCheckInAttendeeArgs
+  | MutationSubmitSessionCsatArgs;
 
 export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -174,6 +177,11 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
         arguments: { barcode_id, user_id, bypass_email, bypass_phone, email, phone },
         identity,
       });
+    }
+
+    if (event.info.fieldName === 'submitSessionCSAT') {
+      const { input } = event.arguments as MutationSubmitSessionCsatArgs;
+      return handleSubmitSessionCSAT(identity.sub, input, S3_BUCKET);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

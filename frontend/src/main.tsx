@@ -15,6 +15,7 @@ import { SponsorDashboardRoute } from './routes/SponsorDashboardRoute.tsx';
 import AuthCallbackRoute from './routes/AuthCallbackRoute.tsx';
 import LoginRoute from './routes/Login.tsx';
 import Checkin from './routes/Checkin.tsx';
+import SessionCSATRoute from './routes/SessionCSATRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/profile" element={<MyProfileRoute />} />
                 <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
                 <Route path="checkin" element={<Checkin />} />
+                <Route path="/session/:sessionId/csat" element={<SessionCSATRoute />} />
               </Route>
             </Routes>
           </BrowserRouter>

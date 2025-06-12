@@ -41,6 +41,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
+  submitSessionCSAT: SessionCsatResponse;
   updateAgenda?: Maybe<AgendaData>;
   updateRoomAgenda?: Maybe<RoomAgendaData>;
   updateUser?: Maybe<User>;
@@ -60,6 +61,11 @@ export type MutationCheckInAttendeeArgs = {
 
 export type MutationRegisterSponsorVisitArgs = {
   input: RegisterSponsorVisitInput;
+};
+
+
+export type MutationSubmitSessionCsatArgs = {
+  input: SessionCsatInput;
 };
 
 
@@ -148,6 +154,18 @@ export type Session = {
   speakers?: Maybe<Array<Maybe<Speaker>>>;
   status?: Maybe<Scalars['String']['output']>;
   time: Scalars['String']['output'];
+};
+
+export type SessionCsatInput = {
+  feedback?: InputMaybe<Scalars['String']['input']>;
+  rating: Scalars['Int']['input'];
+  sessionId: Scalars['ID']['input'];
+};
+
+export type SessionCsatResponse = {
+  __typename?: 'SessionCSATResponse';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
 };
 
 export type SessionInput = {

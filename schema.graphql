@@ -166,11 +166,22 @@ input RegisterSponsorVisitInput {
   message: String
 }
 
+input SessionCSATInput {
+  sessionId: ID!
+  rating: Int!
+  feedback: String
+}
+
 type CheckInResponse {
   status: CheckInStatus!
   message: String
   missingFields: [String]
   user: User
+}
+
+type SessionCSATResponse {
+  success: Boolean!
+  message: String!
 }
 
 enum CheckInStatus {
@@ -205,6 +216,8 @@ type Mutation {
     phone: String
   ): CheckInResponse!
   @aws_auth(cognito_groups: ["CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
+  submitSessionCSAT(input: SessionCSATInput!): SessionCSATResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
 }
 
 schema {
