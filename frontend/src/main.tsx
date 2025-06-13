@@ -15,6 +15,8 @@ import { SponsorDashboardRoute } from './routes/SponsorDashboardRoute.tsx';
 import AuthCallbackRoute from './routes/AuthCallbackRoute.tsx';
 import LoginRoute from './routes/Login.tsx';
 import Checkin from './routes/Checkin.tsx';
+import { AgendaRoute } from './routes/AgendaRoute.tsx';
+import { AgendaDetailsRoute } from './routes/AgendaDetailsRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -30,6 +32,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<App />} />
                 <Route path="/profile/:id" element={<UserProfileRoute />} />
                 <Route path="/profile" element={<MyProfileRoute />} />
+                <Route path="/agenda" element={<AgendaRoute />} />
+                <Route path="/agenda/:id" element={<AgendaDetailsRoute />} />
                 <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
                 <Route path="checkin" element={<Checkin />} />
               </Route>
