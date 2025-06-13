@@ -52,6 +52,12 @@ type Query
   @aws_auth(cognito_groups: ["Sponsors"])
   getSponsorDashboard: SponsorDashboard!
   @aws_auth(cognito_groups: ["Sponsors"])
+  getAvailablePhotoSessions(date: String!): [PhotoSession!]!
+  @aws_auth(cognito_groups: ["Attendees"])
+  getMyPhotoReservation: PhotoReservation
+  @aws_auth(cognito_groups: ["Attendees"])
+  getPhotoSessionReservations(timeSlot: String!, date: String!): [PhotoReservation!]!
+  @aws_auth(cognito_groups: ["Sponsors", "CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
 }
 
 input UpdateUserInput {
@@ -192,6 +198,39 @@ enum CheckInStatus {
   INCOMPLETE_PROFILE
 }
 
+type PhotoSession 
+@aws_cognito_user_pools
+{
+  timeSlot: String!
+  date: String!
+  availableSpots: Int!
+  totalSpots: Int!
+  reservations: [PhotoReservation!]!
+}
+
+type PhotoReservation 
+@aws_cognito_user_pools
+{
+  user_id: ID!
+  name: String!
+  email: String
+  cell_phone: String
+  timeSlot: String!
+  date: String!
+  reservedAt: String!
+}
+
+type PhotoReservationResponse {
+  success: Boolean!
+  message: String!
+  reservation: PhotoReservation
+}
+
+input ReservePhotoSessionInput {
+  timeSlot: String!
+  date: String!
+}
+
 type Subscription {
   onAgendaUpdate: AgendaData
     @aws_subscribe(mutations: ["updateAgenda"])
@@ -220,6 +259,10 @@ type Mutation {
   ): CheckInResponse!
   @aws_auth(cognito_groups: ["CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
   submitSessionCSAT(input: SessionCSATInput!): SessionCSATResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
+  reservePhotoSession(input: ReservePhotoSessionInput!): PhotoReservationResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
+  cancelPhotoReservation: PhotoReservationResponse!
   @aws_auth(cognito_groups: ["Attendees"])
 }
 

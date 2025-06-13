@@ -40,8 +40,10 @@ export enum CheckInStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  cancelPhotoReservation: PhotoReservationResponse;
   checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
+  reservePhotoSession: PhotoReservationResponse;
   submitSessionCSAT: SessionCsatResponse;
   updateAgenda?: Maybe<AgendaData>;
   updateRoomAgenda?: Maybe<RoomAgendaData>;
@@ -62,6 +64,11 @@ export type MutationCheckInAttendeeArgs = {
 
 export type MutationRegisterSponsorVisitArgs = {
   input: RegisterSponsorVisitInput;
+};
+
+
+export type MutationReservePhotoSessionArgs = {
+  input: ReservePhotoSessionInput;
 };
 
 
@@ -91,6 +98,33 @@ export type MutationViewProfileArgs = {
   pin: Scalars['String']['input'];
 };
 
+export type PhotoReservation = {
+  __typename?: 'PhotoReservation';
+  cell_phone?: Maybe<Scalars['String']['output']>;
+  date: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  reservedAt: Scalars['String']['output'];
+  timeSlot: Scalars['String']['output'];
+  user_id: Scalars['ID']['output'];
+};
+
+export type PhotoReservationResponse = {
+  __typename?: 'PhotoReservationResponse';
+  message: Scalars['String']['output'];
+  reservation?: Maybe<PhotoReservation>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type PhotoSession = {
+  __typename?: 'PhotoSession';
+  availableSpots: Scalars['Int']['output'];
+  date: Scalars['String']['output'];
+  reservations: Array<PhotoReservation>;
+  timeSlot: Scalars['String']['output'];
+  totalSpots: Scalars['Int']['output'];
+};
+
 export type ProfileAccess = {
   __typename?: 'ProfileAccess';
   PK: Scalars['String']['output'];
@@ -102,11 +136,25 @@ export type Query = {
   __typename?: 'Query';
   getAgenda?: Maybe<AgendaData>;
   getAgendaHash: Scalars['String']['output'];
+  getAvailablePhotoSessions: Array<PhotoSession>;
+  getMyPhotoReservation?: Maybe<PhotoReservation>;
   getMyProfile?: Maybe<User>;
+  getPhotoSessionReservations: Array<PhotoReservation>;
   getRoomAgenda?: Maybe<RoomAgendaData>;
   getRoomAgendaHash: Scalars['String']['output'];
   getSponsorDashboard: SponsorDashboard;
   getSponsorVisit?: Maybe<SponsorUser>;
+};
+
+
+export type QueryGetAvailablePhotoSessionsArgs = {
+  date: Scalars['String']['input'];
+};
+
+
+export type QueryGetPhotoSessionReservationsArgs = {
+  date: Scalars['String']['input'];
+  timeSlot: Scalars['String']['input'];
 };
 
 
@@ -127,6 +175,11 @@ export type QueryGetSponsorVisitArgs = {
 export type RegisterSponsorVisitInput = {
   message?: InputMaybe<Scalars['String']['input']>;
   short_id: Scalars['ID']['input'];
+};
+
+export type ReservePhotoSessionInput = {
+  date: Scalars['String']['input'];
+  timeSlot: Scalars['String']['input'];
 };
 
 export type RoomAgendaData = {
@@ -359,9 +412,13 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  PhotoReservation: ResolverTypeWrapper<PhotoReservation>;
+  PhotoReservationResponse: ResolverTypeWrapper<PhotoReservationResponse>;
+  PhotoSession: ResolverTypeWrapper<PhotoSession>;
   ProfileAccess: ResolverTypeWrapper<ProfileAccess>;
   Query: ResolverTypeWrapper<{}>;
   RegisterSponsorVisitInput: RegisterSponsorVisitInput;
+  ReservePhotoSessionInput: ReservePhotoSessionInput;
   RoomAgendaData: ResolverTypeWrapper<RoomAgendaData>;
   Session: ResolverTypeWrapper<Session>;
   SessionCSATInput: SessionCsatInput;
@@ -388,9 +445,13 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
+  PhotoReservation: PhotoReservation;
+  PhotoReservationResponse: PhotoReservationResponse;
+  PhotoSession: PhotoSession;
   ProfileAccess: ProfileAccess;
   Query: {};
   RegisterSponsorVisitInput: RegisterSponsorVisitInput;
+  ReservePhotoSessionInput: ReservePhotoSessionInput;
   RoomAgendaData: RoomAgendaData;
   Session: Session;
   SessionCSATInput: SessionCsatInput;
@@ -422,13 +483,42 @@ export type CheckInResponseResolvers<ContextType = any, ParentType extends Resol
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  cancelPhotoReservation?: Resolver<ResolversTypes['PhotoReservationResponse'], ParentType, ContextType>;
   checkInAttendee?: Resolver<ResolversTypes['CheckInResponse'], ParentType, ContextType, Partial<MutationCheckInAttendeeArgs>>;
   registerSponsorVisit?: Resolver<Maybe<ResolversTypes['SponsorUser']>, ParentType, ContextType, RequireFields<MutationRegisterSponsorVisitArgs, 'input'>>;
+  reservePhotoSession?: Resolver<ResolversTypes['PhotoReservationResponse'], ParentType, ContextType, RequireFields<MutationReservePhotoSessionArgs, 'input'>>;
   submitSessionCSAT?: Resolver<ResolversTypes['SessionCSATResponse'], ParentType, ContextType, RequireFields<MutationSubmitSessionCsatArgs, 'input'>>;
   updateAgenda?: Resolver<Maybe<ResolversTypes['AgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateAgendaArgs, 'sessions'>>;
   updateRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<MutationUpdateRoomAgendaArgs, 'location' | 'sessions'>>;
   updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'input'>>;
   viewProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationViewProfileArgs, 'id' | 'pin'>>;
+};
+
+export type PhotoReservationResolvers<ContextType = any, ParentType extends ResolversParentTypes['PhotoReservation'] = ResolversParentTypes['PhotoReservation']> = {
+  cell_phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  reservedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timeSlot?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PhotoReservationResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['PhotoReservationResponse'] = ResolversParentTypes['PhotoReservationResponse']> = {
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  reservation?: Resolver<Maybe<ResolversTypes['PhotoReservation']>, ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PhotoSessionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PhotoSession'] = ResolversParentTypes['PhotoSession']> = {
+  availableSpots?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  reservations?: Resolver<Array<ResolversTypes['PhotoReservation']>, ParentType, ContextType>;
+  timeSlot?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalSpots?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ProfileAccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProfileAccess'] = ResolversParentTypes['ProfileAccess']> = {
@@ -441,7 +531,10 @@ export type ProfileAccessResolvers<ContextType = any, ParentType extends Resolve
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getAgenda?: Resolver<Maybe<ResolversTypes['AgendaData']>, ParentType, ContextType>;
   getAgendaHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  getAvailablePhotoSessions?: Resolver<Array<ResolversTypes['PhotoSession']>, ParentType, ContextType, RequireFields<QueryGetAvailablePhotoSessionsArgs, 'date'>>;
+  getMyPhotoReservation?: Resolver<Maybe<ResolversTypes['PhotoReservation']>, ParentType, ContextType>;
   getMyProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  getPhotoSessionReservations?: Resolver<Array<ResolversTypes['PhotoReservation']>, ParentType, ContextType, RequireFields<QueryGetPhotoSessionReservationsArgs, 'date' | 'timeSlot'>>;
   getRoomAgenda?: Resolver<Maybe<ResolversTypes['RoomAgendaData']>, ParentType, ContextType, RequireFields<QueryGetRoomAgendaArgs, 'location'>>;
   getRoomAgendaHash?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetRoomAgendaHashArgs, 'location'>>;
   getSponsorDashboard?: Resolver<ResolversTypes['SponsorDashboard'], ParentType, ContextType>;
@@ -546,6 +639,9 @@ export type Resolvers<ContextType = any> = {
   AgendaData?: AgendaDataResolvers<ContextType>;
   CheckInResponse?: CheckInResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PhotoReservation?: PhotoReservationResolvers<ContextType>;
+  PhotoReservationResponse?: PhotoReservationResponseResolvers<ContextType>;
+  PhotoSession?: PhotoSessionResolvers<ContextType>;
   ProfileAccess?: ProfileAccessResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   RoomAgendaData?: RoomAgendaDataResolvers<ContextType>;

@@ -17,6 +17,9 @@ import {
   QueryGetSponsorVisitArgs,
   MutationCheckInAttendeeArgs,
   MutationSubmitSessionCsatArgs,
+  QueryGetAvailablePhotoSessionsArgs,
+  QueryGetPhotoSessionReservationsArgs,
+  MutationReservePhotoSessionArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
@@ -29,6 +32,13 @@ import getSponsorDashboard from './handlers/getSponsorDashboard';
 import { handler as handleCheckInAttendee } from './handlers/checkInAttendee';
 import getMyProfile from './handlers/getMyProfile';
 import handleSubmitSessionCSAT from './handlers/submitSessionCSAT';
+import {
+  getAvailablePhotoSessions,
+  getMyPhotoReservation,
+  getPhotoSessionReservations,
+  reservePhotoSession,
+  cancelPhotoReservation
+} from './handlers/photoSessions';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -61,7 +71,10 @@ type HandlerArgs =
   | MutationRegisterSponsorVisitArgs
   | QueryGetSponsorVisitArgs
   | MutationCheckInAttendeeArgs
-  | MutationSubmitSessionCsatArgs;
+  | MutationSubmitSessionCsatArgs
+  | QueryGetAvailablePhotoSessionsArgs
+  | QueryGetPhotoSessionReservationsArgs
+  | MutationReservePhotoSessionArgs;
 
 export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -182,6 +195,30 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
     if (event.info.fieldName === 'submitSessionCSAT') {
       const { input } = event.arguments as MutationSubmitSessionCsatArgs;
       return handleSubmitSessionCSAT(identity.sub, input, S3_BUCKET);
+    }
+
+    // Photo session handlers
+    if (event.info.fieldName === 'getAvailablePhotoSessions') {
+      const { date } = event.arguments as QueryGetAvailablePhotoSessionsArgs;
+      return getAvailablePhotoSessions(date);
+    }
+
+    if (event.info.fieldName === 'getMyPhotoReservation') {
+      return getMyPhotoReservation(identity);
+    }
+
+    if (event.info.fieldName === 'getPhotoSessionReservations') {
+      const { timeSlot, date } = event.arguments as QueryGetPhotoSessionReservationsArgs;
+      return getPhotoSessionReservations(timeSlot, date);
+    }
+
+    if (event.info.fieldName === 'reservePhotoSession') {
+      const { input } = event.arguments as MutationReservePhotoSessionArgs;
+      return reservePhotoSession(identity, input.timeSlot, input.date);
+    }
+
+    if (event.info.fieldName === 'cancelPhotoReservation') {
+      return cancelPhotoReservation(identity);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

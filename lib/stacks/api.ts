@@ -156,6 +156,32 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'submitSessionCSAT',
     });
+
+    // Photo session resolvers
+    lambdaDataSource.createResolver('GraphQLResolverGetAvailablePhotoSessions', {
+      typeName: 'Query',
+      fieldName: 'getAvailablePhotoSessions',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetMyPhotoReservation', {
+      typeName: 'Query',
+      fieldName: 'getMyPhotoReservation',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetPhotoSessionReservations', {
+      typeName: 'Query',
+      fieldName: 'getPhotoSessionReservations',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverReservePhotoSession', {
+      typeName: 'Mutation',
+      fieldName: 'reservePhotoSession',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverCancelPhotoReservation', {
+      typeName: 'Mutation',
+      fieldName: 'cancelPhotoReservation',
+    });
   }
   
   private createOutputs(environmentName: string): void {

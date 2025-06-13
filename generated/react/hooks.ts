@@ -39,8 +39,10 @@ export enum CheckInStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  cancelPhotoReservation: PhotoReservationResponse;
   checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
+  reservePhotoSession: PhotoReservationResponse;
   submitSessionCSAT: SessionCsatResponse;
   updateAgenda?: Maybe<AgendaData>;
   updateRoomAgenda?: Maybe<RoomAgendaData>;
@@ -61,6 +63,11 @@ export type MutationCheckInAttendeeArgs = {
 
 export type MutationRegisterSponsorVisitArgs = {
   input: RegisterSponsorVisitInput;
+};
+
+
+export type MutationReservePhotoSessionArgs = {
+  input: ReservePhotoSessionInput;
 };
 
 
@@ -90,6 +97,33 @@ export type MutationViewProfileArgs = {
   pin: Scalars['String']['input'];
 };
 
+export type PhotoReservation = {
+  __typename?: 'PhotoReservation';
+  cell_phone?: Maybe<Scalars['String']['output']>;
+  date: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  reservedAt: Scalars['String']['output'];
+  timeSlot: Scalars['String']['output'];
+  user_id: Scalars['ID']['output'];
+};
+
+export type PhotoReservationResponse = {
+  __typename?: 'PhotoReservationResponse';
+  message: Scalars['String']['output'];
+  reservation?: Maybe<PhotoReservation>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type PhotoSession = {
+  __typename?: 'PhotoSession';
+  availableSpots: Scalars['Int']['output'];
+  date: Scalars['String']['output'];
+  reservations: Array<PhotoReservation>;
+  timeSlot: Scalars['String']['output'];
+  totalSpots: Scalars['Int']['output'];
+};
+
 export type ProfileAccess = {
   __typename?: 'ProfileAccess';
   PK: Scalars['String']['output'];
@@ -101,11 +135,25 @@ export type Query = {
   __typename?: 'Query';
   getAgenda?: Maybe<AgendaData>;
   getAgendaHash: Scalars['String']['output'];
+  getAvailablePhotoSessions: Array<PhotoSession>;
+  getMyPhotoReservation?: Maybe<PhotoReservation>;
   getMyProfile?: Maybe<User>;
+  getPhotoSessionReservations: Array<PhotoReservation>;
   getRoomAgenda?: Maybe<RoomAgendaData>;
   getRoomAgendaHash: Scalars['String']['output'];
   getSponsorDashboard: SponsorDashboard;
   getSponsorVisit?: Maybe<SponsorUser>;
+};
+
+
+export type QueryGetAvailablePhotoSessionsArgs = {
+  date: Scalars['String']['input'];
+};
+
+
+export type QueryGetPhotoSessionReservationsArgs = {
+  date: Scalars['String']['input'];
+  timeSlot: Scalars['String']['input'];
 };
 
 
@@ -126,6 +174,11 @@ export type QueryGetSponsorVisitArgs = {
 export type RegisterSponsorVisitInput = {
   message?: InputMaybe<Scalars['String']['input']>;
   short_id: Scalars['ID']['input'];
+};
+
+export type ReservePhotoSessionInput = {
+  date: Scalars['String']['input'];
+  timeSlot: Scalars['String']['input'];
 };
 
 export type RoomAgendaData = {
