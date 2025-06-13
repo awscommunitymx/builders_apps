@@ -2,6 +2,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
+import { TvDisplayStack } from '../lib/tv-display-stack';
 import { generateAuthDomain } from '../utils/cognito';
 
 const app = new cdk.App();
@@ -33,6 +34,11 @@ const frontendDomain =
   environmentName == 'production'
     ? `mx-central-1.${hostedZoneName}`
     : `mx-central-1-${environmentName}.${hostedZoneName}`;
+
+const tvDisplayDomain =
+  environmentName === 'production'
+    ? `tv.${hostedZoneName}`
+    : `tv-${environmentName}.${hostedZoneName}`;
 
 const backendDomain =
   environmentName === 'production'
@@ -85,3 +91,21 @@ const frontendStack = new FrontendStack(app, `ProfilesStackFrontend-${environmen
   hostedZoneName: hostedZoneName,
   domainName: frontendDomain,
 });
+
+// Only create TV display stack if dist folder exists (i.e., when deploying TV)
+const tvDisplayDistPath = './tv-display/dist';
+if (require('fs').existsSync(tvDisplayDistPath)) {
+  const tvDisplayStack = new TvDisplayStack(app, `ProfilesStackTvDisplay-${environmentName}`, {
+    apiUrl: backendStack.apiUrl,
+    apiKey: backendStack.apiKey,
+    environment: environmentName,
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: 'us-east-1',
+    },
+    certificateArn: certificateArn,
+    hostedZoneId: hostedZoneId,
+    hostedZoneName: hostedZoneName,
+    domainName: tvDisplayDomain,
+  });
+}
