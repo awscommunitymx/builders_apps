@@ -38,7 +38,10 @@ type SponsorDashboard {
   total_visits: Int!
 }
 
-type Query {
+type Query 
+  @aws_cognito_user_pools
+  @aws_api_key
+{
   getMyProfile: User
   @aws_auth(cognito_groups: ["Attendees"])
   getAgenda: AgendaData
@@ -49,6 +52,12 @@ type Query {
   @aws_auth(cognito_groups: ["Sponsors"])
   getSponsorDashboard: SponsorDashboard!
   @aws_auth(cognito_groups: ["Sponsors"])
+  getAvailablePhotoSessions(date: String!): [PhotoSession!]!
+  @aws_auth(cognito_groups: ["Attendees"])
+  getMyPhotoReservation: PhotoReservation
+  @aws_auth(cognito_groups: ["Attendees"])
+  getPhotoSessionReservations(timeSlot: String!, date: String!): [PhotoReservation!]!
+  @aws_auth(cognito_groups: ["Sponsors", "CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
 }
 
 input UpdateUserInput {
@@ -166,6 +175,12 @@ input RegisterSponsorVisitInput {
   message: String
 }
 
+input SessionCSATInput {
+  sessionId: ID!
+  rating: Int!
+  feedback: String
+}
+
 type CheckInResponse {
   status: CheckInStatus!
   message: String
@@ -173,9 +188,47 @@ type CheckInResponse {
   user: User
 }
 
+type SessionCSATResponse {
+  success: Boolean!
+  message: String!
+}
+
 enum CheckInStatus {
   SUCCESS
   INCOMPLETE_PROFILE
+}
+
+type PhotoSession 
+@aws_cognito_user_pools
+{
+  timeSlot: String!
+  date: String!
+  availableSpots: Int!
+  totalSpots: Int!
+  reservations: [PhotoReservation!]!
+}
+
+type PhotoReservation 
+@aws_cognito_user_pools
+{
+  user_id: ID!
+  name: String!
+  email: String
+  cell_phone: String
+  timeSlot: String!
+  date: String!
+  reservedAt: String!
+}
+
+type PhotoReservationResponse {
+  success: Boolean!
+  message: String!
+  reservation: PhotoReservation
+}
+
+input ReservePhotoSessionInput {
+  timeSlot: String!
+  date: String!
 }
 
 type Subscription {
@@ -191,9 +244,9 @@ type Mutation {
   updateUser(input: UpdateUserInput!): User
   @aws_auth(cognito_groups: ["Attendees"])
   updateAgenda(sessions: AgendaDataInput!): AgendaData 
-    @aws_api_key
+  @aws_api_key
   updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
-    @aws_api_key
+  @aws_api_key
   registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
   @aws_auth(cognito_groups: ["Attendees"])
   checkInAttendee(
@@ -205,6 +258,12 @@ type Mutation {
     phone: String
   ): CheckInResponse!
   @aws_auth(cognito_groups: ["CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
+  submitSessionCSAT(input: SessionCSATInput!): SessionCSATResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
+  reservePhotoSession(input: ReservePhotoSessionInput!): PhotoReservationResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
+  cancelPhotoReservation: PhotoReservationResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
 }
 
 schema {

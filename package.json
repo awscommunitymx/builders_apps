@@ -18,6 +18,8 @@
     "populate-dynamodb": "ts-node scripts/populate-dynamodb.ts",
     "deploy": "bash scripts/deploy.sh",
     "deploy:with-frontend": "bash scripts/deploy.sh --deploy-frontend",
+    "deploy:with-tv": "bash scripts/deploy.sh --deploy-tv",
+    "deploy:full": "bash scripts/deploy.sh --deploy-frontend --deploy-tv",
     "deploy:destroy": "bash scripts/deploy.sh --destroy",
     "deploy:help": "bash scripts/deploy.sh --help",
     "storybook": "npm run storybook --workspace=frontend",

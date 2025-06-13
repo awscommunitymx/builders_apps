@@ -12,6 +12,7 @@ import {
   SpaceBetween,
   Spinner,
 } from '@cloudscape-design/components';
+import { downloadUserVCF } from '../utils/vcfGenerator';
 
 const GET_USER = gql`
   mutation viewProfile($id: String!, $pin: String!) {
@@ -49,7 +50,17 @@ export function PublicUserProfile({ id }: PublicUserProfileProps) {
   }, [data]);
 
   const actionButton = (
-    <Button variant="primary" iconName="download" ariaLabel="Descargar tarjeta de contacto">
+    <Button 
+      variant="primary" 
+      iconName="download" 
+      ariaLabel="Descargar tarjeta de contacto"
+      onClick={() => {
+        if (data?.viewProfile) {
+          downloadUserVCF(data.viewProfile);
+        }
+      }}
+      disabled={!data?.viewProfile}
+    >
       Descargar contacto
     </Button>
   );
