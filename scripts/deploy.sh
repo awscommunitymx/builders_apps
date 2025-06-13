@@ -37,6 +37,7 @@ show_help() {
   echo -e "  ${BLUE}--destroy, -d${NC}    Destroy stack instead of deploying"
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
   echo -e "  ${BLUE}--deploy-frontend${NC} Also build and deploy frontend (default: false)"
+  echo -e "  ${BLUE}--deploy-tv${NC}       Also build and deploy TV display (default: false)"
   echo -e "  ${BLUE}--force-populate${NC} Force population of DynamoDB and creation of Cognito user"
   echo -e "  ${BLUE}--help, -h${NC}       Show this help message"
   echo
@@ -96,6 +97,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --deploy-frontend)
       DEPLOY_FRONTEND=true
+      shift
+      ;;
+    --deploy-tv)
+      DEPLOY_TV=true
       shift
       ;;
     --force-populate)
@@ -240,6 +245,16 @@ EOL
     npm run frontend:build
     npx cdk deploy --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStackFrontend-${ENV}"
     echo -e "${GREEN}✅ Frontend deployment completed${NC}"
+  fi
+
+  if [ "$DEPLOY_TV" = true ]; then
+    echo -e "${CYAN}📺 Building TV display...${NC}"
+    cd tv-display
+    npm run build
+    cd ..
+    echo -e "${CYAN}📺 Deploying TV display...${NC}"
+    npx cdk deploy --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStackTvDisplay-${ENV}"
+    echo -e "${GREEN}✅ TV display deployment completed${NC}"
   fi
 
   if [[ "$ENV" =~ ^dev- ]] && { [ "$FIRST_TIME" = true ] || [ "$FORCE_POPULATE" = true ]; }; then
