@@ -223,6 +223,18 @@ EOL
   
   echo -e "${GREEN}✅ Created frontend/.env file with API configuration${NC}"
   
+  # Create .env file in the tv-display directory for TV UI
+  # For AppSync realtime URL, convert the GraphQL URL to realtime format
+  REALTIME_URL=$(echo "$API_URL" | sed 's|https://|wss://|' | sed 's|\.appsync-api\.|.appsync-realtime-api.|' | sed 's|/graphql|/graphql|')
+  
+  cat > tv-display/.env << EOL
+VITE_GRAPHQL_API_URL=${API_URL}
+VITE_GRAPHQL_API_KEY=${API_KEY}
+VITE_GRAPHQL_REALTIME_URL=${REALTIME_URL}
+EOL
+  
+  echo -e "${GREEN}✅ Created tv-display/.env file with GraphQL configuration${NC}"
+  
   if [ "$DEPLOY_FRONTEND" = true ]; then
     echo -e "${CYAN}📦 Building and deploying frontend...${NC}"
     npm run frontend:build
