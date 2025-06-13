@@ -16,6 +16,7 @@ import AuthCallbackRoute from './routes/AuthCallbackRoute.tsx';
 import LoginRoute from './routes/Login.tsx';
 import Checkin from './routes/Checkin.tsx';
 import SessionCSATRoute from './routes/SessionCSATRoute.tsx';
+import PhotoSessionRoute from './routes/PhotoSessionRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/profile" element={<MyProfileRoute />} />
                 <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
                 <Route path="checkin" element={<Checkin />} />
+                <Route path="photo-sessions" element={<PhotoSessionRoute />} />
                 <Route path="/session/:sessionId/csat" element={<SessionCSATRoute />} />
               </Route>
             </Routes>
