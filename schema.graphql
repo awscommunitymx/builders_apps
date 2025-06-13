@@ -194,9 +194,9 @@ type Mutation {
   updateUser(input: UpdateUserInput!): User
   @aws_auth(cognito_groups: ["Attendees"])
   updateAgenda(sessions: AgendaDataInput!): AgendaData 
-    @aws_api_key
+  @aws_api_key
   updateRoomAgenda(location: String!, sessions: AgendaDataInput!): RoomAgendaData 
-    @aws_api_key
+  @aws_api_key
   registerSponsorVisit(input: RegisterSponsorVisitInput!): SponsorUser
   @aws_auth(cognito_groups: ["Attendees"])
   checkInAttendee(
