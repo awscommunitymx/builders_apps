@@ -2,7 +2,7 @@ import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { Outlet } from 'react-router';
 import { generateLoginUrl } from './auth-utils';
 import { useEffect, useState } from 'react';
-import imgUrl from './assets/logo.svg';
+import imgUrl from './assets/logo-community.png';
 import { getLoggedInUser } from './utils/getAuthenticatedUser';
 
 export function Layout() {

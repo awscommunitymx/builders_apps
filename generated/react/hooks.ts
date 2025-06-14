@@ -41,13 +41,13 @@ export enum CheckInStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  cancelPhotoReservation: PhotoReservationResponse;
   addFavoriteSession: Scalars['Boolean']['output'];
+  cancelPhotoReservation: PhotoReservationResponse;
   checkInAttendee: CheckInResponse;
   registerSponsorVisit?: Maybe<SponsorUser>;
+  removeFavoriteSession: Scalars['Boolean']['output'];
   reservePhotoSession: PhotoReservationResponse;
   submitSessionCSAT: SessionCsatResponse;
-  removeFavoriteSession: Scalars['Boolean']['output'];
   updateAgenda?: Maybe<AgendaData>;
   updateRoomAgenda?: Maybe<RoomAgendaData>;
   updateUser?: Maybe<User>;
@@ -75,6 +75,11 @@ export type MutationRegisterSponsorVisitArgs = {
 };
 
 
+export type MutationRemoveFavoriteSessionArgs = {
+  sessionId: Scalars['ID']['input'];
+};
+
+
 export type MutationReservePhotoSessionArgs = {
   input: ReservePhotoSessionInput;
 };
@@ -82,11 +87,6 @@ export type MutationReservePhotoSessionArgs = {
 
 export type MutationSubmitSessionCsatArgs = {
   input: SessionCsatInput;
-};
-
-
-export type MutationRemoveFavoriteSessionArgs = {
-  sessionId: Scalars['ID']['input'];
 };
 
 
@@ -150,8 +150,8 @@ export type Query = {
   getAgenda?: Maybe<AgendaData>;
   getAgendaHash: Scalars['String']['output'];
   getAvailablePhotoSessions: Array<PhotoSession>;
-  getMyPhotoReservation?: Maybe<PhotoReservation>;
   getMyFavoriteSessions: Array<Scalars['String']['output']>;
+  getMyPhotoReservation?: Maybe<PhotoReservation>;
   getMyProfile?: Maybe<User>;
   getPhotoSessionReservations: Array<PhotoReservation>;
   getRoomAgenda?: Maybe<RoomAgendaData>;
