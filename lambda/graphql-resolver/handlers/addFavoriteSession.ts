@@ -57,7 +57,7 @@ export default async function addFavoriteSession(
     return true;
   } catch (error: any) {
     subSegment?.close(error);
-    
+
     // If the item already exists, that's OK - return true
     if (error.name === 'ConditionalCheckFailedException') {
       logger.info('Session is already in favorites', {
@@ -72,7 +72,7 @@ export default async function addFavoriteSession(
       sessionId,
       error: error.message,
     });
-    
+
     metrics.addMetric('FavoriteSessionAddError', MetricUnit.Count, 1);
     throw error;
   }

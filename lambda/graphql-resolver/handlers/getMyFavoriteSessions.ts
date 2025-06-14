@@ -35,7 +35,7 @@ export default async function getMyFavoriteSessions(
     };
 
     const result = await docClient.send(new QueryCommand(queryParams));
-    
+
     // Extract session IDs from the result
     const sessionIds: string[] = (result.Items || []).map((item: any) => item.sessionId);
 
@@ -46,18 +46,18 @@ export default async function getMyFavoriteSessions(
 
     metrics.addMetric('FavoriteSessionsRetrieved', MetricUnit.Count, 1);
     metrics.addMetric('SessionCount', MetricUnit.Count, sessionIds.length);
-    
+
     subSegment?.close();
 
     return sessionIds;
   } catch (error: any) {
     subSegment?.close(error);
-    
+
     logger.error('Error retrieving favorite sessions', {
       user_id: identity.sub,
       error: error.message,
     });
-    
+
     metrics.addMetric('FavoriteSessionsRetrieveError', MetricUnit.Count, 1);
     throw error;
   }

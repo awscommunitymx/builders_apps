@@ -44,7 +44,7 @@ export default async function getSessionFavoriteUsers(sessionId: string): Promis
     // Now get the user profiles for these user IDs
     // We'll use the cognito_sub-index to get user profiles
     const users: User[] = [];
-    
+
     for (const userId of userIds) {
       try {
         const userQueryParams = {
@@ -58,7 +58,7 @@ export default async function getSessionFavoriteUsers(sessionId: string): Promis
         };
 
         const userResult = await docClient.send(new QueryCommand(userQueryParams));
-        
+
         if (userResult.Items && userResult.Items.length > 0) {
           users.push(userResult.Items[0] as User);
         }
@@ -75,18 +75,18 @@ export default async function getSessionFavoriteUsers(sessionId: string): Promis
 
     metrics.addMetric('SessionFavoriteUsersRetrieved', MetricUnit.Count, 1);
     metrics.addMetric('UserCount', MetricUnit.Count, users.length);
-    
+
     subSegment?.close();
 
     return users;
   } catch (error: any) {
     subSegment?.close(error);
-    
+
     logger.error('Error retrieving session favorite users', {
       sessionId,
       error: error.message,
     });
-    
+
     metrics.addMetric('SessionFavoriteUsersRetrieveError', MetricUnit.Count, 1);
     throw error;
   }

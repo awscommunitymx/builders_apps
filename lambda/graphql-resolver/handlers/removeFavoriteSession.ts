@@ -47,13 +47,13 @@ export default async function removeFavoriteSession(
     return true;
   } catch (error: any) {
     subSegment?.close(error);
-    
+
     logger.error('Error removing favorite session', {
       user_id: identity.sub,
       sessionId,
       error: error.message,
     });
-    
+
     metrics.addMetric('FavoriteSessionRemoveError', MetricUnit.Count, 1);
     throw error;
   }

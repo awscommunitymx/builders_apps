@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { gql, useQuery } from '@apollo/client';
+import { useNavigate } from 'react-router';
 import Header from '@cloudscape-design/components/header';
 import ContentLayout from '@cloudscape-design/components/content-layout';
 import {
@@ -15,6 +17,14 @@ import iamUrl from './assets/iam.svg';
 import eventbridgeUrl from './assets/EventBridge.svg';
 import { getLoggedInUser } from './utils/getAuthenticatedUser';
 import Checkin from './routes/Checkin';
+
+const CHECK_INITIALIZATION = gql`
+  query getMyProfile {
+    getMyProfile {
+      initialized
+    }
+  }
+`;
 
 // Interface for the data property in board items
 interface BoardItemData {
@@ -48,10 +58,45 @@ function boardItem(text: string, imgUrl: string, url: string) {
 
 function App() {
   const loggedInUser = getLoggedInUser();
+  const navigate = useNavigate();
+  const { data, loading, error } = useQuery(CHECK_INITIALIZATION);
+
+  useEffect(() => {
+    if (data?.getMyProfile && !data.getMyProfile.initialized) {
+      navigate('/profile');
+    }
+  }, [data, navigate]);
+
+  // Show loading while checking initialization status
+  if (loading) {
+    return (
+      <AppLayoutToolbar
+        toolsHide={true}
+        content={
+          <ContentLayout
+            header={
+              <SpaceBetween size="m">
+                <Header variant="h1">Cargando...</Header>
+              </SpaceBetween>
+            }
+          >
+            <Container>
+              <div>Verificando estado de inicialización...</div>
+            </Container>
+          </ContentLayout>
+        }
+      />
+    );
+  }
+
+  // Don't render main content if user is not initialized (will redirect)
+  if (data?.getMyProfile && !data.getMyProfile.initialized) {
+    return null;
+  }
 
   const services = [
     {
-      title: 'Perfil',
+      title: 'Mi perfil',
       imgUrl: iamUrl,
       url: '/profile',
     },
@@ -125,7 +170,7 @@ function App() {
           <ContentLayout
             header={
               <SpaceBetween size="m">
-                <Header variant="h1">Página de inicio de la Consola</Header>
+                <Header variant="h1">Página de inicio de Builders app</Header>
               </SpaceBetween>
             }
           >
