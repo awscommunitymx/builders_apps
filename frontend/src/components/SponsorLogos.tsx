@@ -15,9 +15,9 @@ export function SponsorLogos({ visitedSponsorIds }: SponsorLogosProps) {
   // Using the actual sponsor ID and image
   const sponsors = [
     {
-      id: '25449556-a04f-440d-9ecb-51682b339567',
-      name: 'Caylent',
-      logo: '25449556-a04f-440d-9ecb-51682b339567.png',
+      id: '00e3562a-f1db-40e7-a749-b7beb424e895',
+      name: 'Capital One',
+      logo: '00e3562a-f1db-40e7-a749-b7beb424e895.png',
     },
     {
       id: 'b6a1feec-9e10-4f75-8266-517f8690d22f',
@@ -25,29 +25,24 @@ export function SponsorLogos({ visitedSponsorIds }: SponsorLogosProps) {
       logo: 'b6a1feec-9e10-4f75-8266-517f8690d22f.png',
     },
     {
-      id: '00e3562a-f1db-40e7-a749-b7beb424e895',
-      name: 'Capital One',
-      logo: '00e3562a-f1db-40e7-a749-b7beb424e895.png',
+      id: '25449556-a04f-440d-9ecb-51682b339567',
+      name: 'Caylent',
+      logo: '25449556-a04f-440d-9ecb-51682b339567.png',
     },
     {
       id: 'ef2774df-4614-4082-9e6a-9ba5389f4d41',
-      name: 'Astra Zeneca',
+      name: 'AstraZeneca',
       logo: 'ef2774df-4614-4082-9e6a-9ba5389f4d41.PNG',
-    },
-    {
-      id: '5772e99c-c0ca-48a0-9ed9-3eb59d80f92e',
-      name: 'IBM',
-      logo: '5772e99c-c0ca-48a0-9ed9-3eb59d80f92e.gif',
-    },
-    {
-      id: '80f1f3a0-0ab5-4c5f-98be-09211b07b193',
-      name: 'Collectors',
-      logo: '80f1f3a0-0ab5-4c5f-98be-09211b07b193.png',
     },
     {
       id: '7d1564cf-4158-4aa0-8d6c-b12460aa4767',
       name: 'Nu',
       logo: '7d1564cf-4158-4aa0-8d6c-b12460aa4767.png',
+    },
+    {
+      id: '5772e99c-c0ca-48a0-9ed9-3eb59d80f92e',
+      name: 'IBM',
+      logo: '5772e99c-c0ca-48a0-9ed9-3eb59d80f92e.gif',
     },
     {
       id: '0ff4049b-a7c0-4a0e-ac6b-de7b6790942e',
@@ -58,6 +53,11 @@ export function SponsorLogos({ visitedSponsorIds }: SponsorLogosProps) {
       id: 'fb1e781d-f35f-4435-968f-ed7f1a16eac1',
       name: 'SoftServe',
       logo: 'fb1e781d-f35f-4435-968f-ed7f1a16eac1.png',
+    },
+    {
+      id: '80f1f3a0-0ab5-4c5f-98be-09211b07b193',
+      name: 'Collectors',
+      logo: '80f1f3a0-0ab5-4c5f-98be-09211b07b193.png',
     },
   ];
 
