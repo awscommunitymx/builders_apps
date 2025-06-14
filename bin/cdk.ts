@@ -3,6 +3,7 @@ import * as cdk from 'aws-cdk-lib';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
 import { TvDisplayStack } from '../lib/tv-display-stack';
+import { CsatQrDisplayStack } from '../lib/csat-qr-display-stack';
 import { generateAuthDomain } from '../utils/cognito';
 
 const app = new cdk.App();
@@ -39,6 +40,11 @@ const tvDisplayDomain =
   environmentName === 'production'
     ? `tv.${hostedZoneName}`
     : `tv-${environmentName}.${hostedZoneName}`;
+
+const csatQrDisplayDomain =
+  environmentName === 'production'
+    ? `csat.${hostedZoneName}`
+    : `csat-${environmentName}.${hostedZoneName}`;
 
 const backendDomain =
   environmentName === 'production'
@@ -107,5 +113,23 @@ if (require('fs').existsSync(tvDisplayDistPath)) {
     hostedZoneId: hostedZoneId,
     hostedZoneName: hostedZoneName,
     domainName: tvDisplayDomain,
+  });
+}
+
+// Only create CSAT QR display stack if dist folder exists (i.e., when deploying CSAT)
+const csatQrDisplayDistPath = './csat-qr-display/dist';
+if (require('fs').existsSync(csatQrDisplayDistPath)) {
+  const csatQrDisplayStack = new CsatQrDisplayStack(app, `ProfilesStackCsatQrDisplay-${environmentName}`, {
+    apiUrl: backendStack.apiUrl,
+    apiKey: backendStack.apiKey,
+    environment: environmentName,
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: 'us-east-1',
+    },
+    certificateArn: certificateArn,
+    hostedZoneId: hostedZoneId,
+    hostedZoneName: hostedZoneName,
+    domainName: csatQrDisplayDomain,
   });
 }

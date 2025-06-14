@@ -282,9 +282,9 @@ EOL
     npm install
     npm run build
     cd ..
-    echo -e "${GREEN}✅ CSAT QR display build completed${NC}"
-    echo -e "${YELLOW}💡 Note: CSAT QR display build is ready in csat-qr-display/dist/${NC}"
-    echo -e "${YELLOW}💡 Deploy the dist folder to your hosting service${NC}"
+    echo -e "${CYAN}📊 Deploying CSAT QR display...${NC}"
+    npx cdk deploy --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStackCsatQrDisplay-${ENV}"
+    echo -e "${GREEN}✅ CSAT QR display deployment completed${NC}"
   fi
 
   if [[ "$ENV" =~ ^dev- ]] && { [ "$FIRST_TIME" = true ] || [ "$FORCE_POPULATE" = true ]; }; then
