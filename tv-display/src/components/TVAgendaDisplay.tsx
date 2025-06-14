@@ -1,10 +1,10 @@
-import { useRef, useEffect, useMemo, useState } from "react"
-import { gsap } from "gsap"
-import { Clock, MapPin, Users } from "lucide-react"
+import { useRef, useEffect, useMemo, useState } from 'react';
+import { gsap } from 'gsap';
+import { Clock, MapPin, Users } from 'lucide-react';
 import { Speaker } from '@awscommunity/generated-ts';
-import { useAgendaDisplay } from "@/hooks/useAgendaDisplay";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { useParams } from "react-router-dom";
+import { useAgendaDisplay } from '@/hooks/useAgendaDisplay';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { useParams } from 'react-router-dom';
 
 interface TVAgendaDisplayProps {
   sponsorIndex: number;
@@ -15,10 +15,10 @@ interface TVAgendaDisplayProps {
 gsap.registerPlugin(ScrollToPlugin);
 
 const DISPLAY_TIMES = {
-  CURRENT_SESSION: 10000,  // 15 seconds
+  CURRENT_SESSION: 10000, // 15 seconds
   UPCOMING_SESSIONS: 20000, // 20 seconds
-  SPONSOR_MEDIA: 20000,    // 20 seconds
-  TRANSITION_DELAY: 500,   // 0.5 second transition
+  SPONSOR_MEDIA: 20000, // 20 seconds
+  TRANSITION_DELAY: 500, // 0.5 second transition
 } as const;
 
 type DisplayMode = 'current' | 'upcoming' | 'sponsor';
@@ -26,110 +26,105 @@ type DisplayMode = 'current' | 'upcoming' | 'sponsor';
 // Sponsor content
 const sponsorContent = [
   {
-    type: "video",
-    url: "/epam.mp4?height=600&width=800",
+    type: 'video',
+    url: '/epam.mp4?height=600&width=800',
     duration: 20000,
-    title: "Epam",
+    title: 'Epam',
   },
   {
-    type: "image",
-    url: "/zillow.png?height=200&width=400",
+    type: 'image',
+    url: '/zillow.png?height=200&width=400',
     duration: 20000,
-    title: "Zillow",
+    title: 'Zillow',
   },
   {
-    type: "video",
-    url: "/wizeline.mp4?height=600&width=800",
+    type: 'video',
+    url: '/wizeline.mp4?height=600&width=800',
     duration: 20000,
-    title: "Wizeline",
+    title: 'Wizeline',
   },
   {
-    type: "image",
-    url: "/uala.png?height=600&width=800",
+    type: 'image',
+    url: '/uala.png?height=600&width=800',
     duration: 20000,
-    title: "Ualá",
+    title: 'Ualá',
   },
   {
-    type: "image",
-    url: "/softserve.png?height=600&width=800",
+    type: 'image',
+    url: '/softserve.png?height=600&width=800',
     duration: 20000,
-    title: "Softserve",
+    title: 'Softserve',
   },
   {
-    type: "video",
-    url: "/nu.mp4?height=600&width=800",
+    type: 'video',
+    url: '/nu.mp4?height=600&width=800',
     duration: 20000,
-    title: "nu",
+    title: 'nu',
   },
   {
-    type: "image",
-    url: "/ibm.png?height=600&width=800",
+    type: 'image',
+    url: '/ibm.png?height=600&width=800',
     duration: 20000,
-    title: "IBM",
+    title: 'IBM',
   },
   {
-    type: "image",
-    url: "/grafana.png?height=600&width=800",
+    type: 'image',
+    url: '/grafana.png?height=600&width=800',
     duration: 20000,
-    title: "Grafana",
+    title: 'Grafana',
   },
   {
-    type: "image",
-    url: "/globant.png?height=600&width=800",
+    type: 'image',
+    url: '/globant.png?height=600&width=800',
     duration: 20000,
-    title: "Globant",
+    title: 'Globant',
   },
   {
-    type: "video",
-    url: "/doit.mp4?height=600&width=800",
+    type: 'video',
+    url: '/doit.mp4?height=600&width=800',
     duration: 20000,
-    title: "Doit",
+    title: 'Doit',
   },
   {
-    type: "image",
-    url: "/collectors.png?height=600&width=800",
+    type: 'image',
+    url: '/collectors.png?height=600&width=800',
     duration: 20000,
-    title: "Collectors",
+    title: 'Collectors',
   },
   {
-    type: "video",
-    url: "/caylent.mp4?height=600&width=800",
+    type: 'video',
+    url: '/caylent.mp4?height=600&width=800',
     duration: 20000,
-    title: "Caylent",
+    title: 'Caylent',
   },
   {
-    type: "image",
-    url: "/capitalone.png?height=600&width=800",
+    type: 'image',
+    url: '/capitalone.png?height=600&width=800',
     duration: 20000,
-    title: "Capital One",
+    title: 'Capital One',
   },
   {
-    type: "image",
-    url: "/AZ.png?height=600&width=800",
+    type: 'image',
+    url: '/AZ.png?height=600&width=800',
     duration: 20000,
-    title: "Astra Zeneca",
+    title: 'Astra Zeneca',
   },
-]
+];
 
 // Helper function to convert URL location to display location
 const formatLocation = (location: string): string => {
   // Convert kebab-case to Title Case with spaces
   return location
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
 
 export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgendaDisplayProps) {
   const { location: locationParam } = useParams<{ location: string }>();
-  const location = locationParam ? formatLocation(locationParam) : "La Corona";
+  const location = locationParam ? formatLocation(locationParam) : 'La Corona';
 
-  const {
-    loading,
-    error,
-    sessions,
-    location: actualLocation,
-  } = useAgendaDisplay(location);
+  const { loading, error, sessions, location: actualLocation } = useAgendaDisplay(location);
 
   // Local display rotation state
   const [displayMode, setDisplayMode] = useState<DisplayMode>('current');
@@ -144,16 +139,18 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
     return () => clearInterval(timer);
   }, []);
 
+  // State for fullscreen video display
+  const [isFullscreenVideo, setIsFullscreenVideo] = useState(false);
+
   // Display rotation logic
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let transitionTimeoutId: NodeJS.Timeout;
-    let videoEndTimeoutId: NodeJS.Timeout | undefined;
 
     const rotateDisplay = () => {
       setIsTransitioning(true);
       transitionTimeoutId = setTimeout(() => {
-        setDisplayMode(current => {
+        setDisplayMode((current) => {
           if (current === 'current') {
             return 'upcoming';
           } else if (current === 'upcoming') {
@@ -167,40 +164,77 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
         setIsTransitioning(false);
       }, DISPLAY_TIMES.TRANSITION_DELAY);
 
+      // Only set timeout for non-video content or when not in sponsor mode
       const nextDelay =
         displayMode === 'current'
           ? DISPLAY_TIMES.CURRENT_SESSION
           : displayMode === 'upcoming'
-          ? DISPLAY_TIMES.UPCOMING_SESSIONS
-          : DISPLAY_TIMES.SPONSOR_MEDIA;
+            ? DISPLAY_TIMES.UPCOMING_SESSIONS
+            : DISPLAY_TIMES.SPONSOR_MEDIA;
 
-      console.log(nextDelay);
+      console.log(
+        'Display mode:',
+        displayMode,
+        'Sponsor type:',
+        displayMode === 'sponsor' ? sponsorContent[sponsorIndex]?.type : 'N/A'
+      );
 
-      timeoutId = setTimeout(rotateDisplay, nextDelay);
+      // DON'T set timeout if we're about to show a video sponsor - let the video control the timing
+      const nextSponsorIndex = (sponsorIndex + 1) % sponsorContent.length;
+      const willShowVideoSponsor =
+        displayMode === 'upcoming' && sponsorContent[nextSponsorIndex]?.type === 'video';
+      const isCurrentVideoSponsor =
+        displayMode === 'sponsor' && sponsorContent[sponsorIndex]?.type === 'video';
+
+      if (!isCurrentVideoSponsor && !willShowVideoSponsor) {
+        timeoutId = setTimeout(rotateDisplay, nextDelay);
+      }
     };
 
-    // If we're in sponsor mode and the current content is a video, wait for it to end
-    if (displayMode === 'sponsor' && sponsorContent[sponsorIndex].type === 'video') {
-      const videoElement = document.querySelector('video');
-      if (videoElement) {
-        videoElement.onended = () => {
-          rotateDisplay();
-        };
-      }
-    } else {
-      timeoutId = setTimeout(rotateDisplay, DISPLAY_TIMES.CURRENT_SESSION);
+    // Only start rotation if not currently showing a video sponsor
+    const isCurrentlyVideoSponsor =
+      displayMode === 'sponsor' && sponsorContent[sponsorIndex]?.type === 'video';
+    if (!isCurrentlyVideoSponsor) {
+      const initialDelay =
+        displayMode === 'current'
+          ? DISPLAY_TIMES.CURRENT_SESSION
+          : displayMode === 'upcoming'
+            ? DISPLAY_TIMES.UPCOMING_SESSIONS
+            : DISPLAY_TIMES.SPONSOR_MEDIA;
+
+      timeoutId = setTimeout(rotateDisplay, initialDelay);
     }
 
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(transitionTimeoutId);
-      clearTimeout(videoEndTimeoutId);
-      const videoElement = document.querySelector('video');
-      if (videoElement) {
-        videoElement.onended = null;
-      }
     };
   }, [displayMode, sponsorIndex, onSponsorIndexChange]);
+
+  // Separate effect to handle fullscreen video mode
+  useEffect(() => {
+    if (displayMode === 'sponsor' && sponsorContent[sponsorIndex]?.type === 'video') {
+      console.log('Activating fullscreen for video:', sponsorContent[sponsorIndex].title);
+      setIsFullscreenVideo(true);
+    } else {
+      setIsFullscreenVideo(false);
+    }
+  }, [displayMode, sponsorIndex]);
+
+  // Handle video end event - this is the ONLY way videos should end
+  const handleVideoEnd = () => {
+    console.log('Video ended:', sponsorContent[sponsorIndex].title);
+    setIsFullscreenVideo(false);
+
+    // Trigger the next rotation after video ends
+    setTimeout(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setDisplayMode('current');
+        setIsTransitioning(false);
+      }, DISPLAY_TIMES.TRANSITION_DELAY);
+    }, 100);
+  };
 
   // Derive currentSession and upcomingSessions from sessions and currentTime
   const { currentSession, upcomingSessions } = useMemo(() => {
@@ -208,17 +242,19 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
     const sortedSessions = [...sessions].sort(
       (a, b) => new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
     );
-    const current = sortedSessions.find(session => {
+    const current = sortedSessions.find((session) => {
       const start = new Date(session.dateStart);
       const end = new Date(session.dateEnd);
       return now >= start && now <= end;
     });
     const currentEndTime = current ? new Date(current.dateEnd) : now;
-    const upcoming = sortedSessions.filter(session => {
-      const start = new Date(session.dateStart);
-      // Include sessions that start at the same time as the current session ends
-      return start >= currentEndTime;
-    }).slice(0, 3);
+    const upcoming = sortedSessions
+      .filter((session) => {
+        const start = new Date(session.dateStart);
+        // Include sessions that start at the same time as the current session ends
+        return start >= currentEndTime;
+      })
+      .slice(0, 3);
     return { currentSession: current || null, upcomingSessions: upcoming };
   }, [sessions, currentTime]);
 
@@ -236,12 +272,12 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
         opacity: 0,
         y: 50,
         duration: 0.5,
-        ease: "power2.inOut",
+        ease: 'power2.inOut',
         onComplete: () => {
           gsap.fromTo(
             contentRef.current,
             { opacity: 0, y: -50 },
-            { opacity: 1, y: 0, duration: 0.5, ease: "power2.inOut" }
+            { opacity: 1, y: 0, duration: 0.5, ease: 'power2.inOut' }
           );
         },
       });
@@ -260,21 +296,21 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
     if (displayMode === 'current' && currentSessionRef.current) {
       const container = currentSessionRef.current;
       const content = container.firstElementChild as HTMLElement;
-      
+
       if (content) {
         // Reset scroll position
         gsap.set(content, { y: 0 });
 
         // Calculate the total scroll distance
         const scrollDistance = content.scrollHeight - container.clientHeight;
-        
+
         // Only animate if there's content to scroll
         if (scrollDistance > 0) {
           // Create a smooth scroll animation with yoyo effect
           currentSessionScrollRef.current = gsap.to(content, {
             y: -scrollDistance,
             duration: DISPLAY_TIMES.CURRENT_SESSION / 2000,
-            ease: "power1.inOut",
+            ease: 'power1.inOut',
             repeat: -1,
             yoyo: true,
             onRepeat: () => {
@@ -283,19 +319,19 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                 gsap.to(content, {
                   y: 0,
                   duration: DISPLAY_TIMES.CURRENT_SESSION / 2000,
-                  ease: "power1.inOut",
+                  ease: 'power1.inOut',
                   onComplete: () => {
                     gsap.delayedCall(1, () => {
                       gsap.to(content, {
                         y: -scrollDistance,
                         duration: DISPLAY_TIMES.CURRENT_SESSION / 2000,
-                        ease: "power1.inOut"
+                        ease: 'power1.inOut',
                       });
                     });
-                  }
+                  },
                 });
               });
-            }
+            },
           });
         }
       }
@@ -321,30 +357,30 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
     if (displayMode === 'upcoming' && upcomingSessionsRef.current) {
       const container = upcomingSessionsRef.current;
       const content = container.firstElementChild as HTMLElement;
-      
+
       if (content) {
         // Reset scroll position
         container.scrollTop = 0;
 
         // Calculate the total scroll distance
         const scrollDistance = content.scrollHeight - container.clientHeight;
-        
+
         // Only animate if there's content to scroll
         if (scrollDistance > 0) {
           // Create a smooth scroll animation
           scrollAnimationRef.current = gsap.to(container, {
             scrollTo: {
               y: scrollDistance,
-              autoKill: false
+              autoKill: false,
             },
             duration: DISPLAY_TIMES.UPCOMING_SESSIONS / 1000, // Convert ms to seconds
-            ease: "none", // Linear scrolling
+            ease: 'none', // Linear scrolling
             repeat: -1, // Infinite repeat
             yoyo: true, // Reverse the animation
             onRepeat: () => {
               // Reset to top when done
               container.scrollTop = 0;
-            }
+            },
           });
         }
       }
@@ -360,19 +396,19 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
   }, [displayMode]); // Only depend on displayMode, not upcomingSessions
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: false,
     });
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
@@ -403,8 +439,12 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                   </h1>
                 </div>
                 <div className="text-right">
-                  <div className="text-5xl font-mono font-bold text-purple-cd-100">{formatTime(currentTime)}</div>
-                  <div className="text-3xl font-bold text-purple-cd-100/80">{formatDate(currentTime)}</div>
+                  <div className="text-5xl font-mono font-bold text-purple-cd-100">
+                    {formatTime(currentTime)}
+                  </div>
+                  <div className="text-3xl font-bold text-purple-cd-100/80">
+                    {formatDate(currentTime)}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-2xl font-bold">
@@ -418,13 +458,12 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
             {/* Current Session Content */}
             <div className="flex-1 p-8 relative z-10">
               {currentSession ? (
-                <div 
-                  ref={currentSessionRef}
-                  className="h-full overflow-hidden relative"
-                >
+                <div ref={currentSessionRef} className="h-full overflow-hidden relative">
                   <div className="absolute w-full">
                     <div className="max-w-5xl mx-auto bg-blue-cd-200/60 backdrop-blur-xl border border-purple-cd-100/20 rounded-lg p-8">
-                      <h2 className="text-4xl font-display font-bold mb-6 bg-gradient-to-r from-purple-cd-100 to-pink-cd-100 bg-clip-text text-transparent">{currentSession.name}</h2>
+                      <h2 className="text-4xl font-display font-bold mb-6 bg-gradient-to-r from-purple-cd-100 to-pink-cd-100 bg-clip-text text-transparent">
+                        {currentSession.name}
+                      </h2>
                       <p className="text-2xl text-white/80 mb-10">{currentSession.description}</p>
 
                       {/* Session Details with Badges */}
@@ -432,7 +471,8 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                         <div className="flex items-center gap-3 text-white">
                           <Clock className="w-6 h-6" />
                           <span className="text-xl">
-                            {formatTime(new Date(currentSession.dateStart))} - {formatTime(new Date(currentSession.dateEnd))}
+                            {formatTime(new Date(currentSession.dateStart))} -{' '}
+                            {formatTime(new Date(currentSession.dateEnd))}
                           </span>
                         </div>
                         {currentSession.location && (
@@ -467,19 +507,25 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {currentSession.speakers
-                              ?.filter((speaker: Speaker | null): speaker is Speaker => speaker !== null)
+                              ?.filter(
+                                (speaker: Speaker | null): speaker is Speaker => speaker !== null
+                              )
                               .map((speaker: Speaker, index: number) => (
                                 <div
                                   key={speaker.id || index}
                                   className="flex items-center gap-6 p-6 bg-purple-cd-200/30 backdrop-blur-sm rounded-lg border border-purple-cd-100/20"
                                 >
                                   <img
-                                    src={speaker.avatarUrl || "/placeholder.svg?height=100&width=100"}
+                                    src={
+                                      speaker.avatarUrl || '/placeholder.svg?height=100&width=100'
+                                    }
                                     alt={speaker.name}
                                     className="w-16 h-16 rounded-full object-cover border border-purple-cd-100/20"
                                   />
                                   <div>
-                                    <h4 className="text-xl font-semibold text-white">{speaker.name}</h4>
+                                    <h4 className="text-xl font-semibold text-white">
+                                      {speaker.name}
+                                    </h4>
                                     {speaker.company && (
                                       <p className="text-lg text-white/60">{speaker.company}</p>
                                     )}
@@ -495,7 +541,8 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                         <div className="flex items-center gap-3 text-purple-cd-100">
                           <Clock className="w-6 h-6" />
                           <span className="text-xl">
-                            {formatTime(new Date(currentSession.dateStart))} - {formatTime(new Date(currentSession.dateEnd))}
+                            {formatTime(new Date(currentSession.dateStart))} -{' '}
+                            {formatTime(new Date(currentSession.dateEnd))}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-purple-cd-100">
@@ -509,7 +556,9 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
               ) : (
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center max-w-3xl mx-auto">
-                    <h2 className="text-4xl font-display font-bold mb-6 text-white">No Current Session</h2>
+                    <h2 className="text-4xl font-display font-bold mb-6 text-white">
+                      No Current Session
+                    </h2>
                     <p className="text-2xl text-white/80">
                       There is no session currently in progress.
                     </p>
@@ -519,7 +568,7 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
             </div>
           </div>
         );
-      
+
       case 'upcoming':
         return (
           <div className="h-full flex flex-col bg-blue-cd-200 relative">
@@ -534,8 +583,12 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                   </h1>
                 </div>
                 <div className="text-right">
-                  <div className="text-5xl font-mono font-bold text-cyan-cd-100">{formatTime(currentTime)}</div>
-                  <div className="text-3xl font-bold text-cyan-cd-100/80">{formatDate(currentTime)}</div>
+                  <div className="text-5xl font-mono font-bold text-cyan-cd-100">
+                    {formatTime(currentTime)}
+                  </div>
+                  <div className="text-3xl font-bold text-cyan-cd-100/80">
+                    {formatDate(currentTime)}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-2xl font-bold">
@@ -547,7 +600,7 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
             </div>
 
             {/* Upcoming Sessions List */}
-            <div 
+            <div
               ref={upcomingSessionsRef}
               className="flex-1 overflow-hidden relative z-10 bg-blue-cd-200/40"
             >
@@ -561,14 +614,17 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                       >
                         <div className="flex flex-col md:flex-row md:items-start gap-6">
                           <div className="flex-1">
-                            <h2 className="text-3xl font-display font-bold mb-4 bg-gradient-to-r from-cyan-cd-100 to-blue-cd-100 bg-clip-text text-transparent">{session.name}</h2>
-                            
+                            <h2 className="text-3xl font-display font-bold mb-4 bg-gradient-to-r from-cyan-cd-100 to-blue-cd-100 bg-clip-text text-transparent">
+                              {session.name}
+                            </h2>
+
                             {/* Session Details with Badges */}
                             <div className="flex flex-wrap items-center gap-4 mb-6">
                               <div className="flex items-center gap-3 text-white">
                                 <Clock className="w-6 h-6" />
                                 <span className="text-xl">
-                                  {formatTime(new Date(session.dateStart))} - {formatTime(new Date(session.dateEnd))}
+                                  {formatTime(new Date(session.dateStart))} -{' '}
+                                  {formatTime(new Date(session.dateEnd))}
                                 </span>
                               </div>
                               {session.level && (
@@ -592,21 +648,29 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                             {session.speakers && session.speakers.length > 0 && (
                               <div className="flex flex-wrap gap-4">
                                 {session.speakers
-                                  ?.filter((speaker: Speaker | null): speaker is Speaker => speaker !== null)
+                                  ?.filter(
+                                    (speaker: Speaker | null): speaker is Speaker =>
+                                      speaker !== null
+                                  )
                                   .map((speaker: Speaker, speakerIndex: number) => (
                                     <div
                                       key={speaker.id || speakerIndex}
                                       className="flex items-center gap-3 bg-blue-cd-200/40 px-4 py-2 rounded-full border border-cyan-cd-100/20"
                                     >
                                       <img
-                                        src={speaker.avatarUrl || "/placeholder.svg?height=48&width=48"}
+                                        src={
+                                          speaker.avatarUrl || '/placeholder.svg?height=48&width=48'
+                                        }
                                         alt={speaker.name}
                                         className="w-12 h-12 rounded-full object-cover border border-cyan-cd-100/20"
                                       />
                                       <span className="text-xl text-white">
                                         {speaker.name}
                                         {speaker.company && (
-                                          <span className="text-white/60"> • {speaker.company}</span>
+                                          <span className="text-white/60">
+                                            {' '}
+                                            • {speaker.company}
+                                          </span>
                                         )}
                                       </span>
                                     </div>
@@ -621,7 +685,9 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                 ) : (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center max-w-3xl mx-auto">
-                      <h2 className="text-4xl font-display font-bold mb-6 text-white">No More Sessions Today</h2>
+                      <h2 className="text-4xl font-display font-bold mb-6 text-white">
+                        No More Sessions Today
+                      </h2>
                       <p className="text-2xl text-cyan-cd-100/80 mb-8">
                         {currentSession ? (
                           <>
@@ -630,7 +696,7 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                             Thank you for attending!
                           </>
                         ) : (
-                          "There are no more sessions scheduled for today. Thank you for attending!"
+                          'There are no more sessions scheduled for today. Thank you for attending!'
                         )}
                       </p>
                       {currentSession && (
@@ -647,8 +713,17 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
             </div>
           </div>
         );
-      
+
       case 'sponsor':
+        // Don't show regular sponsor content when fullscreen video is active
+        if (isFullscreenVideo && sponsorContent[sponsorIndex].type === 'video') {
+          return (
+            <div className="h-full flex items-center justify-center bg-black">
+              {/* Placeholder while fullscreen video plays */}
+            </div>
+          );
+        }
+
         return (
           <div className="h-full flex flex-col bg-blue-cd-200 relative">
             <div className="absolute inset-0 bg-[url('/Pattern.svg')] opacity-10"></div>
@@ -662,8 +737,12 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                   </h1>
                 </div>
                 <div className="text-right">
-                  <div className="text-5xl font-mono font-bold text-orange-cd-100">{formatTime(currentTime)}</div>
-                  <div className="text-3xl font-bold text-orange-cd-100/80">{formatDate(currentTime)}</div>
+                  <div className="text-5xl font-mono font-bold text-orange-cd-100">
+                    {formatTime(currentTime)}
+                  </div>
+                  <div className="text-3xl font-bold text-orange-cd-100/80">
+                    {formatDate(currentTime)}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-2xl font-bold">
@@ -678,19 +757,15 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
             <div className="flex-1 flex items-center justify-center p-4 relative z-10">
               <div className="w-full h-full max-w-[95vw] max-h-[85vh] flex items-center justify-center">
                 <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
-                  {sponsorContent[sponsorIndex].type === "video" ? (
-                    <video
-                      src={sponsorContent[sponsorIndex].url}
-                      className="w-auto h-auto max-w-full max-h-full object-contain"
-                      autoPlay
-                      loop={false}
-                      muted
-                      playsInline
-                    />
+                  {sponsorContent[sponsorIndex]?.type === 'video' ? (
+                    <div className="text-white text-center">
+                      <p className="text-2xl">Loading video...</p>
+                      <p className="text-lg text-white/60">{sponsorContent[sponsorIndex].title}</p>
+                    </div>
                   ) : (
                     <img
-                      src={sponsorContent[sponsorIndex].url}
-                      alt={sponsorContent[sponsorIndex].title}
+                      src={sponsorContent[sponsorIndex]?.url}
+                      alt={sponsorContent[sponsorIndex]?.title}
                       className="w-auto h-auto max-w-full max-h-full object-contain"
                     />
                   )}
@@ -728,6 +803,45 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
       <div ref={contentRef} className="h-full w-full">
         {renderContent()}
       </div>
+
+      {/* Fullscreen Video Overlay */}
+      {isFullscreenVideo &&
+        displayMode === 'sponsor' &&
+        sponsorContent[sponsorIndex]?.type === 'video' && (
+          <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+            <video
+              key={`fullscreen-${sponsorIndex}-${sponsorContent[sponsorIndex].title}`} // Unique key for each video
+              src={sponsorContent[sponsorIndex].url}
+              className="fullscreen-video w-full h-full object-contain"
+              autoPlay
+              loop={false}
+              muted
+              playsInline
+              onEnded={handleVideoEnd}
+              onLoadedData={() => {
+                console.log(`Fullscreen video loaded: ${sponsorContent[sponsorIndex].title}`);
+              }}
+              onPlay={() => {
+                console.log(`Video started playing: ${sponsorContent[sponsorIndex].title}`);
+              }}
+              onTimeUpdate={(e) => {
+                const video = e.target as HTMLVideoElement;
+                if (video.duration && video.currentTime) {
+                  const progress = (video.currentTime / video.duration) * 100;
+                  if (progress % 25 < 1) {
+                    // Log every 25%
+                    console.log(
+                      `Video progress: ${Math.round(progress)}% - ${sponsorContent[sponsorIndex].title}`
+                    );
+                  }
+                }
+              }}
+              onError={(e) => {
+                console.error('Video error:', e, sponsorContent[sponsorIndex].title);
+              }}
+            />
+          </div>
+        )}
     </div>
   );
-} 
+}
