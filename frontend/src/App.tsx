@@ -15,6 +15,7 @@ import {
 
 import iamUrl from './assets/iam.svg';
 import eventbridgeUrl from './assets/EventBridge.svg';
+import mapIconUrl from './assets/map-icon.svg';
 import { getLoggedInUser } from './utils/getAuthenticatedUser';
 import Checkin from './routes/Checkin';
 
@@ -67,8 +68,6 @@ function App() {
     }
   }, [data, navigate]);
 
-
-
   const services = [
     {
       title: 'Mi perfil',
@@ -84,6 +83,11 @@ function App() {
       title: 'Sesiones de Fotos',
       imgUrl: iamUrl,
       url: '/photo-sessions',
+    },
+    {
+      title: 'Mapa del Evento',
+      imgUrl: mapIconUrl,
+      url: '/map',
     },
     ...(loggedInUser?.groups.includes('Sponsors')
       ? [
@@ -119,6 +123,7 @@ function App() {
               { type: 'link' as const, text: `Mi perfil`, href: `/profile` },
               { type: 'link' as const, text: `Agenda`, href: `/agenda` },
               { type: 'link' as const, text: `Sesiones de Fotos`, href: `/photo-sessions` },
+              { type: 'link' as const, text: `Mapa del Evento`, href: `/map` },
               // { type: 'link' as const, text: `Check-in`, href: `/checkin` },
               ...(loggedInUser?.groups.some((group) => group.startsWith('CheckInVolunteer'))
                 ? [

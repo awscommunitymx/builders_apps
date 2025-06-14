@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo, useState } from 'react';
 import { gsap } from 'gsap';
-import { Clock, MapPin, Users } from 'lucide-react';
+import { Clock, Radio, Users } from 'lucide-react';
 import { Speaker } from '@awscommunity/generated-ts';
 import { useAgendaDisplay } from '@/hooks/useAgendaDisplay';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -24,7 +24,7 @@ const DISPLAY_TIMES = {
 type DisplayMode = 'current' | 'upcoming' | 'sponsor';
 
 // Sponsor content
-const sponsorContent = [
+const baseSponsorContent = [
   {
     type: 'video',
     url: '/epam.mp4?height=600&width=800',
@@ -111,6 +111,19 @@ const sponsorContent = [
   },
 ];
 
+// Helper function to shuffle array randomly
+const shuffleArray = (array: any[]): any[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Create shuffled sponsor content that will be different on each page load
+const sponsorContent = shuffleArray(baseSponsorContent);
+
 // Helper function to convert URL location to display location
 const formatLocation = (location: string): string => {
   // Convert kebab-case to Title Case with spaces
@@ -118,6 +131,23 @@ const formatLocation = (location: string): string => {
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+};
+
+// Helper function to convert room names to headphone port numbers
+const getHeadphonePort = (location: string): string => {
+  const roomToPort: { [key: string]: string } = {
+    'La Botella': 'Canal 01',
+    'El Barril': 'Canal 99',
+    'La Calavera': 'Canal 19',
+    'El Corazón': 'Canal 21',
+    'La Campana': 'Canal 14',
+    'El Sol': 'Canal 12',
+    'La Corona': 'Canal 1',
+    'El Gorrito': 'Canal 50', // Added additional rooms with reasonable channel numbers
+    'El Mundo': 'Canal 25',
+  };
+
+  return roomToPort[location] || location;
 };
 
 export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgendaDisplayProps) {
@@ -430,28 +460,34 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
           <div className="h-full flex flex-col bg-blue-cd-200 relative">
             <div className="absolute inset-0 bg-[url('/Pattern.svg')] opacity-10"></div>
             {/* Header */}
-            <div className="bg-blue-cd-200/60 backdrop-blur-xl border-b border-purple-cd-100/20 p-8 text-white relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <img src="/logo.svg" alt="Logo" className="h-12 w-auto" />
-                <div className="flex items-center gap-4">
-                  <h1 className="text-5xl font-display font-bold bg-gradient-to-r from-purple-cd-100 to-pink-cd-100 bg-clip-text text-transparent">
+            <div className="bg-blue-cd-200/60 backdrop-blur-xl border-b border-purple-cd-100/20 p-4 text-white relative z-10">
+              <div className="flex items-center mb-3">
+                <div className="w-50">
+                  <img src="/logo.svg" alt="Logo" className="h-16 w-auto" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-purple-cd-100 to-pink-cd-100 bg-clip-text text-transparent">
                     CURRENT SESSION
                   </h1>
                 </div>
-                <div className="text-right">
-                  <div className="text-5xl font-mono font-bold text-purple-cd-100">
+                <div className="text-right w-48">
+                  <div className="text-3xl font-mono font-bold text-purple-cd-100">
                     {formatTime(currentTime)}
                   </div>
-                  <div className="text-3xl font-bold text-purple-cd-100/80">
+                  <div className="text-xl font-bold text-purple-cd-100/80">
                     {formatDate(currentTime)}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-2xl font-bold">
-                <div className="flex items-center gap-3 text-purple-cd-100">
-                  <MapPin className="w-6 h-6 text-purple-cd-100" />
-                  <span>{actualLocation}</span>
+              <div className="flex items-center mb-0">
+                <div className="w-48"></div>
+                <div className="flex-1 flex justify-center">
+                  <div className="flex items-center gap-3 text-purple-cd-100 text-xl font-bold">
+                    <Radio className="w-5 h-5 text-purple-cd-100" />
+                    <span>{getHeadphonePort(actualLocation)}</span>
+                  </div>
                 </div>
+                <div className="w-48"></div>
               </div>
             </div>
 
@@ -477,8 +513,8 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                         </div>
                         {currentSession.location && (
                           <div className="bg-purple-cd-100/10 text-white px-4 py-2 rounded-full text-xl border border-purple-cd-100/20 flex items-center gap-2">
-                            <MapPin className="w-5 h-5" />
-                            {currentSession.location}
+                            <Radio className="w-5 h-5" />
+                            {getHeadphonePort(currentSession.location)}
                           </div>
                         )}
                         {currentSession.level && (
@@ -546,8 +582,12 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-purple-cd-100">
-                          <MapPin className="w-6 h-6" />
-                          <span className="text-xl">{currentSession.location}</span>
+                          <Radio className="w-6 h-6" />
+                          <span className="text-xl">
+                            {currentSession.location
+                              ? getHeadphonePort(currentSession.location)
+                              : 'No location'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -574,27 +614,27 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
           <div className="h-full flex flex-col bg-blue-cd-200 relative">
             <div className="absolute inset-0 bg-[url('/Pattern.svg')] opacity-10"></div>
             {/* Header */}
-            <div className="bg-blue-cd-200/60 backdrop-blur-xl border-b border-purple-cd-100/20 p-8 text-white relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <img src="/logo.svg" alt="Logo" className="h-12 w-auto" />
-                <div className="flex items-center gap-4">
-                  <h1 className="text-5xl font-display font-bold bg-gradient-to-r from-cyan-cd-100 to-blue-cd-100 bg-clip-text text-transparent">
+            <div className="bg-blue-cd-200/60 backdrop-blur-xl border-b border-purple-cd-100/20 p-4 text-white relative z-10">
+              <div className="flex items-center mb-3">
+                <img src="/logo.svg" alt="Logo" className="h-16 w-auto" />
+                <div className="flex-1 flex justify-center">
+                  <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-cyan-cd-100 to-blue-cd-100 bg-clip-text text-transparent">
                     UPCOMING SESSIONS
                   </h1>
                 </div>
-                <div className="text-right">
-                  <div className="text-5xl font-mono font-bold text-cyan-cd-100">
+                <div className="text-right w-48">
+                  <div className="text-3xl font-mono font-bold text-cyan-cd-100">
                     {formatTime(currentTime)}
                   </div>
-                  <div className="text-3xl font-bold text-cyan-cd-100/80">
+                  <div className="text-xl font-bold text-cyan-cd-100/80">
                     {formatDate(currentTime)}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-2xl font-bold">
+              <div className="flex items-center justify-center text-xl font-bold">
                 <div className="flex items-center gap-3 text-cyan-cd-100">
-                  <MapPin className="w-6 h-6 text-cyan-cd-100" />
-                  <span>{actualLocation}</span>
+                  <Radio className="w-5 h-5 text-cyan-cd-100" />
+                  <span>{getHeadphonePort(actualLocation)}</span>
                 </div>
               </div>
             </div>
@@ -728,27 +768,27 @@ export function TVAgendaDisplay({ sponsorIndex, onSponsorIndexChange }: TVAgenda
           <div className="h-full flex flex-col bg-blue-cd-200 relative">
             <div className="absolute inset-0 bg-[url('/Pattern.svg')] opacity-10"></div>
             {/* Header */}
-            <div className="bg-blue-cd-200/60 backdrop-blur-xl border-b border-purple-cd-100/20 p-8 text-white relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <img src="/logo.svg" alt="Logo" className="h-12 w-auto" />
-                <div className="flex items-center gap-4">
-                  <h1 className="text-5xl font-display font-bold bg-gradient-to-r from-orange-cd-100 to-pink-cd-100 bg-clip-text text-transparent">
+            <div className="bg-blue-cd-200/60 backdrop-blur-xl border-b border-purple-cd-100/20 p-4 text-white relative z-10">
+              <div className="flex items-center mb-3">
+                <img src="/logo.svg" alt="Logo" className="h-16 w-auto" />
+                <div className="flex-1 flex justify-center">
+                  <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-orange-cd-100 to-pink-cd-100 bg-clip-text text-transparent">
                     SPONSOR HIGHLIGHT
                   </h1>
                 </div>
-                <div className="text-right">
-                  <div className="text-5xl font-mono font-bold text-orange-cd-100">
+                <div className="text-right w-48">
+                  <div className="text-3xl font-mono font-bold text-orange-cd-100">
                     {formatTime(currentTime)}
                   </div>
-                  <div className="text-3xl font-bold text-orange-cd-100/80">
+                  <div className="text-xl font-bold text-orange-cd-100/80">
                     {formatDate(currentTime)}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-2xl font-bold">
+              <div className="flex items-center justify-center text-xl font-bold">
                 <div className="flex items-center gap-3 text-orange-cd-100">
-                  <MapPin className="w-6 h-6 text-orange-cd-100" />
-                  <span>{actualLocation}</span>
+                  <Radio className="w-5 h-5 text-orange-cd-100" />
+                  <span>{getHeadphonePort(actualLocation)}</span>
                 </div>
               </div>
             </div>

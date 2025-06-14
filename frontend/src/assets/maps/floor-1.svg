@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+  
+  <!-- Building outline -->
+  <rect x="50" y="50" width="700" height="500" fill="none" stroke="#6c757d" stroke-width="2"/>
+  
+  <!-- Main Hall -->
+  <rect x="100" y="100" width="300" height="200" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="250" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1976d2">
+    Salón Principal
+  </text>
+  
+  <!-- Conference Rooms -->
+  <rect x="450" y="100" width="120" height="80" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="510" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f57c00">
+    Sala A
+  </text>
+  
+  <rect x="600" y="100" width="120" height="80" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="660" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f57c00">
+    Sala B
+  </text>
+  
+  <rect x="450" y="200" width="120" height="80" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="510" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f57c00">
+    Sala C
+  </text>
+  
+  <rect x="600" y="200" width="120" height="80" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="660" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f57c00">
+    Sala D
+  </text>
+  
+  <!-- Cafeteria -->
+  <rect x="100" y="350" width="200" height="150" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="200" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#7b1fa2">
+    Cafetería
+  </text>
+  
+  <!-- Reception -->
+  <rect x="350" y="350" width="150" height="80" fill="#e8f5e8" stroke="#388e3c" stroke-width="2"/>
+  <text x="425" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#388e3c">
+    Recepción
+  </text>
+  
+  <!-- Networking Area -->
+  <rect x="550" y="350" width="170" height="150" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="635" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c2185b">
+    Área de
+  </text>
+  <text x="635" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c2185b">
+    Networking
+  </text>
+  
+  <!-- Entrance -->
+  <rect x="350" y="20" width="100" height="30" fill="#ffecb3" stroke="#ffa000" stroke-width="2"/>
+  <text x="400" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffa000">
+    ENTRADA
+  </text>
+  
+  <!-- Bathrooms -->
+  <rect x="650" y="450" width="60" height="40" fill="#e0e0e0" stroke="#616161" stroke-width="1"/>
+  <text x="680" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#616161">
+    WC
+  </text>
+  
+  <!-- Title -->
+  <text x="400" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
+    PRIMER PISO
+  </text>
+</svg>

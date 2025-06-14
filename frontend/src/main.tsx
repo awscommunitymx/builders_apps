@@ -20,6 +20,7 @@ import { AgendaDetailsRoute } from './routes/AgendaDetailsRoute.tsx';
 import SessionCSATRoute from './routes/SessionCSATRoute.tsx';
 import PhotoSessionRoute from './routes/PhotoSessionRoute.tsx';
 import PhotoSessionRegistrationsRoute from './routes/PhotoSessionRegistrationsRoute.tsx';
+import { MapRoute } from './routes/MapRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -40,8 +41,12 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="sponsor-dashboard" element={<SponsorDashboardRoute />} />
                 <Route path="checkin" element={<Checkin />} />
                 <Route path="photo-sessions" element={<PhotoSessionRoute />} />
+                <Route path="map" element={<MapRoute />} />
                 <Route path="/session/:sessionId/csat" element={<SessionCSATRoute />} />
-                <Route path="/admin/photo-registrations" element={<PhotoSessionRegistrationsRoute />} />
+                <Route
+                  path="/admin/photo-registrations"
+                  element={<PhotoSessionRegistrationsRoute />}
+                />
               </Route>
             </Routes>
           </BrowserRouter>

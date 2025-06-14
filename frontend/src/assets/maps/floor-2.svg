@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+  
+  <!-- Building outline -->
+  <rect x="50" y="50" width="700" height="500" fill="none" stroke="#6c757d" stroke-width="2"/>
+  
+  <!-- Workshop Rooms -->
+  <rect x="100" y="100" width="150" height="120" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
+  <text x="175" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f9a825">
+    Taller 1
+  </text>
+  <text x="175" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f9a825">
+    Desarrollo
+  </text>
+  
+  <rect x="280" y="100" width="150" height="120" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
+  <text x="355" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f9a825">
+    Taller 2
+  </text>
+  <text x="355" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f9a825">
+    Cloud
+  </text>
+  
+  <rect x="460" y="100" width="150" height="120" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
+  <text x="535" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f9a825">
+    Taller 3
+  </text>
+  <text x="535" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#f9a825">
+    AI/ML
+  </text>
+  
+  <!-- Presentation Room -->
+  <rect x="640" y="100" width="100" height="120" fill="#e1f5fe" stroke="#0277bd" stroke-width="2"/>
+  <text x="690" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0277bd">
+    Sala de
+  </text>
+  <text x="690" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0277bd">
+    Presentación
+  </text>
+  
+  <!-- Coworking Space -->
+  <rect x="100" y="260" width="250" height="180" fill="#f1f8e9" stroke="#689f38" stroke-width="2"/>
+  <text x="225" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#689f38">
+    Espacio de Coworking
+  </text>
+  <text x="225" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#689f38">
+    Área colaborativa
+  </text>
+  
+  <!-- Meeting Rooms -->
+  <rect x="380" y="260" width="100" height="80" fill="#fdf2e9" stroke="#d84315" stroke-width="2"/>
+  <text x="430" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#d84315">
+    Reunión 1
+  </text>
+  
+  <rect x="500" y="260" width="100" height="80" fill="#fdf2e9" stroke="#d84315" stroke-width="2"/>
+  <text x="550" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#d84315">
+    Reunión 2
+  </text>
+  
+  <rect x="620" y="260" width="100" height="80" fill="#fdf2e9" stroke="#d84315" stroke-width="2"/>
+  <text x="670" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#d84315">
+    Reunión 3
+  </text>
+  
+  <!-- Break Area -->
+  <rect x="380" y="360" width="220" height="80" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="490" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#7b1fa2">
+    Área de Descanso
+  </text>
+  
+  <!-- Storage -->
+  <rect x="620" y="360" width="100" height="80" fill="#efebe9" stroke="#5d4037" stroke-width="2"/>
+  <text x="670" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#5d4037">
+    Almacén
+  </text>
+  
+  <!-- Stairs -->
+  <rect x="50" y="480" width="60" height="60" fill="#e8eaf6" stroke="#3f51b5" stroke-width="2"/>
+  <text x="80" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#3f51b5">
+    ESCALERAS
+  </text>
+  
+  <!-- Elevator -->
+  <rect x="130" y="480" width="50" height="60" fill="#e8eaf6" stroke="#3f51b5" stroke-width="2"/>
+  <text x="155" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#3f51b5">
+    ASCENSOR
+  </text>
+  
+  <!-- Title -->
+  <text x="400" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
+    SEGUNDO PISO
+  </text>
+</svg>
