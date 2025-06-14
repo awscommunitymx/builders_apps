@@ -1,0 +1,61 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* App container */
+.app {
+  min-height: 100vh;
+  background: #00FF00; /* Bright green for chroma key */
+  background: linear-gradient(135deg, #00FF00 0%, #32CD32 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* QR Display Component */
+.qr-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.qr-container {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .qr-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-container {
+    padding: 1rem;
+  }
+  
+  .app {
+    padding: 1rem;
+  }
+}
