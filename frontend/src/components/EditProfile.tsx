@@ -179,7 +179,26 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                   placeholder="Ingresa tu nombre completo"
                 />
               </FormField>
-              <FormField label="Correo electrónico">
+              <FormField
+                label={
+                  <SpaceBetween direction="horizontal" size="xs">
+                    Correo electrónico
+                    <Box color="text-status-info" display="inline">
+                      <Popover
+                        header="Cambiar correo electrónico"
+                        size="medium"
+                        triggerType="text"
+                        content="Si quieres cambiar tu correo electrónico, asiste después de las 12:00 PM a soporte."
+                        renderWithPortal={true}
+                      >
+                        <Box color="text-status-info" fontSize="body-s" fontWeight="bold">
+                          Info
+                        </Box>
+                      </Popover>
+                    </Box>
+                  </SpaceBetween>
+                }
+              >
                 <Input
                   value={email}
                   disabled={true}
@@ -193,7 +212,26 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                   Compartir mi correo electrónico
                 </Checkbox>
               </FormField>
-              <FormField label="Teléfono">
+              <FormField
+                label={
+                  <SpaceBetween direction="horizontal" size="xs">
+                    Teléfono
+                    <Box color="text-status-info" display="inline">
+                      <Popover
+                        header="Cambiar teléfono"
+                        size="medium"
+                        triggerType="text"
+                        content="Si quieres cambiar tu número de teléfono, asiste después de las 12:00 PM a soporte."
+                        renderWithPortal={true}
+                      >
+                        <Box color="text-status-info" fontSize="body-s" fontWeight="bold">
+                          Info
+                        </Box>
+                      </Popover>
+                    </Box>
+                  </SpaceBetween>
+                }
+              >
                 <Input value={cellPhone} disabled={true} placeholder="Número de teléfono" />
                 <Checkbox
                   checked={sharePhone}
@@ -210,12 +248,12 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                   placeholder="Ingresa el nombre de tu empresa"
                 />
               </FormField>
-              <FormField label="Puesto o rol">
+              <FormField label="Puesto">
                 <Input
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.detail.value)}
                   disabled={loading}
-                  placeholder="Ingresa tu puesto de trabajo o rol"
+                  placeholder="Ingresa tu puesto de trabajo"
                 />
               </FormField>
               <FormField
@@ -227,7 +265,7 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                         header="Tu PIN"
                         size="medium"
                         triggerType="text"
-                        content="El PIN es un código de 4 dígitos que permitirá a otros builders acceder a tu perfil y contactarte. Puedes cambiarlo en cualquier momento."
+                        content="El PIN es un código de 4 dígitos que permitirá a otros builders acceder a tu perfil y contactarte. Puedes cambiarlo en cualquier momento. No uses tu PIN bancario"
                         renderWithPortal={true}
                       >
                         <Box color="text-status-info" fontSize="body-s" fontWeight="bold">
@@ -237,7 +275,7 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                     </Box>
                   </SpaceBetween>
                 }
-                description="Ingresa exactamente 4 dígitos numéricos"
+                description="Ingresa exactamente 4 dígitos."
                 errorText={pinError}
               >
                 <Input

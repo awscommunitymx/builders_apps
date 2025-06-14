@@ -44,6 +44,21 @@ export function SponsorLogos({ visitedSponsorIds }: SponsorLogosProps) {
       name: 'Collectors',
       logo: '80f1f3a0-0ab5-4c5f-98be-09211b07b193.png',
     },
+    {
+      id: '7d1564cf-4158-4aa0-8d6c-b12460aa4767',
+      name: 'Nu',
+      logo: '7d1564cf-4158-4aa0-8d6c-b12460aa4767.png',
+    },
+    {
+      id: '0ff4049b-a7c0-4a0e-ac6b-de7b6790942e',
+      name: 'EPAM',
+      logo: '0ff4049b-a7c0-4a0e-ac6b-de7b6790942e.png',
+    },
+    {
+      id: 'fb1e781d-f35f-4435-968f-ed7f1a16eac1',
+      name: 'SoftServe',
+      logo: 'fb1e781d-f35f-4435-968f-ed7f1a16eac1.png',
+    },
   ];
 
   return (
@@ -56,7 +71,7 @@ export function SponsorLogos({ visitedSponsorIds }: SponsorLogosProps) {
               header="Pasaporte"
               size="medium"
               triggerType="text"
-              content="Visita a todos los patrocinadores y participa en los sorteos al final del dia."
+              content="Visita los stands de nuestros patrocinadores, completa tu pasaporte y participa en la rifa de grandes regalos al final del día."
               renderWithPortal={true}
             >
               <Box color="text-status-info" fontSize="body-s" fontWeight="bold">

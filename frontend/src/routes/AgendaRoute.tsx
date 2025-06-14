@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { gql, useQuery } from '@apollo/client';
 import {
   AppLayoutToolbar,
   BreadcrumbGroup,
@@ -19,6 +20,14 @@ import {
   useAddFavoriteSessionMutation,
   useRemoveFavoriteSessionMutation,
 } from '../../../generated/react/hooks';
+
+const CHECK_INITIALIZATION = gql`
+  query getMyProfile {
+    getMyProfile {
+      initialized
+    }
+  }
+`;
 
 // Importar logos de sponsors
 // @ts-ignore
@@ -103,7 +112,7 @@ const SPONSORS_DATA = {
     },
   ],
   Oro: [
-    { id: 'sponsor-nu', name: 'Nu', logoUrl: nuLogo, websiteUrl: 'https://nu.com' },
+    { id: 'sponsor-nu', name: 'Nu', logoUrl: nuLogo, websiteUrl: 'https://nu.com.mx' },
     { id: 'sponsor-ibm', name: 'IBM', logoUrl: ibmLogo, websiteUrl: 'https://www.ibm.com' },
     { id: 'sponsor-epam', name: 'EPAM', logoUrl: epamLogo, websiteUrl: 'https://www.epam.com' },
     {
@@ -277,6 +286,17 @@ const separateSessionsByStatus = (sessions: SessionType[]) => {
 const sessions: SessionType[] = sortSessionsByTime(sessionsData.sessions);
 
 export function AgendaRoute() {
+  const navigate = useNavigate();
+  const { data: initData, loading: initLoading } = useQuery(CHECK_INITIALIZATION);
+
+  // Check initialization and redirect if needed
+  useEffect(() => {
+    if (initData?.getMyProfile && !initData.getMyProfile.initialized) {
+      navigate('/profile');
+    }
+  }, [initData, navigate]);
+
+
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]); // Changed to string[] for GraphQL
   const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
@@ -284,7 +304,11 @@ export function AgendaRoute() {
   const [finishedMixedItems, setFinishedMixedItems] = useState<ItemType[]>([]);
 
   // GraphQL hooks for favorites
-  const { data: favoriteSessionsData, loading: favoritesLoading, refetch: refetchFavorites } = useGetMyFavoriteSessionsQuery();
+  const {
+    data: favoriteSessionsData,
+    loading: favoritesLoading,
+    refetch: refetchFavorites,
+  } = useGetMyFavoriteSessionsQuery();
   const [addFavoriteSession] = useAddFavoriteSessionMutation();
   const [removeFavoriteSession] = useRemoveFavoriteSessionMutation();
 
@@ -335,8 +359,6 @@ export function AgendaRoute() {
     value: category,
   }));
 
-  const navigate = useNavigate();
-
   // Cargar favoritos al iniciar el componente ya no es necesario
   // porque ahora usamos el hook useGetMyFavoriteSessionsQuery
 
@@ -360,13 +382,13 @@ export function AgendaRoute() {
       if (isCurrentlyFavorited) {
         // Quitar de favoritos
         await removeFavoriteSession({
-          variables: { sessionId }
+          variables: { sessionId },
         });
         console.log(`Sesión ${sessionId} eliminada de favoritos con éxito`);
       } else {
         // Agregar a favoritos
         await addFavoriteSession({
-          variables: { sessionId }
+          variables: { sessionId },
         });
         console.log(`Sesión ${sessionId} agregada a favoritos con éxito`);
       }

@@ -67,32 +67,7 @@ function App() {
     }
   }, [data, navigate]);
 
-  // Show loading while checking initialization status
-  if (loading) {
-    return (
-      <AppLayoutToolbar
-        toolsHide={true}
-        content={
-          <ContentLayout
-            header={
-              <SpaceBetween size="m">
-                <Header variant="h1">Cargando...</Header>
-              </SpaceBetween>
-            }
-          >
-            <Container>
-              <div>Verificando estado de inicialización...</div>
-            </Container>
-          </ContentLayout>
-        }
-      />
-    );
-  }
 
-  // Don't render main content if user is not initialized (will redirect)
-  if (data?.getMyProfile && !data.getMyProfile.initialized) {
-    return null;
-  }
 
   const services = [
     {
