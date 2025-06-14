@@ -12,95 +12,60 @@ import {
 } from '@cloudscape-design/components';
 import Avatar from '@cloudscape-design/chat-components/avatar';
 import CountryFlag from './CountryFlag';
-
-import sessionsData from '../data/sessions-transformed.json';
+import {
+  useGetAgendaQuery,
+  useGetMyFavoriteSessionsQuery,
+  useAddFavoriteSessionMutation,
+  useRemoveFavoriteSessionMutation,
+} from '../../../generated/react/hooks';
 
 // Sample images - usados como fallback en caso de no tener imágenes reales
 const sessionImages: { [key: string]: string } = {
   default: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&auto=format',
 };
 
-// Define the Speaker interface
+// Define the Speaker interface - actualizada para coincidir con GraphQL
 interface SpeakerType {
+  id?: string | null;
   name: string;
-  bio: string;
-  avatarUrl: string;
-  company?: string;
-  nationality?: string; // Añadimos nacionalidad específica para cada ponente
+  bio?: string | null;
+  avatarUrl?: string | null;
+  company?: string | null;
+  nationality?: string | null;
   socialMedia?: {
-    linkedin?: string;
-    github?: string;
-    twitter?: string;
-    facebook?: string;
-    instagram?: string;
-    blog?: string;
-    company?: string;
-    other?: string;
-  };
+    linkedin?: string | null;
+    github?: string | null;
+    twitter?: string | null;
+    facebook?: string | null;
+    instagram?: string | null;
+    blog?: string | null;
+    company?: string | null;
+    other?: string | null;
+  } | null;
 }
 
+// Define the Session interface - actualizada para coincidir con GraphQL
 interface SessionType {
   id: string;
-  name: string;
-  description: string;
-  extendedDescription: string;
-  speakers: SpeakerType[];
+  name?: string | null;
+  description?: string | null;
+  extendedDescription?: string | null;
+  speakers?: SpeakerType[] | null;
   time: string;
-  dateStart?: string;
-  dateEnd?: string;
-  duration?: number;
-  location: string;
-  capacity: number;
-  Nationality?: string;
-  level: string;
-  language: string;
-  catergory: string;
-  status?: string;
+  dateStart: string;
+  dateEnd: string;
+  duration?: number | null;
+  location?: string | null;
+  capacity?: number | null;
+  nationality?: string | null;
+  level?: string | null;
+  language?: string | null;
+  category?: string | null;
+  status?: string | null;
   liveUrl?: string | null;
   recordingUrl?: string | null;
-  tags?: string[]; // Añadimos el campo tags que se utiliza en la UI
+  tags?: string[]; // Campo computado para compatibilidad con la UI
 }
-
-// Convertir los datos del JSON al formato necesario para SessionDetails
-const sessionData: { [key: string]: SessionType } = {};
-
-// Procesar cada sesión del archivo JSON y adaptarla a nuestro formato
-sessionsData.sessions.forEach((session: any) => {
-  // Crear tags a partir de los campos language y category para mantener compatibilidad con la UI
-  const tags = [];
-  if (session.language) tags.push(session.language);
-  if (session.catergory) tags.push(session.catergory);
-  if (session.level) tags.push(session.level);
-
-  sessionData[session.id] = {
-    id: session.id,
-    name: session.name,
-    description: session.description,
-    extendedDescription: session.extendedDescription || session.description,
-    speakers: session.speakers.map((speaker: any) => ({
-      name: speaker.name,
-      bio: speaker.bio || 'No hay biografía disponible para este ponente.',
-      avatarUrl: speaker.avatarUrl,
-      company: speaker.company,
-      nationality: speaker.nationality, // Añadir la nacionalidad del ponente
-      socialMedia: speaker.socialMedia,
-    })),
-    time: session.time,
-    dateStart: session.dateStart,
-    dateEnd: session.dateEnd,
-    duration: session.duration,
-    location: session.location,
-    capacity: session.capacity || 100,
-    Nationality: session.Nationality,
-    level: session.level,
-    language: session.language,
-    catergory: session.catergory,
-    status: session.status,
-    liveUrl: session.liveUrl,
-    recordingUrl: session.recordingUrl,
-    tags: tags,
-  };
-});
 
 export interface SessionDetailProps {
   sessionId: string;
@@ -109,7 +74,41 @@ export interface SessionDetailProps {
 export default function SessionDetail({ sessionId }: SessionDetailProps) {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  // GraphQL queries y mutations
+  const { data: agendaData, loading: agendaLoading, error: agendaError } = useGetAgendaQuery();
+  const {
+    data: favoriteSessionsData,
+    loading: favoritesLoading,
+    refetch: refetchFavorites,
+  } = useGetMyFavoriteSessionsQuery();
+  const [addFavoriteSession] = useAddFavoriteSessionMutation();
+  const [removeFavoriteSession] = useRemoveFavoriteSessionMutation();
+
+  // Obtener sesiones de GraphQL y transformarlas al tipo local
+  const sessions: SessionType[] = (agendaData?.getAgenda?.sessions || []).map((session: any) => ({
+    ...session,
+    // Filtrar speakers que sean null
+    speakers: session.speakers?.filter((speaker: any) => speaker !== null) || [],
+    // Crear tags a partir de los campos para compatibilidad con la UI
+    tags: [
+      session.language,
+      session.category,
+      session.level,
+    ].filter(Boolean) as string[],
+  })) as SessionType[];
+
+  // Buscar la sesión específica por ID
+  const session = sessions.find((s) => s.id === sessionId);
+
+  // Update favorites when GraphQL data is available
+  useEffect(() => {
+    if (favoriteSessionsData?.getMyFavoriteSessions) {
+      setFavorites(favoriteSessionsData.getMyFavoriteSessions);
+      setIsFavorite(favoriteSessionsData.getMyFavoriteSessions.includes(sessionId));
+    }
+  }, [favoriteSessionsData, sessionId]);
 
   // Función para convertir saltos de línea a elementos <br>
   const formatTextWithBreaks = (text: string) => {
@@ -121,8 +120,77 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
     ));
   };
 
+  const toggleFavorite = async (event: CustomEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Verificar si ya estaba en favoritos antes de actualizar el estado
+    const isCurrentlyFavorited = favorites.includes(sessionId);
+
+    // Actualizar el estado local primero para una UI responsiva
+    setFavorites((prevFavorites) => {
+      if (prevFavorites.includes(sessionId)) {
+        return prevFavorites.filter((id) => id !== sessionId);
+      } else {
+        return [...prevFavorites, sessionId];
+      }
+    });
+    setIsFavorite(!isCurrentlyFavorited);
+
+    try {
+      if (isCurrentlyFavorited) {
+        // Quitar de favoritos
+        await removeFavoriteSession({
+          variables: { sessionId },
+        });
+        console.log(`Sesión ${sessionId} eliminada de favoritos con éxito`);
+      } else {
+        // Agregar a favoritos
+        await addFavoriteSession({
+          variables: { sessionId },
+        });
+        console.log(`Sesión ${sessionId} agregada a favoritos con éxito`);
+      }
+
+      // Refrescar los favoritos desde el servidor
+      await refetchFavorites();
+    } catch (error) {
+      console.error('Error al actualizar favoritos:', error);
+
+      // Revertir el cambio local en caso de error
+      setFavorites((prevFavorites) => {
+        if (isCurrentlyFavorited) {
+          return [...prevFavorites, sessionId]; // Volver a agregar
+        } else {
+          return prevFavorites.filter((id) => id !== sessionId); // Volver a quitar
+        }
+      });
+      setIsFavorite(isCurrentlyFavorited);
+    }
+  };
+
+  // Mostrar loading mientras se cargan los datos
+  if (agendaLoading || favoritesLoading) {
+    return (
+      <Container>
+        <StatusIndicator type="loading">Cargando detalles de la sesión...</StatusIndicator>
+      </Container>
+    );
+  }
+
+  // Mostrar error si hay algún error
+  if (agendaError) {
+    return (
+      <Container>
+        <StatusIndicator type="error">
+          Error al cargar los datos: {agendaError.message}
+        </StatusIndicator>
+      </Container>
+    );
+  }
+
   // Verificar si el ID de sesión es válido
-  if (!sessionId || !sessionData[sessionId]) {
+  if (!sessionId || !session) {
     return (
       <Container header={<Header>Sesión no encontrada</Header>}>
         <Box textAlign="center" padding="l">
@@ -134,115 +202,6 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
       </Container>
     );
   }
-
-  const session = sessionData[sessionId];
-
-  const toggleFavorite = async (event: CustomEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Convertir sessionId a número para comparar con la lista de favoritos
-    const sessionIdNum = parseInt(sessionId, 10);
-
-    // Verificar si ya estaba en favoritos antes de actualizar el estado
-    const isCurrentlyFavorited = favorites.includes(sessionIdNum);
-
-    // Actualizar el estado local primero para una UI responsiva
-    setIsFavorite(!isFavorite);
-
-    // Actualizar la lista de favoritos
-    if (isCurrentlyFavorited) {
-      // Quitar de favoritos
-      setFavorites(favorites.filter((id) => id !== sessionIdNum));
-    } else {
-      // Añadir a favoritos
-      setFavorites([...favorites, sessionIdNum]);
-    }
-
-    try {
-      // Determinar el método HTTP según si estamos agregando o quitando de favoritos
-      const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
-      const response = await fetch('https://auth-api.console.awscommunity.mx/session', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionId }),
-        credentials: 'include', // Esto asegura que se envíen las cookies
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error al ${isCurrentlyFavorited ? 'eliminar de' : 'agregar a'} favoritos`);
-      }
-
-      console.log(
-        `Sesión ${sessionId} ${isCurrentlyFavorited ? 'eliminada de' : 'agregada a'} favoritos con éxito`
-      );
-    } catch (error) {
-      console.error('Error al actualizar favoritos:', error);
-
-      // Revertir el cambio local en caso de error
-      setIsFavorite(isCurrentlyFavorited);
-
-      // Revertir la lista de favoritos
-      if (isCurrentlyFavorited) {
-        // Volver a agregar
-        setFavorites([...favorites, sessionIdNum]);
-      } else {
-        // Volver a quitar
-        setFavorites(favorites.filter((id) => id !== sessionIdNum));
-      }
-    }
-  };
-
-  // Obtener las sesiones favoritas y verificar si la sesión actual está en la lista
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        // Hacer GET a https://auth-api.console.awscommunity.mx/session para obtener favoritos
-        const response = await fetch('https://auth-api.console.awscommunity.mx/session', {
-          method: 'GET',
-          credentials: 'include', // Para enviar las cookies
-        });
-        if (response.ok) {
-          const data = await response.json();
-
-          if (Array.isArray(data)) {
-            // Convertir los IDs de string a número
-            const favoriteIds = data
-              .map((id) => {
-                // Asegurar que solo tenemos números válidos
-                const numId = parseInt(id, 10);
-                return isNaN(numId) ? null : numId;
-              })
-              .filter((id) => id !== null) as number[];
-
-            // Guardar la lista de favoritos
-            setFavorites(favoriteIds);
-
-            // Verificar si la sesión actual está en favoritos
-            const sessionIdNum = parseInt(sessionId, 10);
-            setIsFavorite(favoriteIds.includes(sessionIdNum));
-
-            console.log('Sesiones favoritas cargadas:', favoriteIds);
-            console.log(
-              'Sesión actual:',
-              sessionIdNum,
-              'Es favorita:',
-              favoriteIds.includes(sessionIdNum)
-            );
-          }
-        } else {
-          console.error('Error al obtener favoritos:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error al cargar favoritos:', error);
-      }
-    };
-
-    fetchFavorites();
-  }, [sessionId]);
-
   return (
     <ContentLayout
       header={
@@ -262,7 +221,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
             </SpaceBetween>
           }
         >
-          {session.name}
+          {session.name || 'Sesión sin título'}
         </Header>
       }
       maxContentWidth={1200}
@@ -288,7 +247,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
 
               <div style={{ flex: '1', minWidth: '10px', padding: '0 3px' }}>
                 <Box variant="awsui-key-label">Escenario</Box>
-                <div>{session.location}</div>
+                <div>{session.location || 'No especificado'}</div>
               </div>
 
               <div style={{ flex: '1', minWidth: '10px', paddingLeft: '3px' }}>
@@ -306,17 +265,17 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
           <SpaceBetween size="s">
             <Box>
               <h3>Descripción</h3>
-              <p>{formatTextWithBreaks(session.extendedDescription)}</p>
+              <p>{formatTextWithBreaks(session.extendedDescription || session.description || 'Sin descripción disponible')}</p>
             </Box>
 
             <Box>
               <h3>Presentadores</h3>
 
               <SpaceBetween size="s">
-                {session.speakers.map((speaker, index) => (
+                {(session.speakers || []).map((speaker, index) => (
                   <div key={index} style={{ marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Avatar ariaLabel="" imgUrl={speaker.avatarUrl} width={40} />
+                      <Avatar ariaLabel="" imgUrl={speaker.avatarUrl || undefined} width={40} />
                       <div style={{ marginLeft: '15px', flex: 1 }}>
                         <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                           {speaker.name}
@@ -325,9 +284,9 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
                         {speaker.company && (
                           <div style={{ fontSize: '14px', color: '#222' }}>{speaker.company}</div>
                         )}
-                        {/* Mostrar nacionalidad si está disponible */}
+                        {/* Mostrar biografía si está disponible */}
                         <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-                          {speaker.bio}
+                          {speaker.bio || 'No hay biografía disponible para este ponente.'}
                         </div>
 
                         {/* Social Media Icons */}
