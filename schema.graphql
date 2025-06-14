@@ -12,6 +12,7 @@ type User {
   short_id: String
   ticket_class_id: String
   sponsor_visits: [String!]
+  consent_data_sharing: Boolean
 }
 
 type SponsorUser {
@@ -70,6 +71,7 @@ input UpdateUserInput {
   pin: Int
   share_email: Boolean
   share_phone: Boolean
+  consent_data_sharing: Boolean
 }
 
 input AgendaDataInput {

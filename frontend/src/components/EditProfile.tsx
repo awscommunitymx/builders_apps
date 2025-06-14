@@ -45,6 +45,7 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
 
   const [shareEmail, setShareEmail] = useState<boolean>(user?.share_email || true);
   const [sharePhone, setSharePhone] = useState<boolean>(user?.share_phone || true);
+  const [consentDataSharing, setConsentDataSharing] = useState<boolean>(user?.consent_data_sharing ?? true);
   const [pin, setPin] = useState(user?.pin?.toString() || '');
   const [pinError, setPinError] = useState<string | null>(null);
 
@@ -58,6 +59,7 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
       setEmail(user.email || '');
       setCellPhone(user.cell_phone || '');
       setCompany(user.company || '');
+      setConsentDataSharing(user.consent_data_sharing ?? true);
     }
   }, [user]);
 
@@ -115,6 +117,7 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
             pin: pin ? parseInt(pin, 10) : undefined, // Convertir a número si existe
             share_email: shareEmail,
             share_phone: sharePhone,
+            consent_data_sharing: consentDataSharing,
           },
         },
       });
@@ -285,6 +288,34 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                   type="text"
                   inputMode="numeric"
                 />
+              </FormField>
+              <FormField
+                label={
+                  <SpaceBetween direction="horizontal" size="xs">
+                    Consentimiento de compartir datos
+                    <Box color="text-status-info" display="inline">
+                      <Popover
+                        header="Consentimiento de datos"
+                        size="medium"
+                        triggerType="text"
+                        content="Al marcar esta opción, consientes que tus datos de perfil puedan ser compartidos con otros participantes del evento y con los patrocinadores para fines de networking y seguimiento del evento."
+                        renderWithPortal={true}
+                      >
+                        <Box color="text-status-info" fontSize="body-s" fontWeight="bold">
+                          Info
+                        </Box>
+                      </Popover>
+                    </Box>
+                  </SpaceBetween>
+                }
+                description="Acepta compartir tus datos de perfil para networking y seguimiento del evento."
+              >
+                <Checkbox
+                  checked={consentDataSharing}
+                  onChange={({ detail }) => setConsentDataSharing(detail.checked)}
+                >
+                  Consiento compartir mis datos de perfil con otros participantes y patrocinadores del evento
+                </Checkbox>
               </FormField>
             </SpaceBetween>
           </Container>

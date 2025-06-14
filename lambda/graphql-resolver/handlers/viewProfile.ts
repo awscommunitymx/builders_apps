@@ -69,6 +69,13 @@ export default async function handleViewProfile(
       throw new Error('PIN incorrecto');
     }
 
+    // Check if user consented to data sharing
+    if (!user.consent_data_sharing) {
+      logger.info('User has not consented to data sharing', { id });
+      metrics.addMetric('DataSharingNotConsented', MetricUnit.Count, 1);
+      throw new Error('Este usuario no ha dado su consentimiento para compartir sus datos');
+    }
+
     // Remove sensitive data
     delete user.initialized;
     delete user.pin;

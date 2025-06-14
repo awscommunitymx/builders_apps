@@ -330,6 +330,7 @@ export type SubscriptionOnRoomAgendaUpdateArgs = {
 
 export type UpdateUserInput = {
   company?: InputMaybe<Scalars['String']['input']>;
+  consent_data_sharing?: InputMaybe<Scalars['Boolean']['input']>;
   pin?: InputMaybe<Scalars['Int']['input']>;
   role?: InputMaybe<Scalars['String']['input']>;
   share_email?: InputMaybe<Scalars['Boolean']['input']>;
@@ -340,6 +341,7 @@ export type User = {
   __typename?: 'User';
   cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
+  consent_data_sharing?: Maybe<Scalars['Boolean']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   initialized?: Maybe<Scalars['Boolean']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
