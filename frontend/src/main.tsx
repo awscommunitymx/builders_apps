@@ -17,6 +17,7 @@ import LoginRoute from './routes/Login.tsx';
 import Checkin from './routes/Checkin.tsx';
 import SessionCSATRoute from './routes/SessionCSATRoute.tsx';
 import PhotoSessionRoute from './routes/PhotoSessionRoute.tsx';
+import PhotoSessionRegistrationsRoute from './routes/PhotoSessionRegistrationsRoute.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>
@@ -36,6 +37,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="checkin" element={<Checkin />} />
                 <Route path="photo-sessions" element={<PhotoSessionRoute />} />
                 <Route path="/session/:sessionId/csat" element={<SessionCSATRoute />} />
+                <Route path="/admin/photo-registrations" element={<PhotoSessionRegistrationsRoute />} />
               </Route>
             </Routes>
           </BrowserRouter>
