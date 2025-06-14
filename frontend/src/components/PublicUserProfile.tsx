@@ -23,6 +23,9 @@ const GET_USER = gql`
       cell_phone
       company
       user_id
+      twitter_url
+      linkedin_url
+      blog_url
     }
   }
 `;

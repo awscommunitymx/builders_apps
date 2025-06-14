@@ -13,5 +13,9 @@ query GetMyProfile {
     short_id
     ticket_class_id
     sponsor_visits
+    consent_data_sharing
+    twitter_url
+    linkedin_url
+    blog_url
   }
 }

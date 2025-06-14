@@ -43,11 +43,14 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
   const [company, setCompany] = useState(user?.company || '');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [shareEmail, setShareEmail] = useState<boolean>(user?.share_email || true);
-  const [sharePhone, setSharePhone] = useState<boolean>(user?.share_phone || true);
+  const [shareEmail, setShareEmail] = useState<boolean>(user?.share_email ?? true);
+  const [sharePhone, setSharePhone] = useState<boolean>(user?.share_phone ?? true);
   const [consentDataSharing, setConsentDataSharing] = useState<boolean>(user?.consent_data_sharing ?? true);
   const [pin, setPin] = useState(user?.pin?.toString() || '');
   const [pinError, setPinError] = useState<string | null>(null);
+  const [twitterUrl, setTwitterUrl] = useState(user?.twitter_url || '');
+  const [linkedinUrl, setLinkedinUrl] = useState(user?.linkedin_url || '');
+  const [blogUrl, setBlogUrl] = useState(user?.blog_url || '');
 
   const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER);
 
@@ -59,7 +62,12 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
       setEmail(user.email || '');
       setCellPhone(user.cell_phone || '');
       setCompany(user.company || '');
+      setShareEmail(user.share_email ?? true);
+      setSharePhone(user.share_phone ?? true);
       setConsentDataSharing(user.consent_data_sharing ?? true);
+      setTwitterUrl(user.twitter_url || '');
+      setLinkedinUrl(user.linkedin_url || '');
+      setBlogUrl(user.blog_url || '');
     }
   }, [user]);
 
@@ -118,6 +126,9 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
             share_email: shareEmail,
             share_phone: sharePhone,
             consent_data_sharing: consentDataSharing,
+            twitter_url: twitterUrl || undefined,
+            linkedin_url: linkedinUrl || undefined,
+            blog_url: blogUrl || undefined,
           },
         },
       });
@@ -316,6 +327,46 @@ export function EditUserProfile({ loading = false, error = null, user = null }: 
                 >
                   Consiento compartir mis datos de perfil con otros participantes y patrocinadores del evento
                 </Checkbox>
+              </FormField>
+            </SpaceBetween>
+          </Container>
+          <Container header={<Header variant="h2">Redes sociales y blog</Header>}>
+            <SpaceBetween direction="vertical" size="l">
+              <FormField 
+                label="X (Twitter)"
+                description="Comparte tu perfil de X para que otros builders puedan conectar contigo."
+              >
+                <Input
+                  value={twitterUrl}
+                  onChange={(e) => setTwitterUrl(e.detail.value)}
+                  disabled={loading}
+                  placeholder="https://x.com/tu_usuario"
+                  type="url"
+                />
+              </FormField>
+              <FormField 
+                label="LinkedIn"
+                description="Comparte tu perfil profesional de LinkedIn."
+              >
+                <Input
+                  value={linkedinUrl}
+                  onChange={(e) => setLinkedinUrl(e.detail.value)}
+                  disabled={loading}
+                  placeholder="https://linkedin.com/in/tu-perfil"
+                  type="url"
+                />
+              </FormField>
+              <FormField 
+                label="Blog personal"
+                description="Comparte la URL de tu blog o sitio web personal."
+              >
+                <Input
+                  value={blogUrl}
+                  onChange={(e) => setBlogUrl(e.detail.value)}
+                  disabled={loading}
+                  placeholder="https://tu-blog.com"
+                  type="url"
+                />
               </FormField>
             </SpaceBetween>
           </Container>

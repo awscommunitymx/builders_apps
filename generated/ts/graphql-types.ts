@@ -328,22 +328,27 @@ export type SubscriptionOnRoomAgendaUpdateArgs = {
 };
 
 export type UpdateUserInput = {
+  blog_url?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   consent_data_sharing?: InputMaybe<Scalars['Boolean']['input']>;
+  linkedin_url?: InputMaybe<Scalars['String']['input']>;
   pin?: InputMaybe<Scalars['Int']['input']>;
   role?: InputMaybe<Scalars['String']['input']>;
   share_email?: InputMaybe<Scalars['Boolean']['input']>;
   share_phone?: InputMaybe<Scalars['Boolean']['input']>;
+  twitter_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
   __typename?: 'User';
+  blog_url?: Maybe<Scalars['String']['output']>;
   cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
   consent_data_sharing?: Maybe<Scalars['Boolean']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   initialized?: Maybe<Scalars['Boolean']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
+  linkedin_url?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   pin?: Maybe<Scalars['Int']['output']>;
   share_email?: Maybe<Scalars['Boolean']['output']>;
@@ -351,6 +356,7 @@ export type User = {
   short_id?: Maybe<Scalars['String']['output']>;
   sponsor_visits?: Maybe<Array<Scalars['String']['output']>>;
   ticket_class_id?: Maybe<Scalars['String']['output']>;
+  twitter_url?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };
 
@@ -644,12 +650,14 @@ export type SubscriptionResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  blog_url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   cell_phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   company?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   consent_data_sharing?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   initialized?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   job_title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  linkedin_url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   pin?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   share_email?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -657,6 +665,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   short_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sponsor_visits?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   ticket_class_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  twitter_url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user_id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

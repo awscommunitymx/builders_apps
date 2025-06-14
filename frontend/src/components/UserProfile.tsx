@@ -10,6 +10,7 @@ import {
   Spinner,
   Flashbar,
   StatusIndicator,
+  Link,
 } from '@cloudscape-design/components';
 import { PropsWithChildren } from 'react';
 
@@ -169,6 +170,57 @@ export function UserProfile({
               ]}
             />
           </Container>
+          {(user?.twitter_url || user?.linkedin_url || user?.blog_url) && (
+            <Container header={<Header variant="h2">Redes sociales</Header>}>
+              <KeyValuePairs
+                columns={1}
+                items={[
+                  ...(user?.twitter_url
+                    ? [
+                        {
+                          label: 'X (Twitter)',
+                          value: loading ? (
+                            <Spinner />
+                          ) : (
+                            <Link external href={user.twitter_url} target="_blank">
+                              {user.twitter_url}
+                            </Link>
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(user?.linkedin_url
+                    ? [
+                        {
+                          label: 'LinkedIn',
+                          value: loading ? (
+                            <Spinner />
+                          ) : (
+                            <Link external href={user.linkedin_url} target="_blank">
+                              {user.linkedin_url}
+                            </Link>
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(user?.blog_url
+                    ? [
+                        {
+                          label: 'Blog personal',
+                          value: loading ? (
+                            <Spinner />
+                          ) : (
+                            <Link external href={user.blog_url} target="_blank">
+                              {user.blog_url}
+                            </Link>
+                          ),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            </Container>
+          )}
           {children}
         </SpaceBetween>
       )}

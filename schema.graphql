@@ -13,6 +13,9 @@ type User {
   ticket_class_id: String
   sponsor_visits: [String!]
   consent_data_sharing: Boolean
+  twitter_url: String
+  linkedin_url: String
+  blog_url: String
 }
 
 type SponsorUser {
@@ -72,6 +75,9 @@ input UpdateUserInput {
   share_email: Boolean
   share_phone: Boolean
   consent_data_sharing: Boolean
+  twitter_url: String
+  linkedin_url: String
+  blog_url: String
 }
 
 input AgendaDataInput {

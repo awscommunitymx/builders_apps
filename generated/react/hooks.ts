@@ -329,22 +329,27 @@ export type SubscriptionOnRoomAgendaUpdateArgs = {
 };
 
 export type UpdateUserInput = {
+  blog_url?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   consent_data_sharing?: InputMaybe<Scalars['Boolean']['input']>;
+  linkedin_url?: InputMaybe<Scalars['String']['input']>;
   pin?: InputMaybe<Scalars['Int']['input']>;
   role?: InputMaybe<Scalars['String']['input']>;
   share_email?: InputMaybe<Scalars['Boolean']['input']>;
   share_phone?: InputMaybe<Scalars['Boolean']['input']>;
+  twitter_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
   __typename?: 'User';
+  blog_url?: Maybe<Scalars['String']['output']>;
   cell_phone?: Maybe<Scalars['String']['output']>;
   company?: Maybe<Scalars['String']['output']>;
   consent_data_sharing?: Maybe<Scalars['Boolean']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   initialized?: Maybe<Scalars['Boolean']['output']>;
   job_title?: Maybe<Scalars['String']['output']>;
+  linkedin_url?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   pin?: Maybe<Scalars['Int']['output']>;
   share_email?: Maybe<Scalars['Boolean']['output']>;
@@ -352,6 +357,7 @@ export type User = {
   short_id?: Maybe<Scalars['String']['output']>;
   sponsor_visits?: Maybe<Array<Scalars['String']['output']>>;
   ticket_class_id?: Maybe<Scalars['String']['output']>;
+  twitter_url?: Maybe<Scalars['String']['output']>;
   user_id: Scalars['ID']['output'];
 };
 
@@ -389,7 +395,7 @@ export type GetSessionFavoriteUsersQuery = { __typename?: 'Query', getSessionFav
 export type GetMyProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyProfileQuery = { __typename?: 'Query', getMyProfile?: { __typename?: 'User', initialized?: boolean | null, user_id: string, name: string, company?: string | null, job_title?: string | null, cell_phone?: string | null, share_phone?: boolean | null, email?: string | null, share_email?: boolean | null, pin?: number | null, short_id?: string | null, ticket_class_id?: string | null, sponsor_visits?: Array<string> | null } | null };
+export type GetMyProfileQuery = { __typename?: 'Query', getMyProfile?: { __typename?: 'User', initialized?: boolean | null, user_id: string, name: string, company?: string | null, job_title?: string | null, cell_phone?: string | null, share_phone?: boolean | null, email?: string | null, share_email?: boolean | null, pin?: number | null, short_id?: string | null, ticket_class_id?: string | null, sponsor_visits?: Array<string> | null, consent_data_sharing?: boolean | null, twitter_url?: string | null, linkedin_url?: string | null, blog_url?: string | null } | null };
 
 
 export const GetAgendaDocument = gql`
@@ -620,6 +626,10 @@ export const GetMyProfileDocument = gql`
     short_id
     ticket_class_id
     sponsor_visits
+    consent_data_sharing
+    twitter_url
+    linkedin_url
+    blog_url
   }
 }
     `;

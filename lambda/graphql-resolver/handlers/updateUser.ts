@@ -35,29 +35,62 @@ export default async function handleUpdateUser(
     throw new Error('El PIN es obligatorio');
   }
 
+  // Build UpdateExpression dynamically based on provided values
+  const setExpressions: string[] = [
+    '#company = :company',
+    '#pin = :pin',
+    '#job_title = :job_title',
+    '#share_email = :share_email',
+    '#share_phone = :share_phone',
+    '#consent_data_sharing = :consent_data_sharing',
+    '#initialized = :initialized'
+  ];
+
+  const expressionAttributeNames: Record<string, string> = {
+    '#company': 'company',
+    '#pin': 'pin',
+    '#job_title': 'job_title',
+    '#share_email': 'share_email',
+    '#share_phone': 'share_phone',
+    '#consent_data_sharing': 'consent_data_sharing',
+    '#initialized': 'initialized',
+  };
+
+  const expressionAttributeValues: Record<string, any> = {
+    ':company': updates.company,
+    ':pin': updates.pin,
+    ':job_title': updates.role,
+    ':share_email': updates.share_email,
+    ':share_phone': updates.share_phone,
+    ':consent_data_sharing': updates.consent_data_sharing,
+    ':initialized': true,
+  };
+
+  // Only add social media fields if they are provided
+  if (updates.twitter_url !== undefined) {
+    setExpressions.push('#twitter_url = :twitter_url');
+    expressionAttributeNames['#twitter_url'] = 'twitter_url';
+    expressionAttributeValues[':twitter_url'] = updates.twitter_url;
+  }
+
+  if (updates.linkedin_url !== undefined) {
+    setExpressions.push('#linkedin_url = :linkedin_url');
+    expressionAttributeNames['#linkedin_url'] = 'linkedin_url';
+    expressionAttributeValues[':linkedin_url'] = updates.linkedin_url;
+  }
+
+  if (updates.blog_url !== undefined) {
+    setExpressions.push('#blog_url = :blog_url');
+    expressionAttributeNames['#blog_url'] = 'blog_url';
+    expressionAttributeValues[':blog_url'] = updates.blog_url;
+  }
+
   const updateParams: UpdateCommandInput = {
     TableName: tableName,
     Key: { PK: `USER#${authenticatedUser.user_id}`, SK: 'PROFILE' },
-    UpdateExpression:
-      'SET #company = :company, #pin = :pin, #job_title = :job_title, #share_email = :share_email, #share_phone = :share_phone, #consent_data_sharing = :consent_data_sharing, #initialized = :initialized',
-    ExpressionAttributeNames: {
-      '#company': 'company',
-      '#pin': 'pin',
-      '#job_title': 'job_title',
-      '#share_email': 'share_email',
-      '#share_phone': 'share_phone',
-      '#consent_data_sharing': 'consent_data_sharing',
-      '#initialized': 'initialized',
-    },
-    ExpressionAttributeValues: {
-      ':company': updates.company,
-      ':pin': updates.pin,
-      ':job_title': updates.role,
-      ':share_email': updates.share_email,
-      ':share_phone': updates.share_phone,
-      ':consent_data_sharing': updates.consent_data_sharing,
-      ':initialized': true,
-    },
+    UpdateExpression: `SET ${setExpressions.join(', ')}`,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
     ConditionExpression: 'attribute_exists(PK)',
   };
 
