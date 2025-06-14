@@ -38,6 +38,7 @@ show_help() {
   echo -e "  ${BLUE}--allow-prod${NC}     Allow deployment to production environment"
   echo -e "  ${BLUE}--deploy-frontend${NC} Also build and deploy frontend (default: false)"
   echo -e "  ${BLUE}--deploy-tv${NC}       Also build and deploy TV display (default: false)"
+  echo -e "  ${BLUE}--deploy-csat${NC}     Also build and deploy CSAT QR display (default: false)"
   echo -e "  ${BLUE}--force-populate${NC} Force population of DynamoDB and creation of Cognito user"
   echo -e "  ${BLUE}--help, -h${NC}       Show this help message"
   echo
@@ -101,6 +102,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --deploy-tv)
       DEPLOY_TV=true
+      shift
+      ;;
+    --deploy-csat)
+      DEPLOY_CSAT=true
       shift
       ;;
     --force-populate)
@@ -240,6 +245,20 @@ EOL
   
   echo -e "${GREEN}✅ Created tv-display/.env file with GraphQL configuration${NC}"
   
+  # Get the frontend URL for CSAT QR codes
+  FRONTEND_URL=$(aws cloudformation describe-stacks --stack-name "ProfilesStackFrontend-${ENV}" --query "Stacks[0].Outputs[?OutputKey=='WebsiteURL'].OutputValue" --output text 2>/dev/null || echo "")
+  
+  # Create .env file in the csat-qr-display directory
+  cat > csat-qr-display/.env << EOL
+VITE_FRONTEND_URL=${FRONTEND_URL}
+VITE_GRAPHQL_API_URL=${API_URL}
+VITE_GRAPHQL_API_KEY=${API_KEY}
+VITE_GRAPHQL_REALTIME_URL=${REALTIME_URL}
+VITE_ENVIRONMENT=${ENV}
+EOL
+  
+  echo -e "${GREEN}✅ Created csat-qr-display/.env file with frontend URL configuration${NC}"
+  
   if [ "$DEPLOY_FRONTEND" = true ]; then
     echo -e "${CYAN}📦 Building and deploying frontend...${NC}"
     npm run frontend:build
@@ -255,6 +274,17 @@ EOL
     echo -e "${CYAN}📺 Deploying TV display...${NC}"
     npx cdk deploy --require-approval never ${CONTEXT_VALUES[*]} "ProfilesStackTvDisplay-${ENV}"
     echo -e "${GREEN}✅ TV display deployment completed${NC}"
+  fi
+
+  if [ "$DEPLOY_CSAT" = true ]; then
+    echo -e "${CYAN}📊 Building CSAT QR display...${NC}"
+    cd csat-qr-display
+    npm install
+    npm run build
+    cd ..
+    echo -e "${GREEN}✅ CSAT QR display build completed${NC}"
+    echo -e "${YELLOW}💡 Note: CSAT QR display build is ready in csat-qr-display/dist/${NC}"
+    echo -e "${YELLOW}💡 Deploy the dist folder to your hosting service${NC}"
   fi
 
   if [[ "$ENV" =~ ^dev- ]] && { [ "$FIRST_TIME" = true ] || [ "$FORCE_POPULATE" = true ]; }; then
