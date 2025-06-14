@@ -53,9 +53,9 @@ export function UserProfile({
           <Flashbar
             items={[
               {
-                type: 'warning',
+                type: 'error',
                 content:
-                  'Tu perfil no está configurado. Por favor haz clic en el botón "Editar perfil" para configurarlo.',
+                  'Tu perfil no está configurado. Para acceder a todas las funciones de Builders App, debes completar tu perfil haciendo clic en "Editar perfil".',
                 dismissible: false,
               },
             ]}
@@ -89,7 +89,7 @@ export function UserProfile({
                         copyButtonAriaLabel="Copy ARN"
                         copyErrorText="ARN failed to copy"
                         copySuccessText="ARN copied"
-                        textToCopy={`arn:aws:iam::${user?.user_id}:builder/${user?.name.toLowerCase().replace(/\s/g, '')}`}
+                        textToCopy={`arn:aws:iam::140625:builder/${user?.name.toLowerCase().replace(/\s/g, '')}`}
                         variant="inline"
                       />
                     ),

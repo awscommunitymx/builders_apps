@@ -115,7 +115,7 @@ const LoginRoute: React.FC = () => {
         <Container
           header={
             <Box textAlign="center">
-              <Header variant="h2">Acceder a la Builders App</Header>
+              <Header variant="h2">Acceder a Builders App</Header>
             </Box>
           }
         >
@@ -143,10 +143,10 @@ const LoginRoute: React.FC = () => {
             <FormField
               label={
                 <SpaceBetween direction="horizontal" size="xs">
-                  <span>Short ID</span>
+                  <span>ID</span>
                 </SpaceBetween>
               }
-              description="Ingresa tu identificador único para recibir un enlace mágico en tu email"
+              description="Ingresa el identificador único que está impreso bajo el código QR de tu acreditación"
               stretch
             >
               <Input

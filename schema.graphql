@@ -58,6 +58,10 @@ type Query
   @aws_auth(cognito_groups: ["Attendees"])
   getPhotoSessionReservations(timeSlot: String!, date: String!): [PhotoReservation!]!
   @aws_auth(cognito_groups: ["Sponsors", "CheckInVolunteerMain1", "CheckInVolunteerMain2", "CheckInVolunteerMain3", "CheckInVolunteerMain4", "CheckInVolunteerSecondary"])
+  getMyFavoriteSessions: [String!]!
+  @aws_auth(cognito_groups: ["Attendees"])
+  getSessionFavoriteUsers(sessionId: ID!): [User!]!
+  @aws_auth(cognito_groups: ["Attendees"])
 }
 
 input UpdateUserInput {
@@ -263,6 +267,10 @@ type Mutation {
   reservePhotoSession(input: ReservePhotoSessionInput!): PhotoReservationResponse!
   @aws_auth(cognito_groups: ["Attendees"])
   cancelPhotoReservation: PhotoReservationResponse!
+  @aws_auth(cognito_groups: ["Attendees"])
+  addFavoriteSession(sessionId: ID!): Boolean!
+  @aws_auth(cognito_groups: ["Attendees"])
+  removeFavoriteSession(sessionId: ID!): Boolean!
   @aws_auth(cognito_groups: ["Attendees"])
 }
 

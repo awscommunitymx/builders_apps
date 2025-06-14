@@ -20,6 +20,9 @@ import {
   QueryGetAvailablePhotoSessionsArgs,
   QueryGetPhotoSessionReservationsArgs,
   MutationReservePhotoSessionArgs,
+  MutationAddFavoriteSessionArgs,
+  MutationRemoveFavoriteSessionArgs,
+  QueryGetSessionFavoriteUsersArgs,
 } from '@awscommunity/generated-ts';
 import handleViewProfile from './handlers/viewProfile';
 import handleUpdateUser from './handlers/updateUser';
@@ -39,6 +42,10 @@ import {
   reservePhotoSession,
   cancelPhotoReservation
 } from './handlers/photoSessions';
+import addFavoriteSession from './handlers/addFavoriteSession';
+import removeFavoriteSession from './handlers/removeFavoriteSession';
+import getMyFavoriteSessions from './handlers/getMyFavoriteSessions';
+import getSessionFavoriteUsers from './handlers/getSessionFavoriteUsers';
 
 const SERVICE_NAME = 'graphql-resolver';
 
@@ -74,7 +81,11 @@ type HandlerArgs =
   | MutationSubmitSessionCsatArgs
   | QueryGetAvailablePhotoSessionsArgs
   | QueryGetPhotoSessionReservationsArgs
-  | MutationReservePhotoSessionArgs;
+  | MutationReservePhotoSessionArgs
+  | MutationCheckInAttendeeArgs
+  | MutationAddFavoriteSessionArgs
+  | MutationRemoveFavoriteSessionArgs
+  | QueryGetSessionFavoriteUsersArgs;
 
 export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) => {
   const correlationId = `${event.info.fieldName}-${Date.now()}`;
@@ -219,6 +230,25 @@ export const handler = middy((async (event: AppSyncResolverEvent<HandlerArgs>) =
 
     if (event.info.fieldName === 'cancelPhotoReservation') {
       return cancelPhotoReservation(identity);
+    }
+
+    if (event.info.fieldName === 'getMyFavoriteSessions') {
+      return getMyFavoriteSessions(identity);
+    }
+
+    if (event.info.fieldName === 'addFavoriteSession') {
+      const { sessionId } = event.arguments as MutationAddFavoriteSessionArgs;
+      return addFavoriteSession(identity, sessionId);
+    }
+
+    if (event.info.fieldName === 'removeFavoriteSession') {
+      const { sessionId } = event.arguments as MutationRemoveFavoriteSessionArgs;
+      return removeFavoriteSession(identity, sessionId);
+    }
+
+    if (event.info.fieldName === 'getSessionFavoriteUsers') {
+      const { sessionId } = event.arguments as QueryGetSessionFavoriteUsersArgs;
+      return getSessionFavoriteUsers(sessionId);
     }
 
     throw new Error(`Unsupported field ${event.info.fieldName}`);

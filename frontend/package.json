@@ -15,7 +15,9 @@
     "@algolia/autocomplete-js": "^1.19.2",
     "@algolia/autocomplete-theme-classic": "^1.19.2",
     "@cloudscape-design/board-components": "^3.0.101",
+    "@cloudscape-design/chat-components": "^1.0.45",
     "@cloudscape-design/components": "^3.0.923",
+    "@cloudscape-design/design-tokens": "^3.0.57",
     "@cloudscape-design/global-styles": "^1.0.38",
     "@yudiel/react-qr-scanner": "^2.3.1",
     "algoliasearch": "^4.24.0",
@@ -24,7 +26,8 @@
     "aws-rum-web": "^1.22.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router": "^7.5.2"
+    "react-router": "^7.5.2",
+    "react-world-flags": "^1.6.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.6",
@@ -37,6 +40,7 @@
     "@storybook/test": "^8.6.12",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@types/react-world-flags": "^1.6.0",
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.21.0",

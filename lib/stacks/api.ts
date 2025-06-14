@@ -182,6 +182,27 @@ export class ApiStack extends Construct {
       typeName: 'Mutation',
       fieldName: 'cancelPhotoReservation',
     });
+
+    // Favorite sessions resolvers
+    lambdaDataSource.createResolver('GraphQLResolverGetMyFavoriteSessions', {
+      typeName: 'Query',
+      fieldName: 'getMyFavoriteSessions',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverAddFavoriteSession', {
+      typeName: 'Mutation',
+      fieldName: 'addFavoriteSession',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverRemoveFavoriteSession', {
+      typeName: 'Mutation',
+      fieldName: 'removeFavoriteSession',
+    });
+
+    lambdaDataSource.createResolver('GraphQLResolverGetSessionFavoriteUsers', {
+      typeName: 'Query',
+      fieldName: 'getSessionFavoriteUsers',
+    });
   }
   
   private createOutputs(environmentName: string): void {
