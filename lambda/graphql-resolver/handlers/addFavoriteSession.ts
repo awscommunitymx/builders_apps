@@ -27,11 +27,13 @@ export default async function addFavoriteSession(
   try {
     // Store favorite session with pattern: PK=USER#{user_id}, SK=FAV#{sessionId}
     // We use cognito_sub as user_id for authenticated users
+    // Add a specific field for GSI to only index favorites
     const item = {
       PK: `USER#${identity.sub}`,
       SK: `FAV#${sessionId}`,
       user_id: identity.sub,
       sessionId,
+      favoriteType: 'SESSION', // This field will be used as partition key in GSI
       createdAt: new Date().toISOString(),
     };
 

@@ -54,11 +54,14 @@ export class DatabaseStack extends Construct {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
-    // Add GSI for efficient querying of favorites by session ID
     this.table.addGlobalSecondaryIndex({
-      indexName: 'sk-index',
+      indexName: 'favoriteType-sessionId-index',
       partitionKey: {
-        name: 'SK',
+        name: 'favoriteType',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'sessionId',
         type: dynamodb.AttributeType.STRING,
       },
       projectionType: dynamodb.ProjectionType.ALL,

@@ -21,7 +21,7 @@ export default async function getSessionFavoriteUsers(sessionId: string): Promis
   subSegment?.addAnnotation('sessionId', sessionId);
 
   try {
-    // Use the SK index to efficiently find all users who have this session as favorite
+    // Temporarily use the old sk-index while we transition to the new GSI
     // Query with SK = FAV#{sessionId} using the sk-index GSI
     const queryParams = {
       TableName: tableName,
