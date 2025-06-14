@@ -150,7 +150,7 @@ function App() {
           <ContentLayout
             header={
               <SpaceBetween size="m">
-                <Header variant="h1">Página de inicio de Builders app</Header>
+                <Header variant="h1">Página de inicio de Builders App</Header>
               </SpaceBetween>
             }
           >
