@@ -1,0 +1,11 @@
+query GetMyFavoriteSessions {
+  getMyFavoriteSessions
+}
+
+mutation AddFavoriteSession($sessionId: ID!) {
+  addFavoriteSession(sessionId: $sessionId)
+}
+
+mutation RemoveFavoriteSession($sessionId: ID!) {
+  removeFavoriteSession(sessionId: $sessionId)
+}

@@ -353,6 +353,16 @@ export type User = {
   user_id: Scalars['ID']['output'];
 };
 
+export type GetAgendaQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAgendaQuery = { __typename?: 'Query', getAgenda?: { __typename?: 'AgendaData', sessions: Array<{ __typename?: 'Session', id: string, name?: string | null, description?: string | null, extendedDescription?: string | null, time: string, dateStart: string, dateEnd: string, duration?: number | null, location?: string | null, nationality?: string | null, level?: string | null, language?: string | null, category?: string | null, capacity?: number | null, status?: string | null, liveUrl?: string | null, recordingUrl?: string | null, speakers?: Array<{ __typename?: 'Speaker', id?: string | null, name: string, avatarUrl?: string | null, company?: string | null, bio?: string | null, nationality?: string | null, socialMedia?: { __typename?: 'SocialMedia', twitter?: string | null, linkedin?: string | null, company?: string | null } | null } | null> | null }> } | null };
+
+export type GetMyFavoriteSessionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMyFavoriteSessionsQuery = { __typename?: 'Query', getMyFavoriteSessions: Array<string> };
+
 export type AddFavoriteSessionMutationVariables = Exact<{
   sessionId: Scalars['ID']['input'];
 }>;
@@ -367,11 +377,6 @@ export type RemoveFavoriteSessionMutationVariables = Exact<{
 
 export type RemoveFavoriteSessionMutation = { __typename?: 'Mutation', removeFavoriteSession: boolean };
 
-export type GetMyFavoriteSessionsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetMyFavoriteSessionsQuery = { __typename?: 'Query', getMyFavoriteSessions: Array<string> };
-
 export type GetSessionFavoriteUsersQueryVariables = Exact<{
   sessionId: Scalars['ID']['input'];
 }>;
@@ -379,7 +384,119 @@ export type GetSessionFavoriteUsersQueryVariables = Exact<{
 
 export type GetSessionFavoriteUsersQuery = { __typename?: 'Query', getSessionFavoriteUsers: Array<{ __typename?: 'User', user_id: string, name: string, email?: string | null, company?: string | null }> };
 
+export type GetMyProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
+
+export type GetMyProfileQuery = { __typename?: 'Query', getMyProfile?: { __typename?: 'User', initialized?: boolean | null, user_id: string, name: string, company?: string | null, job_title?: string | null, cell_phone?: string | null, share_phone?: boolean | null, email?: string | null, share_email?: boolean | null, pin?: number | null, short_id?: string | null, ticket_class_id?: string | null, sponsor_visits?: Array<string> | null } | null };
+
+
+export const GetAgendaDocument = gql`
+    query GetAgenda {
+  getAgenda {
+    sessions {
+      id
+      name
+      description
+      extendedDescription
+      speakers {
+        id
+        name
+        avatarUrl
+        company
+        bio
+        nationality
+        socialMedia {
+          twitter
+          linkedin
+          company
+        }
+      }
+      time
+      dateStart
+      dateEnd
+      duration
+      location
+      nationality
+      level
+      language
+      category
+      capacity
+      status
+      liveUrl
+      recordingUrl
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAgendaQuery__
+ *
+ * To run a query within a React component, call `useGetAgendaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAgendaQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAgendaQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAgendaQuery(baseOptions?: Apollo.QueryHookOptions<GetAgendaQuery, GetAgendaQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAgendaQuery, GetAgendaQueryVariables>(GetAgendaDocument, options);
+      }
+export function useGetAgendaLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAgendaQuery, GetAgendaQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAgendaQuery, GetAgendaQueryVariables>(GetAgendaDocument, options);
+        }
+export function useGetAgendaSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAgendaQuery, GetAgendaQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAgendaQuery, GetAgendaQueryVariables>(GetAgendaDocument, options);
+        }
+export type GetAgendaQueryHookResult = ReturnType<typeof useGetAgendaQuery>;
+export type GetAgendaLazyQueryHookResult = ReturnType<typeof useGetAgendaLazyQuery>;
+export type GetAgendaSuspenseQueryHookResult = ReturnType<typeof useGetAgendaSuspenseQuery>;
+export type GetAgendaQueryResult = Apollo.QueryResult<GetAgendaQuery, GetAgendaQueryVariables>;
+export const GetMyFavoriteSessionsDocument = gql`
+    query GetMyFavoriteSessions {
+  getMyFavoriteSessions
+}
+    `;
+
+/**
+ * __useGetMyFavoriteSessionsQuery__
+ *
+ * To run a query within a React component, call `useGetMyFavoriteSessionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyFavoriteSessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyFavoriteSessionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetMyFavoriteSessionsQuery(baseOptions?: Apollo.QueryHookOptions<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>(GetMyFavoriteSessionsDocument, options);
+      }
+export function useGetMyFavoriteSessionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>(GetMyFavoriteSessionsDocument, options);
+        }
+export function useGetMyFavoriteSessionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>(GetMyFavoriteSessionsDocument, options);
+        }
+export type GetMyFavoriteSessionsQueryHookResult = ReturnType<typeof useGetMyFavoriteSessionsQuery>;
+export type GetMyFavoriteSessionsLazyQueryHookResult = ReturnType<typeof useGetMyFavoriteSessionsLazyQuery>;
+export type GetMyFavoriteSessionsSuspenseQueryHookResult = ReturnType<typeof useGetMyFavoriteSessionsSuspenseQuery>;
+export type GetMyFavoriteSessionsQueryResult = Apollo.QueryResult<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>;
 export const AddFavoriteSessionDocument = gql`
     mutation AddFavoriteSession($sessionId: ID!) {
   addFavoriteSession(sessionId: $sessionId)
@@ -442,43 +559,6 @@ export function useRemoveFavoriteSessionMutation(baseOptions?: Apollo.MutationHo
 export type RemoveFavoriteSessionMutationHookResult = ReturnType<typeof useRemoveFavoriteSessionMutation>;
 export type RemoveFavoriteSessionMutationResult = Apollo.MutationResult<RemoveFavoriteSessionMutation>;
 export type RemoveFavoriteSessionMutationOptions = Apollo.BaseMutationOptions<RemoveFavoriteSessionMutation, RemoveFavoriteSessionMutationVariables>;
-export const GetMyFavoriteSessionsDocument = gql`
-    query GetMyFavoriteSessions {
-  getMyFavoriteSessions
-}
-    `;
-
-/**
- * __useGetMyFavoriteSessionsQuery__
- *
- * To run a query within a React component, call `useGetMyFavoriteSessionsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetMyFavoriteSessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetMyFavoriteSessionsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetMyFavoriteSessionsQuery(baseOptions?: Apollo.QueryHookOptions<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>(GetMyFavoriteSessionsDocument, options);
-      }
-export function useGetMyFavoriteSessionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>(GetMyFavoriteSessionsDocument, options);
-        }
-export function useGetMyFavoriteSessionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>(GetMyFavoriteSessionsDocument, options);
-        }
-export type GetMyFavoriteSessionsQueryHookResult = ReturnType<typeof useGetMyFavoriteSessionsQuery>;
-export type GetMyFavoriteSessionsLazyQueryHookResult = ReturnType<typeof useGetMyFavoriteSessionsLazyQuery>;
-export type GetMyFavoriteSessionsSuspenseQueryHookResult = ReturnType<typeof useGetMyFavoriteSessionsSuspenseQuery>;
-export type GetMyFavoriteSessionsQueryResult = Apollo.QueryResult<GetMyFavoriteSessionsQuery, GetMyFavoriteSessionsQueryVariables>;
 export const GetSessionFavoriteUsersDocument = gql`
     query GetSessionFavoriteUsers($sessionId: ID!) {
   getSessionFavoriteUsers(sessionId: $sessionId) {
@@ -522,3 +602,54 @@ export type GetSessionFavoriteUsersQueryHookResult = ReturnType<typeof useGetSes
 export type GetSessionFavoriteUsersLazyQueryHookResult = ReturnType<typeof useGetSessionFavoriteUsersLazyQuery>;
 export type GetSessionFavoriteUsersSuspenseQueryHookResult = ReturnType<typeof useGetSessionFavoriteUsersSuspenseQuery>;
 export type GetSessionFavoriteUsersQueryResult = Apollo.QueryResult<GetSessionFavoriteUsersQuery, GetSessionFavoriteUsersQueryVariables>;
+export const GetMyProfileDocument = gql`
+    query GetMyProfile {
+  getMyProfile {
+    initialized
+    user_id
+    name
+    company
+    job_title
+    cell_phone
+    share_phone
+    email
+    share_email
+    pin
+    short_id
+    ticket_class_id
+    sponsor_visits
+  }
+}
+    `;
+
+/**
+ * __useGetMyProfileQuery__
+ *
+ * To run a query within a React component, call `useGetMyProfileQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyProfileQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyProfileQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetMyProfileQuery(baseOptions?: Apollo.QueryHookOptions<GetMyProfileQuery, GetMyProfileQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyProfileQuery, GetMyProfileQueryVariables>(GetMyProfileDocument, options);
+      }
+export function useGetMyProfileLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyProfileQuery, GetMyProfileQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyProfileQuery, GetMyProfileQueryVariables>(GetMyProfileDocument, options);
+        }
+export function useGetMyProfileSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyProfileQuery, GetMyProfileQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetMyProfileQuery, GetMyProfileQueryVariables>(GetMyProfileDocument, options);
+        }
+export type GetMyProfileQueryHookResult = ReturnType<typeof useGetMyProfileQuery>;
+export type GetMyProfileLazyQueryHookResult = ReturnType<typeof useGetMyProfileLazyQuery>;
+export type GetMyProfileSuspenseQueryHookResult = ReturnType<typeof useGetMyProfileSuspenseQuery>;
+export type GetMyProfileQueryResult = Apollo.QueryResult<GetMyProfileQuery, GetMyProfileQueryVariables>;

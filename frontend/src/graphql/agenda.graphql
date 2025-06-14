@@ -1,0 +1,36 @@
+query GetAgenda {
+  getAgenda {
+    sessions {
+      id
+      name
+      description
+      extendedDescription
+      speakers {
+        id
+        name
+        avatarUrl
+        company
+        bio
+        nationality
+        socialMedia {
+          twitter
+          linkedin
+          company
+        }
+      }
+      time
+      dateStart
+      dateEnd
+      duration
+      location
+      nationality
+      level
+      language
+      category
+      capacity
+      status
+      liveUrl
+      recordingUrl
+    }
+  }
+}

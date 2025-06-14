@@ -4,24 +4,39 @@ import CountryFlag from './CountryFlag';
 
 // Definición de la interfaz para los presentadores
 interface SpeakerType {
+  id?: string | null;
   name: string;
-  avatarUrl: string;
-  company?: string;
-  nationality?: string;
+  avatarUrl?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  nationality?: string | null;
+  socialMedia?: {
+    twitter?: string | null;
+    linkedin?: string | null;
+    company?: string | null;
+  } | null;
 }
 
 // Definición de la interfaz para las sesiones
 interface SessionType {
   id: string;
-  name: string;
-  description: string;
-  speakers: SpeakerType[];
+  name?: string | null;
+  description?: string | null;
+  extendedDescription?: string | null;
+  speakers?: SpeakerType[] | null;
   time: string;
-  location: string;
-  level: string;
-  language: string;
-  catergory: string;
-  Nationality?: string;
+  dateStart: string;
+  dateEnd: string;
+  duration?: number | null;
+  location?: string | null;
+  nationality?: string | null;
+  level?: string | null;
+  language?: string | null;
+  category?: string | null;
+  capacity?: number | null;
+  status?: string | null;
+  liveUrl?: string | null;
+  recordingUrl?: string | null;
 }
 
 interface SessionCardProps {
@@ -74,14 +89,12 @@ export const getSessionCardDefinition = ({
 }: Omit<SessionCardProps, 'item'>) => ({
   header: (item: SessionType) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Link href={`/agenda/${item.id}`}>{item.name}</Link>
+      <Link href={`/agenda/${item.id}`}>{item.name || 'Sin título'}</Link>
       <Button
         variant="icon"
         iconName={favorites.includes(item.id) ? 'heart-filled' : 'heart'}
         onClick={(e) => onToggleFavorite(item.id, e)}
-        ariaLabel={
-          favorites.includes(item.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'
-        }
+        ariaLabel={favorites.includes(item.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
       />
     </div>
   ),
@@ -91,19 +104,23 @@ export const getSessionCardDefinition = ({
       header: 'Descripción',
       content: (item: SessionType) => (
         <div>
-          {expandedDescriptions.includes(item.id)
-            ? formatTextWithBreaks(item.description)
-            : formatTextWithBreaks(truncateText(item.description))}
-          {item.description.length > 100 && (
-            <div style={{ marginTop: '0px' }}>
-              <Button
-                variant="inline-link"
-                onClick={(e) => onToggleDescription(item.id, e)}
-                ariaLabel={expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
-              >
-                {expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
-              </Button>
-            </div>
+          {item.description && (
+            <>
+              {expandedDescriptions.includes(item.id)
+                ? formatTextWithBreaks(item.description)
+                : formatTextWithBreaks(truncateText(item.description))}
+              {item.description.length > 100 && (
+                <div style={{ marginTop: '0px' }}>
+                  <Button
+                    variant="inline-link"
+                    onClick={(e) => onToggleDescription(item.id, e)}
+                    ariaLabel={expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
+                  >
+                    {expandedDescriptions.includes(item.id) ? 'Leer menos' : 'Leer más'}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       ),
@@ -118,7 +135,7 @@ export const getSessionCardDefinition = ({
           </div>
           <div>
             <div style={{ fontWeight: 'bold', fontSize: '13px' }}>Escenario</div>
-            <div>{item.location}</div>
+            <div>{item.location || 'No especificado'}</div>
           </div>
         </div>
       ),
@@ -128,50 +145,60 @@ export const getSessionCardDefinition = ({
       header: 'Presentadores',
       content: (item: SessionType) => (
         <div style={{ marginTop: '4px', marginBottom: '4px' }}>
-          {item.speakers.map((speaker, index) => (
-            <div
-              key={index}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: index < item.speakers.length - 1 ? '10px' : '0',
-                padding: '6px',
-                borderRadius: '4px',
-                backgroundColor: index % 2 === 0 ? '#f9f9f9' : 'transparent',
-              }}
-            >
-              <Avatar ariaLabel={speaker.name} imgUrl={speaker.avatarUrl} width={36} />
-              <div style={{ marginLeft: '12px', flex: 1 }}>
-                <div
-                  style={{
-                    fontWeight: '600',
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {speaker.name}
-                  <CountryFlag nationality={speaker.nationality} />
+          {item.speakers && item.speakers.length > 0 ? (
+            item.speakers.map((speaker, index) => (
+              <div
+                key={speaker.id || index}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: index < (item.speakers?.length || 0) - 1 ? '10px' : '0',
+                  padding: '6px',
+                  borderRadius: '4px',
+                  backgroundColor: index % 2 === 0 ? '#f9f9f9' : 'transparent',
+                }}
+              >
+                <Avatar
+                  ariaLabel={speaker.name}
+                  imgUrl={speaker.avatarUrl || undefined}
+                  width={36}
+                />
+                <div style={{ marginLeft: '12px', flex: 1 }}>
+                  <div
+                    style={{
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {speaker.name}
+                    <CountryFlag nationality={speaker.nationality || undefined} />
+                  </div>
+                  {speaker.company && (
+                    <div style={{ fontSize: '12px', color: '#555' }}>{speaker.company}</div>
+                  )}
                 </div>
-                {speaker.company && (
-                  <div style={{ fontSize: '12px', color: '#555' }}>{speaker.company}</div>
-                )}
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div>No hay presentadores especificados</div>
+          )}
         </div>
       ),
     },
     {
       id: 'level',
-      content: (item: SessionType) => <Badge color={getLevelColor(item.level)}>{item.level}</Badge>,
+      content: (item: SessionType) => (
+        <Badge color={getLevelColor(item.level || '')}>{item.level || 'No especificado'}</Badge>
+      ),
     },
     {
       id: 'category-language',
       content: (item: SessionType) => (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <Badge color={'severity-neutral'}>{item.catergory}</Badge>
-          <Badge color={'blue'}>{item.language}</Badge>
+          <Badge color={'severity-neutral'}>{item.category || 'Sin categoría'}</Badge>
+          <Badge color={'blue'}>{item.language || 'No especificado'}</Badge>
         </div>
       ),
     },

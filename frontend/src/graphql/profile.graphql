@@ -1,0 +1,17 @@
+query GetMyProfile {
+  getMyProfile {
+    initialized
+    user_id
+    name
+    company
+    job_title
+    cell_phone
+    share_phone
+    email
+    share_email
+    pin
+    short_id
+    ticket_class_id
+    sponsor_visits
+  }
+}
