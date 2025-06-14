@@ -14,6 +14,11 @@ import {
 import { useNavigate } from 'react-router';
 import sessionsData from '../data/sessions-transformed.json';
 import { getSessionCardDefinition } from '../components/SessionCard';
+import {
+  useGetMyFavoriteSessionsQuery,
+  useAddFavoriteSessionMutation,
+  useRemoveFavoriteSessionMutation,
+} from '../../../generated/react/hooks';
 
 // Importar logos de sponsors
 // @ts-ignore
@@ -273,10 +278,22 @@ const sessions: SessionType[] = sortSessionsByTime(sessionsData.sessions);
 
 export function AgendaRoute() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]); // Changed to string[] for GraphQL
   const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
   const [activeMixedItems, setActiveMixedItems] = useState<ItemType[]>([]);
   const [finishedMixedItems, setFinishedMixedItems] = useState<ItemType[]>([]);
+
+  // GraphQL hooks for favorites
+  const { data: favoriteSessionsData, loading: favoritesLoading, refetch: refetchFavorites } = useGetMyFavoriteSessionsQuery();
+  const [addFavoriteSession] = useAddFavoriteSessionMutation();
+  const [removeFavoriteSession] = useRemoveFavoriteSessionMutation();
+
+  // Update favorites when GraphQL data is available
+  useEffect(() => {
+    if (favoriteSessionsData?.getMyFavoriteSessions) {
+      setFavorites(favoriteSessionsData.getMyFavoriteSessions);
+    }
+  }, [favoriteSessionsData]);
 
   // Crear items mezclados con sponsors al cargar el componente
   useEffect(() => {
@@ -320,92 +337,51 @@ export function AgendaRoute() {
 
   const navigate = useNavigate();
 
-  // Cargar favoritos al iniciar el componente
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        // Hacer GET a https://auth-api.console.awscommunity.mx/session para obtener favoritos
-        const response = await fetch('https://auth-api.console.awscommunity.mx/session', {
-          method: 'GET',
-          credentials: 'include', // Para enviar las cookies
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-
-          if (Array.isArray(data)) {
-            // Convertir los IDs de string a número
-            const favoriteIds = data
-              .map((id) => {
-                // Asegurar que solo tenemos números válidos
-                const numId = parseInt(id, 10);
-                return isNaN(numId) ? null : numId;
-              })
-              .filter((id) => id !== null) as number[];
-
-            // Guardar la lista de favoritos
-            setFavorites(favoriteIds);
-
-            console.log('Sesiones favoritas cargadas:', favoriteIds);
-          }
-        } else {
-          console.error('Error al obtener favoritos:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error al cargar favoritos:', error);
-      }
-    };
-
-    fetchFavorites();
-  }, []);
+  // Cargar favoritos al iniciar el componente ya no es necesario
+  // porque ahora usamos el hook useGetMyFavoriteSessionsQuery
 
   const toggleFavorite = async (sessionId: string, event: CustomEvent) => {
     event.preventDefault(); // Evitar que el clic se propague al link
     event.stopPropagation();
 
-    // Convertir sessionId a número para comparar con la lista de favoritos
-    const sessionIdNum = parseInt(sessionId, 10);
-
     // Verificar si ya estaba en favoritos antes de actualizar el estado
-    const isCurrentlyFavorited = favorites.includes(sessionIdNum);
+    const isCurrentlyFavorited = favorites.includes(sessionId);
 
     // Actualizar el estado local primero para una UI responsiva
     setFavorites((prevFavorites) => {
-      if (prevFavorites.includes(sessionIdNum)) {
-        return prevFavorites.filter((id) => id !== sessionIdNum);
+      if (prevFavorites.includes(sessionId)) {
+        return prevFavorites.filter((id) => id !== sessionId);
       } else {
-        return [...prevFavorites, sessionIdNum];
+        return [...prevFavorites, sessionId];
       }
     });
 
     try {
-      // Determinar el método HTTP según si estamos agregando o quitando de favoritos
-      const method = isCurrentlyFavorited ? 'DELETE' : 'POST';
-      const response = await fetch('https://auth-api.console.awscommunity.mx/session', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionId }),
-        credentials: 'include', // Esto asegura que se envíen las cookies
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error al ${isCurrentlyFavorited ? 'eliminar de' : 'agregar a'} favoritos`);
+      if (isCurrentlyFavorited) {
+        // Quitar de favoritos
+        await removeFavoriteSession({
+          variables: { sessionId }
+        });
+        console.log(`Sesión ${sessionId} eliminada de favoritos con éxito`);
+      } else {
+        // Agregar a favoritos
+        await addFavoriteSession({
+          variables: { sessionId }
+        });
+        console.log(`Sesión ${sessionId} agregada a favoritos con éxito`);
       }
 
-      console.log(
-        `Sesión ${sessionId} ${isCurrentlyFavorited ? 'eliminada de' : 'agregada a'} favoritos con éxito`
-      );
+      // Refrescar los favoritos desde el servidor
+      await refetchFavorites();
     } catch (error) {
       console.error('Error al actualizar favoritos:', error);
 
       // Revertir el cambio local en caso de error
       setFavorites((prevFavorites) => {
         if (isCurrentlyFavorited) {
-          return [...prevFavorites, sessionIdNum]; // Volver a agregar
+          return [...prevFavorites, sessionId]; // Volver a agregar
         } else {
-          return prevFavorites.filter((id) => id !== sessionIdNum); // Volver a quitar
+          return prevFavorites.filter((id) => id !== sessionId); // Volver a quitar
         }
       });
     }
@@ -571,7 +547,7 @@ export function AgendaRoute() {
         selectedLanguages.length === 0 || selectedLanguages.includes(session.language);
 
       // Filtro de favoritos
-      const favoriteMatch = !showOnlyFavorites || favorites.includes(parseInt(session.id, 10));
+      const favoriteMatch = !showOnlyFavorites || favorites.includes(session.id);
 
       return levelMatch && locationMatch && categoryMatch && languageMatch && favoriteMatch;
     });

@@ -54,6 +54,16 @@ export class DatabaseStack extends Construct {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    // Add GSI for efficient querying of favorites by session ID
+    this.table.addGlobalSecondaryIndex({
+      indexName: 'sk-index',
+      partitionKey: {
+        name: 'SK',
+        type: dynamodb.AttributeType.STRING,
+      },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // Export the table name
     new cdk.CfnOutput(this, 'TableName', {
       value: this.table.tableName,

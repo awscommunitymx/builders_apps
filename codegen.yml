@@ -1,4 +1,5 @@
 schema: ./schema.no-directives.graphql
+documents: './frontend/src/graphql/**/*.graphql'
 generates:
   ./generated/ts/graphql-types.ts:
     plugins:

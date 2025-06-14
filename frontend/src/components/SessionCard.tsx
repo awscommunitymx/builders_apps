@@ -26,7 +26,7 @@ interface SessionType {
 
 interface SessionCardProps {
   item: SessionType;
-  favorites: number[];
+  favorites: string[];
   expandedDescriptions: string[];
   onToggleFavorite: (sessionId: string, event: CustomEvent) => void;
   onToggleDescription: (sessionId: string, event: CustomEvent) => void;
@@ -77,10 +77,10 @@ export const getSessionCardDefinition = ({
       <Link href={`/agenda/${item.id}`}>{item.name}</Link>
       <Button
         variant="icon"
-        iconName={favorites.includes(parseInt(item.id, 10)) ? 'heart-filled' : 'heart'}
+        iconName={favorites.includes(item.id) ? 'heart-filled' : 'heart'}
         onClick={(e) => onToggleFavorite(item.id, e)}
         ariaLabel={
-          favorites.includes(parseInt(item.id, 10)) ? 'Quitar de favoritos' : 'Agregar a favoritos'
+          favorites.includes(item.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'
         }
       />
     </div>
