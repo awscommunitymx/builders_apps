@@ -224,6 +224,50 @@ const sortSessionsByTime = (sessions: SessionType[]): SessionType[] => {
   });
 };
 
+// Función para verificar si una sesión ha terminado
+const isSessionFinished = (sessionTime: string): boolean => {
+  const now = new Date();
+
+  // Verificar si estamos en la fecha del evento: sábado 14 de junio de 2025
+  const eventDate = new Date(2025, 5, 14); // Mes 5 = junio (0-indexed)
+  const isEventDay =
+    now.getFullYear() === eventDate.getFullYear() &&
+    now.getMonth() === eventDate.getMonth() &&
+    now.getDate() === eventDate.getDate();
+
+  // Si no es el día del evento, todas las sesiones se consideran activas
+  if (!isEventDay) {
+    return false;
+  }
+
+  const currentTime = now.getHours() * 60 + now.getMinutes(); // Tiempo actual en minutos
+
+  // Extraer la hora de fin del formato "HH:MM - HH:MM"
+  const endTime = sessionTime.split(' - ')[1];
+  if (!endTime) return false;
+
+  const [hours, minutes] = endTime.split(':').map(Number);
+  const sessionEndTime = hours * 60 + minutes; // Tiempo de fin de sesión en minutos
+
+  return currentTime > sessionEndTime;
+};
+
+// Función para separar sesiones activas y terminadas
+const separateSessionsByStatus = (sessions: SessionType[]) => {
+  const activeSessions: SessionType[] = [];
+  const finishedSessions: SessionType[] = [];
+
+  sessions.forEach((session) => {
+    if (isSessionFinished(session.time)) {
+      finishedSessions.push(session);
+    } else {
+      activeSessions.push(session);
+    }
+  });
+
+  return { activeSessions, finishedSessions };
+};
+
 // Extraer los datos del JSON y ordenarlos por hora
 const sessions: SessionType[] = sortSessionsByTime(sessionsData.sessions);
 
@@ -231,11 +275,25 @@ export function AgendaRoute() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
-  const [mixedItems, setMixedItems] = useState<ItemType[]>([]);
+  const [activeMixedItems, setActiveMixedItems] = useState<ItemType[]>([]);
+  const [finishedMixedItems, setFinishedMixedItems] = useState<ItemType[]>([]);
 
   // Crear items mezclados con sponsors al cargar el componente
   useEffect(() => {
-    setMixedItems(createMixedItems(sessions));
+    const { activeSessions, finishedSessions } = separateSessionsByStatus(sessions);
+    setActiveMixedItems(createMixedItems(activeSessions));
+    setFinishedMixedItems(createMixedItems(finishedSessions));
+  }, []);
+
+  // Actualizar la clasificación de sesiones cada minuto
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const { activeSessions, finishedSessions } = separateSessionsByStatus(sessions);
+      setActiveMixedItems(createMixedItems(activeSessions));
+      setFinishedMixedItems(createMixedItems(finishedSessions));
+    }, 60000); // Actualizar cada minuto
+
+    return () => clearInterval(interval);
   }, []);
 
   // Estados para los filtros
@@ -486,39 +544,49 @@ export function AgendaRoute() {
     setShowOnlyFavorites(false);
   };
 
-  // Filtrar los items según las selecciones
-  const filteredItems = mixedItems.filter((item) => {
-    // Verificar si hay algún filtro activo
-    const hasActiveFilters =
-      selectedLevels.length > 0 ||
-      selectedLocations.length > 0 ||
-      selectedCategories.length > 0 ||
-      selectedLanguages.length > 0 ||
-      showOnlyFavorites;
+  // Función para filtrar items
+  const filterItems = (items: ItemType[]) => {
+    return items.filter((item) => {
+      // Verificar si hay algún filtro activo
+      const hasActiveFilters =
+        selectedLevels.length > 0 ||
+        selectedLocations.length > 0 ||
+        selectedCategories.length > 0 ||
+        selectedLanguages.length > 0 ||
+        showOnlyFavorites;
 
-    // Si es un sponsor y hay filtros activos, no incluirlo
-    if (isSponsor(item)) {
-      return !hasActiveFilters;
-    }
+      // Si es un sponsor y hay filtros activos, no incluirlo
+      if (isSponsor(item)) {
+        return !hasActiveFilters;
+      }
 
-    // Si es una sesión, aplicar filtros
-    const session = item as SessionType;
-    const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(session.level);
-    const locationMatch =
-      selectedLocations.length === 0 || selectedLocations.includes(session.location);
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(session.catergory);
-    const languageMatch =
-      selectedLanguages.length === 0 || selectedLanguages.includes(session.language);
+      // Si es una sesión, aplicar filtros
+      const session = item as SessionType;
+      const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(session.level);
+      const locationMatch =
+        selectedLocations.length === 0 || selectedLocations.includes(session.location);
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(session.catergory);
+      const languageMatch =
+        selectedLanguages.length === 0 || selectedLanguages.includes(session.language);
 
-    // Filtro de favoritos
-    const favoriteMatch = !showOnlyFavorites || favorites.includes(parseInt(session.id, 10));
+      // Filtro de favoritos
+      const favoriteMatch = !showOnlyFavorites || favorites.includes(parseInt(session.id, 10));
 
-    return levelMatch && locationMatch && categoryMatch && languageMatch && favoriteMatch;
-  });
+      return levelMatch && locationMatch && categoryMatch && languageMatch && favoriteMatch;
+    });
+  };
+
+  // Filtrar sesiones activas y terminadas
+  const filteredActiveItems = filterItems(activeMixedItems);
+  const filteredFinishedItems = filterItems(finishedMixedItems);
 
   // Contar solo las sesiones filtradas para el indicador
-  const filteredSessionsCount = filteredItems.filter((item) => !isSponsor(item)).length;
+  const filteredActiveSessionsCount = filteredActiveItems.filter((item) => !isSponsor(item)).length;
+  const filteredFinishedSessionsCount = filteredFinishedItems.filter(
+    (item) => !isSponsor(item)
+  ).length;
+  const totalFilteredSessionsCount = filteredActiveSessionsCount + filteredFinishedSessionsCount;
 
   return (
     <AppLayoutToolbar
@@ -640,12 +708,8 @@ export function AgendaRoute() {
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                 >
                   <StatusIndicator type="success">
-                    {filteredSessionsCount} sesiones encontradas
-                    {selectedLevels.length > 0 ||
-                      selectedLocations.length > 0 ||
-                      selectedCategories.length > 0 ||
-                      selectedLanguages.length > 0 ||
-                      showOnlyFavorites}
+                    {totalFilteredSessionsCount} sesiones encontradas ({filteredActiveSessionsCount}{' '}
+                    activas, {filteredFinishedSessionsCount} terminadas)
                   </StatusIndicator>
 
                   {(selectedLevels.length > 0 ||
@@ -662,16 +726,39 @@ export function AgendaRoute() {
             </Container>
           )}
 
-          {/* Sección de tarjetas */}
-          <Cards
-            cardsPerRow={[
-              { cards: 1 }, // Default for smallest screens
-              { minWidth: 500, cards: 2 }, // Only use 2 cards when width >= 500px
-            ]}
-            variant="container"
-            items={filteredItems}
-            cardDefinition={getMixedCardDefinition()}
-          />
+          {/* Sección de sesiones activas */}
+          {filteredActiveItems.length > 0 && (
+            <>
+              <Header variant="h2">Sesiones Activas</Header>
+              <Cards
+                cardsPerRow={[
+                  { cards: 1 }, // Default for smallest screens
+                  { minWidth: 500, cards: 2 }, // Only use 2 cards when width >= 500px
+                ]}
+                variant="full-page"
+                items={filteredActiveItems}
+                cardDefinition={getMixedCardDefinition()}
+              />
+            </>
+          )}
+
+          {/* Sección de sesiones terminadas */}
+          {filteredFinishedItems.length > 0 && (
+            <>
+              <Header variant="h2" description="Sesiones que ya han finalizado">
+                Sesiones Terminadas
+              </Header>
+              <Cards
+                cardsPerRow={[
+                  { cards: 1 }, // Default for smallest screens
+                  { minWidth: 500, cards: 2 }, // Only use 2 cards when width >= 500px
+                ]}
+                variant="full-page"
+                items={filteredFinishedItems}
+                cardDefinition={getMixedCardDefinition()}
+              />
+            </>
+          )}
         </SpaceBetween>
       }
     ></AppLayoutToolbar>
